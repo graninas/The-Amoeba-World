@@ -1,0 +1,6 @@
+#!/bin/bash
+
+cd M-Space
+ghc -threaded --make -outputdir ../bin -o ../Temp/M-Space M-Space.hs
+cd ..
+

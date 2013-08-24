@@ -1,0 +1,44 @@
+name:           The Amoeba world
+version:        0.1
+cabal-version:  >= 1.2
+build-type:     Simple
+author:         Alexander Granin
+synopsis:       The Amoeba World Conquest Game
+description:    The Amoeba World Conquest Game
+license:        GPL-3
+
+library
+  build-depends:   
+                   base >= 4,
+                   vector,
+                   OpenGL,
+                   bytestring,
+                   array,
+                   binary,
+                   GLUT,
+                   haskell-src,
+                   network,
+                   GLURaw,
+                   old-time,
+                   QuickCheck,
+                   mtl,
+                   old-locale,
+                   containers,
+                   transformers,
+                   BigSpaceLibrary
+  ghc-options:     -O1
+  hs-source-dirs:  Amoeba
+  main-is:         Amoeba.hs
+  other-modules:   
+                   Application.Boot,
+                   Application.Config
+
+executable Amoeba
+  build-depends:   base >= 4
+  hs-source-dirs:  Amoeba
+  ghc-options:     -O1 -threaded -outputdir ./Temp -o ./Temp/Amoeba ./Amoeba/Amoeba.hs
+  main-is:         Amoeba.hs
+  other-modules:   
+                   Application.Boot,
+                   Application.Config
+
