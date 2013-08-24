@@ -40,7 +40,8 @@ library
                    World.World,
                    World.Karyon,
                    World.Player,
-                   World.Geometry
+                   World.Geometry,
+                   World.Stochastic
 
 executable Amoeba
   build-depends:   base >= 4
@@ -56,5 +57,6 @@ executable Amoeba
                    World.World,
                    World.Karyon,
                    World.Player,
-                   World.Geometry
+                   World.Geometry,
+                   World.Stochastic
 
