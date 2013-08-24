@@ -38,11 +38,14 @@ library
                    Application.MainLoop,
                    Application.Wire,
                    World.World,
-                   World.Karyon,
                    World.Player,
                    World.Geometry,
                    World.Stochastic,
-                   World.Test
+                   World.Test,
+                   World.Items.Karyon,
+                   World.Items.Plasma,
+                   World.Constants,
+                   World.Items.Stone
 
 executable Amoeba
   build-depends:   base >= 4
@@ -56,9 +59,12 @@ executable Amoeba
                    Application.MainLoop,
                    Application.Wire,
                    World.World,
-                   World.Karyon,
                    World.Player,
                    World.Geometry,
                    World.Stochastic,
-                   World.Test
+                   World.Test,
+                   World.Items.Karyon,
+                   World.Items.Plasma,
+                   World.Constants,
+                   World.Items.Stone
 

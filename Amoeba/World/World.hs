@@ -36,6 +36,11 @@ data Action = forall i. Active i => AddSingleActive { actionPoint :: Point
 
 type Actions = [Action]
 
+showAction (Modify p _ modId _) = "Point: " ++ show p ++ "\nModId: " ++ show modId
+showAction (AddSingleActive p _) = "Single active at: " ++ show p
+showAction (AddSingleConflicted p _ pl) = "Single action at: " ++ show p ++ " for player " ++ show pl
+showAction _ = "Not implemented." 
+
 data WorldMutator = WorldMutator { worldMutatorActions :: Actions
                                  , worldMutatorRndGen :: StdGen }
 

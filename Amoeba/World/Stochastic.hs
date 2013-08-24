@@ -16,6 +16,9 @@ data DirectionProbability = DirectionProbability
   deriving (Show, Read, Eq)
     
 type ProbabilityRange = (RandomNumber, RandomNumber)
+
+type GrowProbabilities = [(Direction, DirectionProbability)]
+
 probabilityRange :: ProbabilityRange
 probabilityRange = (0, 99)
 
@@ -40,7 +43,15 @@ getSafeRandomDirection rndNum prob@(DirectionProbability l u r d) =
     if dir == zeroPoint
     then Left ("Not applicable rndNum: " ++ show rndNum ++ " to prob: " ++ show prob)
     else Right dir
-
-triedDirsChecker :: [Direction] -> Either String ()
+    
+triedDirsChecker :: [Direction] -> Either String ()  -- TODO: move it
 triedDirsChecker triedDirs | length triedDirs >= 3 = Left "3 directions tried"
                            | otherwise = Right ()
+
+chooseRandomDir :: GrowProbabilities -> StdGen -> Direction -> [Direction] -> Either String (StdGen, Direction)
+chooseRandomDir probs g0 dir triedDirs = do
+    triedDirsChecker triedDirs -- TODO: move it
+    let (rndNum, g1) = randomProbabilityNum g0
+    let dirProb = getDirectionProbability dir probs
+    rndDir <- getSafeRandomDirection rndNum dirProb
+    return (g1, rndDir)
