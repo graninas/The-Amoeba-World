@@ -8,9 +8,11 @@ import qualified Data.Map as Map
 import System.Random
 
 import World.Geometry
+import World.Player
 
 class Active i where
   --activate :: item -> item position -> previous mutator -> previous word -> new mutator
+    ownedBy :: i -> Player
     activate :: i -> Point -> WorldMutator -> World -> WorldMutator
 
 
@@ -18,6 +20,7 @@ data World = World { worldMap :: WorldMap }
 
 
 data Action = forall i. Active i => AddSingleActive Point i
+            | forall i. Active i => AddSingleConflicted Point Player i
             | forall i. Active i => DeleteActive Point i
   
 type Actions = [Action]
@@ -45,6 +48,14 @@ inactive _ wm _ = wm
 takeWorldItems :: Point -> World -> Items
 takeWorldItems p (World (WorldMap wolrdMap)) = Maybe.fromMaybe noItems $ Map.lookup p wolrdMap
 
+isOnePlayerHere :: Player -> Items -> Bool
+isOnePlayerHere _ NoItems = False
+isOnePlayerHere pl (Items actives) = all ((pl ==) . ownedBy) actives
+
+isObstacle :: Items -> Bool
+isObstacle NoItems = False
+isObstacle (Items actives) = any ( (`elem` obstaclePlayers) . ownedBy) actives
+
 isEmptyCell :: Point -> World -> Bool
 isEmptyCell p w = case takeWorldItems p w of
     NoItems -> False
@@ -60,3 +71,6 @@ createWorldMutator = flip WorldMutator
 
 addSingleActive :: Active i => Point -> i -> Action
 addSingleActive = AddSingleActive
+
+addSingleConflicted :: Active i => Point -> Player -> i -> Action
+addSingleConflicted = AddSingleConflicted

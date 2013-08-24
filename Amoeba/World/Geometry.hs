@@ -2,22 +2,37 @@ module World.Geometry where
 
 import Linear
 
-type Radius = V3 Double
+type Radius = Double
 type Point = V3 Int
 
 type Position = (Int, Int)
 
-data Bound = BoundCircle { circleCenter :: Point
-                         , circleRadius ::  Radius }
-           | BoundRectangle { rectangleLeftUp :: Point
-                            , rectangleRightDown :: Point }
-           | BoundPoint { pointPosition :: Point }
+data Bound = Circle { circleCenter :: Point
+                    , circleRadius ::  Radius }
+--           | Rectangle { rectangleLeftUp :: Point
+--                       , rectangleRightDown :: Point }
+           | Pointed { pointPosition :: Point }
   deriving (Show, Read, Eq)
 
 
 class Bounded i where
     bounds :: i -> Point -> Bound
 
+toDoubleV3 :: V3 Int -> V3 Double
+toDoubleV3 (V3 x1 x2 x3) = V3 (fromIntegral x1) (fromIntegral x2) (fromIntegral x3)
+
+normIntV3 :: Point -> Double
+normIntV3  = norm . toDoubleV3
+ 
+-- Inspired by https://github.com/ocharles/netwire-classics/blob/master/asteroids/Asteroids.hs
+intersecting :: Bound -> Bound -> Bool
+intersecting (Circle c1 r1) (Circle c2 r2) = normIntV3 (c1 - c2) < (r1 + r2)
+intersecting c@(Circle _ _) (Pointed p) = intersecting c (Circle p 0)
+intersecting p@(Pointed _) c@(Circle _ _) = intersecting c p
+intersecting (Pointed _) (Pointed _) = False
+
+inBounds :: Point -> Bound -> Bool
+inBounds p = intersecting (Pointed p) 
 
 type Direction = Point
 type Shift = Point -> Point
