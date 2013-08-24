@@ -31,14 +31,12 @@ library
   main-is:         Amoeba.hs
   other-modules:   
                    Application.Boot,
-                   Application.Config
+                   Amoeba
 
 executable Amoeba
   build-depends:   base >= 4
   hs-source-dirs:  Amoeba
   ghc-options:     -O1 -threaded -outputdir ./Temp -o ./Temp/Amoeba ./Amoeba/Amoeba.hs
   main-is:         Amoeba.hs
-  other-modules:   
-                   Application.Boot,
-                   Application.Config
+  other-modules:   Application.Boot
 
