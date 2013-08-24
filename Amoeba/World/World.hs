@@ -27,16 +27,16 @@ data Action = forall i. Active i => AddSingleActive { actionPoint :: Point
             | forall i. Active i => AddSingleConflicted { actionPoint :: Point
                                                         , actionItemConstructor :: ItemId -> i
                                                         , actionPlayer :: Player } 
-            | forall i. Active i => Modify { actionPoint :: Point
-                                           , actionItem :: i
-                                           , actionModificatorId :: Int
-                                           , actionModificator :: WorldMap -> WorldMap }
+            | forall i. Active i => ModifyItem { actionPoint :: Point
+                                               , actionItem :: i
+                                               , actionModificatorId :: Int
+                                               , actionModificator :: i -> i }
             | forall i. Active i => DeleteActive { actionPoint :: Point
                                                  , actionItem :: i }
 
 type Actions = [Action]
 
-showAction (Modify p _ modId _) = "Point: " ++ show p ++ "\nModId: " ++ show modId
+showAction (ModifyItem p _ modId _) = "Point: " ++ show p ++ "\nModId: " ++ show modId
 showAction (AddSingleActive p _) = "Single active at: " ++ show p
 showAction (AddSingleConflicted p _ pl) = "Single action at: " ++ show p ++ " for player " ++ show pl
 showAction _ = "Not implemented." 
@@ -100,17 +100,20 @@ createWorldMutator = flip WorldMutator
 
 emptyWorldMutator = WorldMutator []
 
-addSingleActive :: Active i => Point -> (ItemId -> i) -> Action
-addSingleActive = AddSingleActive
+addSingleActiveAction :: Active i => Point -> (ItemId -> i) -> Action
+addSingleActiveAction = AddSingleActive
 
-addSingleConflicted :: Active i => Point -> (ItemId -> i) -> Player -> Action
-addSingleConflicted = AddSingleConflicted
+addSingleConflictedAction :: Active i => Point -> (ItemId -> i) -> Player -> Action
+addSingleConflictedAction = AddSingleConflicted
+
+modifyItemAction :: Active i => Point -> i -> Int -> (i -> i) -> Action
+modifyItemAction = ModifyItem
 
 getModificatorActions :: ItemId -> Int -> WorldMutator -> Actions
 getModificatorActions itemId mId (WorldMutator acts _) = filter (isMutatorAction itemId mId) acts
 
 isMutatorAction :: ItemId -> Int -> Action -> Bool
-isMutatorAction itemId mId (Modify _ i mId' _) = (mId == mId') && (itemId == getId i)
+isMutatorAction itemId mId (ModifyItem _ i mId' _) = (mId == mId') && (itemId == getId i)
 isMutatorAction _ _ _ = False
 
 activateWorld :: StdGen -> World -> (World, WorldMutator) -- TODO

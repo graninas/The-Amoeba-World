@@ -42,11 +42,11 @@ grow' :: Bound
 grow' bound pl acts w toPoint dir
     | not $ inBounds toPoint bound = Left StopGrow
     | otherwise = case takeWorldItems toPoint w of
-        NoItems -> let act = addSingleActive toPoint (plasmaConstructor pl)
+        NoItems -> let act = addSingleActiveAction toPoint (plasmaConstructor pl)
                    in return (act : acts)
         items | isOnePlayerHere pl items -> Left (GrowOver toPoint)
               | isObstacle items -> Left StopGrow
-              | otherwise -> let act = addSingleConflicted toPoint (plasmaConstructor pl) pl
+              | otherwise -> let act = addSingleConflictedAction toPoint (plasmaConstructor pl) pl
                              in return (act : acts)
 
 grow :: Bound

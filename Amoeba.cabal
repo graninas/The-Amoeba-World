@@ -45,7 +45,9 @@ library
                    World.Items.Karyon,
                    World.Items.Plasma,
                    World.Constants,
-                   World.Items.Stone
+                   World.Items.Stone,
+                   World.Items.Canyon,
+                   World.Items.Border
 
 executable Amoeba
   build-depends:   base >= 4
@@ -66,5 +68,7 @@ executable Amoeba
                    World.Items.Karyon,
                    World.Items.Plasma,
                    World.Constants,
-                   World.Items.Stone
+                   World.Items.Stone,
+                   World.Items.Canyon,
+                   World.Items.Border
 

@@ -52,12 +52,29 @@ karyon kId pl e pos = map mkItems (kayronCell : pointedFillers)
 
 activateKaryon :: World -> Point -> Karyon -> WorldMutator -> WorldMutator
 activateKaryon w p k@(KaryonFiller{}) mutator = inactive w p mutator
-activateKaryon w p k@(Karyon kId pl e fillers bound) mutator = let
+activateKaryon w p k@(Karyon kId _ e fillers _) mutator = let
     e' = calculateEnergyConsumption kId e mutator
-    activationFunc = activateKayronPiece bound pl mutator w e' p (fillerRelativeShift . head $ fillers)
-    in case activationFunc of
-        Right (e'', wm) -> wm -- TODO: other pieces, other Karyon deals
-        Left _ -> error "activateKaryon fail not implemented"
+    shifts = map fillerRelativeShift fillers
+    in snd $ foldr (activatePieces w p k) (e', mutator) shifts
+
+energyAction :: (Energy -> Energy) -> Int -> Point -> Karyon -> Action
+energyAction f mId p k = modifyItemAction p k mId mod
+  where
+    mod :: Karyon -> Karyon
+    mod k@(KaryonFiller {}) = error "Error. This should'n be."
+    mod k@(Karyon _ _ e _ m) = k { karyonEnergy = f e }
+
+activatePieces :: World -> Point -> Karyon -> Shift -> (Energy, WorldMutator) -> (Energy, WorldMutator)
+activatePieces w p k@(Karyon _ pl _ _ bound) sh (e, wm) = case activateKaryonPiece bound pl w e p sh wm of
+    Left (reservedEnergy, newEnergy, WorldMutator acts g) -> let
+        reserveActions = replicate reservedEnergy (energyAction (+1) increaseEnergyModificatorId p k)
+        consumeActions = replicate (e - newEnergy) (energyAction ((-)1) decreaseEnergyModificatorId p k)
+        newActions = reserveActions ++ consumeActions
+        in (newEnergy, WorldMutator (acts ++ newActions) g)
+    Right (newEnergy, WorldMutator acts g) -> let
+        consumeActions = replicate (e - newEnergy) (energyAction ((-)1) decreaseEnergyModificatorId p k)
+        in (newEnergy, WorldMutator (acts ++ consumeActions) g)
+activatePieces _ _ _ _ eWm = error "Error. This shouldn't be."
 
 calculateEnergyConsumption :: Int -> Energy -> WorldMutator -> Energy
 calculateEnergyConsumption kId e mutator = let
@@ -65,8 +82,10 @@ calculateEnergyConsumption kId e mutator = let
     increased = getModificatorActions kId increaseEnergyModificatorId mutator
     in validateEnergy $ e - length increased + length decreased
 
-activateKayronPiece :: Bound -> Player -> WorldMutator -> World -> Energy -> Point -> Shift -> Either (Energy, Energy, WorldMutator) (Energy, WorldMutator)
-activateKayronPiece karyonBound pl wm w e kayronPoint pieceShift = if isCornerShift pieceShift
+
+
+activateKaryonPiece :: Bound -> Player -> World -> Energy -> Point -> Shift -> WorldMutator -> Either (Energy, Energy, WorldMutator) (Energy, WorldMutator)
+activateKaryonPiece karyonBound pl w e kayronPoint pieceShift wm = if isCornerShift pieceShift
     then E.either (reservableGrow 2) (reservableGrow 1) grow1
     else E.either (reserveEnergy 1) return grow0
   where
