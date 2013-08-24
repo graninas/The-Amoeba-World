@@ -2,14 +2,27 @@ module World.Geometry where
 
 import Linear
 
-type Center = V3 Int
 type Radius = V3 Double
 type Point = V3 Int
 
 type Position = (Int, Int)
 
+data Bound = BoundCircle { circleCenter :: Point
+                         , circleRadius ::  Radius }
+           | BoundRectangle { rectangleLeftUp :: Point
+                            , rectangleRightDown :: Point }
+           | BoundPoint { pointPosition :: Point }
+  deriving (Show, Read, Eq)
+
+
+class Bounded i where
+    bounds :: i -> Point -> Bound
+
+
 point = V3
 
+type Shift = Point -> Point
+type Shifts = [Shift]
 
 shiftNone      = (^+^) $ V3 0 0 0
 shiftLeft      = (^+^) $ V3 (-1) 0 0
@@ -21,11 +34,12 @@ shiftLeftDown  = (^+^) $ V3 (-1) 1 0
 shiftRightUp   = (^+^) $ V3 1 (-1) 0
 shiftRightDown = (^+^) $ V3 1 1 0
 
-ringSquareShifters = [shiftLeft, shiftRight, shiftUp, shiftDown,
-                      shiftLeftUp, shiftLeftDown, shiftRightUp, shiftRightDown]
+ringSquareShifts :: Shifts
+ringSquareShifts = [shiftLeft, shiftRight, shiftUp, shiftDown
+                   , shiftLeftUp, shiftLeftDown, shiftRightUp, shiftRightDown]
 
 ringSquareFiller, fullSquareFiller :: Point -> [Point]
-ringSquareFiller point = map ($ point) ringSquareShifters
-fullSquareFiller point = map ($ point) (shiftNone : ringSquareShifters)
+ringSquareFiller point = map ($ point) ringSquareShifts
+fullSquareFiller point = map ($ point) (shiftNone : ringSquareShifts)
 
 

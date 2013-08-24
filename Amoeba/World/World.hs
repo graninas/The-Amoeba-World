@@ -8,21 +8,9 @@ import System.Random
 
 import World.Geometry
 
--- Inspired by Asteroids: https://github.com/ocharles/netwire-classics/blob/master/asteroids/Asteroids.hs
-class Bounded i where
-    bounds :: i -> Bound
-
-data Bound = BoundCircle { circleCenter :: Center
-                         , circleRadius ::  Radius }
-           | BoundRectangle { rectangleLeftUp :: Point
-                            , rectangleRightDown :: Point }
-           | BoundPoint { pointPosition :: Point }
-  deriving (Show, Read, Eq)
-
-
-
 class Active i where
-    activate :: i -> Point -> World -> Activator 
+  --activate :: item -> item position -> previous activators -> previous word -> new activators
+    activate :: i -> Point -> Activators -> World -> Activators
 
 
 data World = World { worldMap :: WorldMap
@@ -34,8 +22,8 @@ data Action = forall i. Active i => Add Point i
   
 type Actions = [Action]
 
-data Activator = Activator { activatorActions :: Actions
-                           , activatorRndGen :: StdGen }
+data Activators = Activators { activatorActions :: Actions
+                             , currentRndGen :: StdGen }
 
 
 type CoordinateMap = Map.Map Point
@@ -46,4 +34,5 @@ worldMapFromList :: Active i => [(Point, i)] -> WorldMap
 worldMapFromList l = WorldMap (Map.fromList l)
 
 
- 
+inactive :: Active i => i -> Point -> Activators -> World -> Activators
+inactive _ _ acts _ = acts
