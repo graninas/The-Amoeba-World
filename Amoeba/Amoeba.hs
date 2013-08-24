@@ -7,7 +7,7 @@ import qualified World.Karyon as K
 import qualified World.Player as P
 import World.Geometry
 
-world = W.worldMapFromList (K.karyon P.player1 100 (point 10 5 0))
+world = W.worldMapFromList (K.karyon 1 P.player1 100 (point 10 5 0))
 
 
 main::IO ()

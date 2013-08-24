@@ -14,13 +14,20 @@ import qualified Data.Either as E
 
 type Energy = Int
 
-data Karyon = Karyon { karyonPlayer :: Player
+data Karyon = Karyon { karyonId :: ItemId
+                     , karyonPlayer :: Player
                      , karyonEnergy :: Energy
                      , karyonFillers :: [Karyon]
                      , karyonBound :: Bound }
-            | KaryonFiller { karyonPlayer :: Player
+            | KaryonFiller { karyonId :: ItemId
+                           , karyonPlayer :: Player
                            , fillerRelativeShift :: Shift }
 
+instance Id Karyon where
+    getId = karyonId
+  
+decreaseEnergyModificatorId = 1 -- TODO: implement better mechanism
+increaseEnergyModificatorId = 2
 
 instance Active Karyon where
   activate = activateKaryon
@@ -29,25 +36,29 @@ instance Active Karyon where
 ordinalKaryonBound :: Point -> Bound
 ordinalKaryonBound p = Circle p 10
   
-karyon :: Player -> Int -> Point -> [(Point, Items)]
-karyon pl e pos = map mkItems (kayronCell : pointedFillers)
+karyon :: ItemId -> Player -> Int -> Point -> [(Point, Items)]
+karyon kId pl e pos = map mkItems (kayronCell : pointedFillers)
   where
-    kayronCell = ( pos, Karyon pl e fillers (ordinalKaryonBound pos) )
+    kayronCell = ( pos, Karyon kId pl e fillers (ordinalKaryonBound pos) )
     pointedFillers = map makePointedFiller ringSquareShifts
-    makePointedFiller sh = (sh pos, KaryonFiller pl sh)
+    makePointedFiller sh = (sh pos, KaryonFiller kId pl sh)
     fillers = map snd pointedFillers
     mkItems (p, k) = (p, makeItems [k])
 
 activateKaryon :: Karyon -> Point -> WorldMutator -> World -> WorldMutator
-activateKaryon k@(KaryonFiller _ _) p m w = inactive p m w
-activateKaryon k@(Karyon pl e fillers bound) p mutator w = let
-  activationFunc = activateKayronPiece bound pl mutator w e p (fillerRelativeShift . head $ fillers)
-  in case activationFunc of
-    Right (e, wm) -> wm -- TODO
-    Left _ -> undefined
-  
-  
+activateKaryon k@(KaryonFiller{}) p m w = inactive p m w
+activateKaryon k@(Karyon kId pl e fillers bound) p mutator w = let
+    e' = calculateEnergyConsumption kId e mutator
+    activationFunc = activateKayronPiece bound pl mutator w e' p (fillerRelativeShift . head $ fillers)
+    in case activationFunc of
+        Right (e'', wm) -> wm -- TODO
+        Left _ -> error "activateKaryon fail not implemented"
 
+calculateEnergyConsumption :: Int -> Energy -> WorldMutator -> Energy
+calculateEnergyConsumption kId e mutator = let
+    decreased = getModificatorActions kId decreaseEnergyModificatorId mutator
+    increased = getModificatorActions kId increaseEnergyModificatorId mutator
+    in validateEnergy $ e - length increased + length decreased
 
 activateKayronPiece :: Bound -> Player -> WorldMutator -> World -> Energy -> Point -> Shift -> Either (Energy, Energy, WorldMutator) (Energy, WorldMutator)
 activateKayronPiece karyonBound pl wm w e kayronPoint pieceShift = if isCornerShift pieceShift
@@ -61,16 +72,19 @@ activateKayronPiece karyonBound pl wm w e kayronPoint pieceShift = if isCornerSh
       grow2 = growFunc subShift2
       reservableGrow reserve d = E.either (reserveEnergy reserve) return (grow2 d)
 
+decreaseEnergy e | e <= 0 = 0
+                 | otherwise = e - 1
+validateEnergy e | e <= 0 = 0
+                 | otherwise = e
+                 
 activateKayronPiece' :: Bound -> Player -> WorldMutator -> World -> Energy -> Point -> Shift -> Either (Energy, WorldMutator) (Energy, WorldMutator)
 activateKayronPiece' karyonBound pl wm w e kayronPoint subShift
         | e <= 0 = Left (e, wm) -- No energy
         | otherwise = do 
             let growPlasmaFunc = growPlasma karyonBound pl wm w (subShift kayronPoint) (direction subShift)
-            let decreaseEnergy wm' = Right (e - 1, wm')
+            let decreaseEnergyFunc wm' = Right (decreaseEnergy e, wm')
             let failActivation _ = Left (e, wm) -- Failed to grow 
-            E.either failActivation decreaseEnergy growPlasmaFunc
-                    
-            
+            E.either failActivation decreaseEnergyFunc growPlasmaFunc
 
 growProbabilities :: [(Direction, DirectionProbability)]
 growProbabilities = [ (left,  DirectionProbability 50 25 0 25)
@@ -88,14 +102,21 @@ chooseRandomDir g0 dir triedDirs = do
     return (g1, rndDir)
 
 
-data Plasma = Plasma { plasmaPlayer :: Player }
+data Plasma = Plasma { plasmaId :: ItemId
+                     , plasmaPlayer :: Player }
+
+instance Id Plasma where
+  getId = plasmaId
+
 instance Active Plasma where
   activate _ = inactive
   ownedBy = plasmaPlayer
 
-plasma :: Player -> Plasma
+plasma :: Int -> Player -> Plasma
 plasma = Plasma
 
+plasmaConstructor :: Player -> ItemId -> Plasma
+plasmaConstructor pl pId = plasma pId pl
 
 data GrowMode = GrowOver Point
               | StopGrow
@@ -110,11 +131,11 @@ grow' :: Bound
 grow' bound pl acts w toPoint dir
     | not $ inBounds toPoint bound = Left StopGrow
     | otherwise = case takeWorldItems toPoint w of
-        NoItems -> let act = addSingleActive toPoint (plasma pl)
+        NoItems -> let act = addSingleActive toPoint (plasmaConstructor pl)
                    in return (act : acts)
         items | isOnePlayerHere pl items -> Left (GrowOver toPoint)
               | isObstacle items -> Left StopGrow
-              | otherwise -> let act = addSingleConflicted toPoint pl (plasma pl)
+              | otherwise -> let act = addSingleConflicted toPoint (plasmaConstructor pl) pl
                              in return (act : acts)
 
 grow :: Bound

@@ -10,18 +10,30 @@ import System.Random
 import World.Geometry
 import World.Player
 
-class Active i where
+type ItemId = Int
+
+class Id i where
+    getId :: i -> ItemId
+
+class Id i => Active i where
   --activate :: item -> item position -> previous mutator -> previous word -> new mutator
     ownedBy :: i -> Player
     activate :: i -> Point -> WorldMutator -> World -> WorldMutator
 
-
 data World = World { worldMap :: WorldMap }
 
 
-data Action = forall i. Active i => AddSingleActive Point i
-            | forall i. Active i => AddSingleConflicted Point Player i
-            | forall i. Active i => DeleteActive Point i
+data Action = forall i. Active i => AddSingleActive { actionPoint :: Point
+                                                    , actionItemConstructor :: ItemId -> i }
+            | forall i. Active i => AddSingleConflicted { actionPoint :: Point
+                                                        , actionItemConstructor :: ItemId -> i
+                                                        , actionPlayer :: Player } 
+            | forall i. Active i => Modify { actionPoint :: Point
+                                           , actionItem :: i
+                                           , actionModificatorId :: Int
+                                           , actionModificator :: WorldMap -> WorldMap }
+            | forall i. Active i => DeleteActive { actionPoint :: Point
+                                                 , actionItem :: i }
   
 type Actions = [Action]
 
@@ -69,8 +81,15 @@ emptyCellChecker p w =
 createWorldMutator :: StdGen -> Actions -> WorldMutator
 createWorldMutator = flip WorldMutator
 
-addSingleActive :: Active i => Point -> i -> Action
+addSingleActive :: Active i => Point -> (ItemId -> i) -> Action
 addSingleActive = AddSingleActive
 
-addSingleConflicted :: Active i => Point -> Player -> i -> Action
+addSingleConflicted :: Active i => Point -> (ItemId -> i) -> Player -> Action
 addSingleConflicted = AddSingleConflicted
+
+getModificatorActions :: ItemId -> Int -> WorldMutator -> Actions
+getModificatorActions itemId mId (WorldMutator acts _) = filter (isMutatorAction itemId mId) acts
+
+isMutatorAction :: ItemId -> Int -> Action -> Bool
+isMutatorAction itemId mId (Modify _ i mId' _) = (mId == mId') && (itemId == getId i)
+isMutatorAction _ _ _ = False
