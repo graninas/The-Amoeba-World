@@ -16,9 +16,8 @@ class Id i where
     getId :: i -> ItemId
 
 class Id i => Active i where
-  --activate :: item -> item position -> previous mutator -> previous word -> new mutator
     ownedBy :: i -> Player
-    activate :: i -> Point -> WorldMutator -> World -> WorldMutator
+    activate :: World -> Point -> i -> WorldMutator -> WorldMutator
 
 data World = World { worldMap :: WorldMap }
 
@@ -34,7 +33,7 @@ data Action = forall i. Active i => AddSingleActive { actionPoint :: Point
                                            , actionModificator :: WorldMap -> WorldMap }
             | forall i. Active i => DeleteActive { actionPoint :: Point
                                                  , actionItem :: i }
-  
+
 type Actions = [Action]
 
 data WorldMutator = WorldMutator { worldMutatorActions :: Actions
@@ -43,6 +42,16 @@ data WorldMutator = WorldMutator { worldMutatorActions :: Actions
 data Items = forall i. Active i => Items [i]
                                  | NoItems
 data WorldMap = WorldMap (Map.Map Point Items)
+
+invalidId = -1
+
+instance Id Items where
+  getId _ = invalidId
+  
+instance Active Items where
+  ownedBy _ = dummyPlayer
+  activate _ _ NoItems wm = wm
+  activate w p (Items its) wm = foldr (activate w p) wm its
 
 noItems :: Items
 noItems = NoItems
@@ -53,8 +62,11 @@ makeItems = Items
 worldMapFromList :: [(Point, Items)] -> WorldMap
 worldMapFromList l = WorldMap (Map.fromList l)
 
-inactive :: Point -> WorldMutator -> World -> WorldMutator
-inactive _ wm _ = wm
+worldFromList :: [(Point, Items)] -> World
+worldFromList = World . worldMapFromList
+
+inactive :: World -> Point -> WorldMutator -> WorldMutator
+inactive _ _ wm = wm
 
 
 takeWorldItems :: Point -> World -> Items
@@ -81,6 +93,8 @@ emptyCellChecker p w =
 createWorldMutator :: StdGen -> Actions -> WorldMutator
 createWorldMutator = flip WorldMutator
 
+emptyWorldMutator = WorldMutator []
+
 addSingleActive :: Active i => Point -> (ItemId -> i) -> Action
 addSingleActive = AddSingleActive
 
@@ -93,3 +107,10 @@ getModificatorActions itemId mId (WorldMutator acts _) = filter (isMutatorAction
 isMutatorAction :: ItemId -> Int -> Action -> Bool
 isMutatorAction itemId mId (Modify _ i mId' _) = (mId == mId') && (itemId == getId i)
 isMutatorAction _ _ _ = False
+
+activateWorld :: StdGen -> World -> (World, WorldMutator) -- TODO
+activateWorld g w@(World (WorldMap worldMap)) = let
+    emptyWm = emptyWorldMutator g
+    wm = Map.foldrWithKey (activate w) emptyWm worldMap 
+    in (w, wm)
+    

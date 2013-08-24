@@ -45,9 +45,9 @@ karyon kId pl e pos = map mkItems (kayronCell : pointedFillers)
     fillers = map snd pointedFillers
     mkItems (p, k) = (p, makeItems [k])
 
-activateKaryon :: Karyon -> Point -> WorldMutator -> World -> WorldMutator
-activateKaryon k@(KaryonFiller{}) p m w = inactive p m w
-activateKaryon k@(Karyon kId pl e fillers bound) p mutator w = let
+activateKaryon :: World -> Point -> Karyon -> WorldMutator -> WorldMutator
+activateKaryon w p k@(KaryonFiller{}) mutator = inactive w p mutator
+activateKaryon w p k@(Karyon kId pl e fillers bound) mutator = let
     e' = calculateEnergyConsumption kId e mutator
     activationFunc = activateKayronPiece bound pl mutator w e' p (fillerRelativeShift . head $ fillers)
     in case activationFunc of
@@ -109,7 +109,7 @@ instance Id Plasma where
   getId = plasmaId
 
 instance Active Plasma where
-  activate _ = inactive
+  activate w p _ = inactive w p
   ownedBy = plasmaPlayer
 
 plasma :: Int -> Player -> Plasma
