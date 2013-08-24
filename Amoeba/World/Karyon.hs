@@ -13,7 +13,7 @@ import qualified Data.List as L
 import qualified Data.Either as E
 
 
-type Energy = Word
+type Energy = Int
 
 data Karyon = Karyon { karyonPlayer :: Player
                      , karyonEnergy :: Energy
@@ -25,33 +25,39 @@ instance Active Karyon where
   activate = activateKaryon
   
 instance Bounded Karyon where
-  bounds _ = \pos -> BoundCircle pos 10
+  bounds _ pos = BoundCircle pos 10
   
-karyon :: Player -> Int -> Point -> [(Point, Karyon)]
-karyon pl e pos = kayronCell : pointedFillers
+karyon :: Player -> Int -> Point -> [(Point, Items)]
+karyon pl e pos = map mkItems (kayronCell : pointedFillers)
   where
     kayronCell = (pos, Karyon pl e fillers)
     pointedFillers = map makePointedFiller ringSquareShifts
     makePointedFiller sh = (sh pos, KaryonFiller sh)
     fillers = map snd pointedFillers
+    mkItems (p, k) = (p, makeItems [k])
     
 
     
-activateKaryon :: i -> Point -> WorldMutator -> World -> WorldMutator
-activateKaryon k@(KaryonFiller _) = inactive k
+activateKaryon :: Karyon -> Point -> WorldMutator -> World -> WorldMutator
+activateKaryon k@(KaryonFiller _) p m w = inactive p m w
 activateKaryon k@(Karyon pl e fillers) p mutator w = let
 
-  dummy = activateKayronPiece pl p mutator w e (fillerRelativeShift . head $ fillers)
+  dummy = activateKayronPiece pl mutator w e p (fillerRelativeShift . head $ fillers)
   in undefined
   
-activateKayronPiece :: Player -> Point -> WorldMutator -> World -> Energy -> Shift -> Either String (Energy, Mutator) -- TODO
-activateKayronPiece pl p wm w e sh = case isCornerShift sh of
-    True -> 
-    False ->
+activateKayronPiece :: Player -> WorldMutator -> World -> Energy -> Point -> Shift -> Either String (Energy, WorldMutator)
+activateKayronPiece pl wm w e kayronPoint pieceShift = if isCornerShift pieceShift
+    then do
+       let cornerSide1Func = activateKayronPiece' pl wm e kayronPoint (subShift1 pieceShift)
+       let cornerSide2Func (e', wm') = activateKayronPiece' pl wm' e' kayronPoint (subShift2 pieceShift)
+       E.either Left cornerSide2Func cornerSide1Func
+    else activateKayronPiece' pl wm e kayronPoint pieceShift
+
   where
-    activateKayronPiece' pl wm' e' subShift | e' == 0 = Left "No energy" 
-    activateKayronPiece' pl wm' e' subShift | e' > 0 = do
-        growedWm <- growPlasma pl p wm' w subShift
+    activateKayronPiece' :: Player -> WorldMutator -> Energy -> Point -> Shift -> Either String (Energy, WorldMutator)
+    activateKayronPiece' pl wm' e' kayronPoint subShift | e' <= 0   = Left "No energy" 
+                                                        | otherwise = do
+        growedWm <- growPlasma pl wm' w (subShift kayronPoint) (direction subShift)
         return (e' - 1, growedWm)
         
 
@@ -64,37 +70,46 @@ growProbabilities = [ (left,  DirectionProbability 50 25 0 25)
                     , (down,  DirectionProbability 25 0 25 50) ]
 
 
-
+chooseRandomDir :: StdGen -> Direction -> [Direction] -> Either String (StdGen, Direction)
 chooseRandomDir g0 dir triedDirs = do
     triedDirsChecker triedDirs
-    let (rndNum, g1) = random probabilityRange g0
+    let (rndNum, g1) = randomProbabilityNum g0
     let dirProb = getDirectionProbability dir growProbabilities
-    (Right rndDir) <- getSafeRandomDirection rndNum dirProb -- is it impossible to chrash here?
+    rndDir <- getSafeRandomDirection rndNum dirProb -- TODO
     return (g1, rndDir)
 
 
 data Plasma = Plasma { plasmaPlayer :: Player }
 instance Active Plasma where
-  activate = inactive
+  activate _ = inactive
 
-plasma :: Player -> Point -> [(Point, Plasma)]
-plasma pl p = [(p, Plasma pl)]
+plasma :: Player -> Plasma
+plasma = Plasma
 
+grow' :: Player -> Actions -> World -> Point -> Direction -> Either String Actions
 grow' pl acts w toPoint dir = do
-    emptyCellChecker p w
-    let act = addActive toPoint (plasma pl)
+    emptyCellChecker toPoint w
+    let act = addSingleActive toPoint (plasma pl)
     return (act : acts)
 
-grow pl acts g0 w p dir triedDirs = do
-    (g1, rndDir) <- cooseRandomDir g0 dir triedDirs
-    let growFunc = grow' pl acts w (rndDir p) dir
+grow :: Player
+     -> Actions
+     -> StdGen
+     -> World
+     -> Point
+     -> Direction
+     -> [Direction]
+     -> Either String WorldMutator    
+grow pl acts g0 w fromPoint dir triedDirs = do
+    (g1, rndDir) <- chooseRandomDir g0 dir triedDirs
+    let growFunc = grow' pl acts w (movePoint fromPoint rndDir) dir
     let nextDir = nextDirection dir
-    let tryNext = grow pl acts g1 w p nextDir (dir : triedDirs)
-    E.either tryNext createWorldMutator growFunc
+    let tryNext _ = grow pl acts g1 w fromPoint nextDir (dir : triedDirs)
+    let newWm acts = Right $ createWorldMutator g1 acts
+    E.either tryNext newWm growFunc
 
-growPlasma :: Player -> Point -> WorldMutator -> World -> Direction -> Either String WorldMutator
-growPlasma pl p wm@(WorldMutator acts g0) w dir = do
-    grow acts g0 pl wm w p dir []
+growPlasma :: Player -> WorldMutator -> World -> Point -> Direction -> Either String WorldMutator
+growPlasma pl wm@(WorldMutator acts g0) w piecePoint dir = grow pl acts g0 w piecePoint dir []
     
     
     

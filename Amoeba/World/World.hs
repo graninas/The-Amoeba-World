@@ -1,4 +1,4 @@
-{-# LANGUAGE ExistentialQuantification #-}
+{-# LANGUAGE ExistentialQuantification, NoMonomorphismRestriction #-}
 
 module World.World where
 
@@ -10,37 +10,53 @@ import System.Random
 import World.Geometry
 
 class Active i where
-  --activate :: item -> item position -> previous activators -> previous word -> new activators
-    activate :: i -> Point -> Activators -> World -> Activators
+  --activate :: item -> item position -> previous mutator -> previous word -> new mutator
+    activate :: i -> Point -> WorldMutator -> World -> WorldMutator
 
 
 data World = World { worldMap :: WorldMap }
 
 
-data Action = forall i. Active i => Add Point (Point -> i)
-            | forall i. Active i => Delete Point i
+data Action = forall i. Active i => AddSingleActive Point i
+            | forall i. Active i => DeleteActive Point i
   
 type Actions = [Action]
 
 data WorldMutator = WorldMutator { worldMutatorActions :: Actions
                                  , worldMutatorRndGen :: StdGen }
 
-data WorldMap = forall i. Active i => WorldMap (Map.Map Point [i])
+data Items = forall i. Active i => Items [i]
+                                 | NoItems
+data WorldMap = WorldMap (Map.Map Point Items)
 
+noItems :: Items
+noItems = NoItems
 
-worldMapFromList :: Active i => [(Point, [i])] -> WorldMap
+makeItems :: forall i. Active i => [i] -> Items
+makeItems = Items
+
+worldMapFromList :: [(Point, Items)] -> WorldMap
 worldMapFromList l = WorldMap (Map.fromList l)
 
-inactive :: Active i => i -> Point -> WorldMutator -> World -> WorldMutator
-inactive _ _ acts _ = acts
+inactive :: Point -> WorldMutator -> World -> WorldMutator
+inactive _ wm _ = wm
 
 
-takeWorldItems p (World wm) = Maybe.fromMaybe [] $ Map.lookup p wm
-isEmptyCell p (World wm) = null $ takeWorldItems p wm
+takeWorldItems :: Point -> World -> Items
+takeWorldItems p (World (WorldMap wolrdMap)) = Maybe.fromMaybe noItems $ Map.lookup p wolrdMap
+
+isEmptyCell :: Point -> World -> Bool
+isEmptyCell p w = case takeWorldItems p w of
+    NoItems -> False
+    _ -> True
 
 emptyCellChecker p w =
     if isEmptyCell p w
     then Right ()
     else Left "Cell not empty"
 
-addActive = Add
+createWorldMutator :: StdGen -> Actions -> WorldMutator
+createWorldMutator = flip WorldMutator
+
+addSingleActive :: Active i => Point -> i -> Action
+addSingleActive = AddSingleActive

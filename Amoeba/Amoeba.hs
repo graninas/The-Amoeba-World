@@ -17,4 +17,4 @@ main = do
     
     boot
     
-    putStrLn $ "All Ok."
+    putStrLn "All Ok."
