@@ -25,18 +25,36 @@ library
                    old-locale,
                    containers,
                    transformers,
-                   BigSpaceLibrary
+                   BigSpaceLibrary,
+                   linear,
   ghc-options:     -O1
   hs-source-dirs:  Amoeba
   main-is:         Amoeba.hs
   other-modules:   
+                   Amoeba,
                    Application.Boot,
-                   Amoeba
+                   Application.Constants,
+                   Application.Environment,
+                   Application.MainLoop,
+                   Application.Wire,
+                   World.World,
+                   World.Karyon,
+                   World.Player,
+                   World.Geometry
 
 executable Amoeba
   build-depends:   base >= 4
   hs-source-dirs:  Amoeba
   ghc-options:     -O1 -threaded -outputdir ./Temp -o ./Temp/Amoeba ./Amoeba/Amoeba.hs
   main-is:         Amoeba.hs
-  other-modules:   Application.Boot
+  other-modules:   
+                   Application.Boot,
+                   Application.Constants,
+                   Application.Environment,
+                   Application.MainLoop,
+                   Application.Wire,
+                   World.World,
+                   World.Karyon,
+                   World.Player,
+                   World.Geometry
 
