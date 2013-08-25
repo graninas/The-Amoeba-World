@@ -2,6 +2,7 @@ module World.Items.Karyon where
 
 import Prelude hiding (Bounded)
 
+import World.Types
 import World.World
 import World.Player
 import World.Geometry
@@ -16,8 +17,6 @@ import qualified Data.Either as E
 
 -- TODO: World bounds, conflicting cells, other deals
 -- TODO: ++ Modify energy actions!
-
-type Energy = Int
 
 data Karyon = Karyon { karyonId :: ItemId
                      , karyonPlayer :: Player
@@ -82,8 +81,6 @@ calculateEnergyConsumption kId e mutator = let
     increased = getModificatorActions kId increaseEnergyModificatorId mutator
     in validateEnergy $ e - length increased + length decreased
 
-
-
 activateKaryonPiece :: Bound -> Player -> World -> Energy -> Point -> Shift -> WorldMutator -> Either (Energy, Energy, WorldMutator) (Energy, WorldMutator)
 activateKaryonPiece karyonBound pl w e kayronPoint pieceShift wm = if isCornerShift pieceShift
     then E.either (reservableGrow 2) (reservableGrow 1) grow1
@@ -100,11 +97,11 @@ decreaseEnergy e | e <= 0 = 0
                  | otherwise = e - 1
 validateEnergy e | e <= 0 = 0
                  | otherwise = e
-                 
+
 activateKayronPiece' :: Bound -> Player -> WorldMutator -> World -> Energy -> Point -> Shift -> Either (Energy, WorldMutator) (Energy, WorldMutator)
 activateKayronPiece' karyonBound pl wm w e kayronPoint subShift
         | e <= 0 = Left (e, wm) -- No energy
-        | otherwise = do 
+        | otherwise = do
             let growPlasmaFunc = growPlasma karyonBound pl wm w (subShift kayronPoint) (direction subShift)
             let decreaseEnergyFunc wm' = Right (decreaseEnergy e, wm')
             let failActivation _ = Left (e, wm) -- Failed to grow 

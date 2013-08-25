@@ -7,6 +7,7 @@ import World.Player
 import World.Geometry
 import World.Stochastic
 import World.Constants
+import World.Types
 
 import Data.Word
 import System.Random
@@ -15,19 +16,36 @@ import qualified Data.Either as E
 
 data Plasma = Plasma { plasmaId :: ItemId
                      , plasmaPlayer :: Player }
+            | ConflictedPlasma { plasmaId :: ItemId
+                               , conflictedOwner :: Player
+                               , conflictedPlayers :: Players }
 
 instance Id Plasma where
   getId = plasmaId
 
 instance Active Plasma where
   activate w p _ = inactive w p
-  ownedBy = plasmaPlayer
+  ownedBy p@(Plasma{}) = plasmaPlayer p
+  ownedBy p@(ConflictedPlasma{}) = conflictedOwner p
 
 plasma :: Int -> Player -> Plasma
 plasma = Plasma
 
+conflictedPlasma :: ItemId -> Player -> Players -> Plasma
+conflictedPlasma = ConflictedPlasma
+
+conflictatePlasma :: Plasma -> Players -> Plasma
+conflictatePlasma (ConflictedPlasma plId owner ps1) ps2 = 
+    ConflictedPlasma plId owner (ps1 `L.union` ps2)
+conflictatePlasma (Plasma plId pl) ps =
+    ConflictedPlasma plId conflictPlayer ([pl] `L.union` ps)
+  
+
 plasmaConstructor :: Player -> ItemId -> Plasma
 plasmaConstructor pl pId = plasma pId pl
+
+conflictedPlasmaConstructor :: Players -> ItemId -> Plasma
+conflictedPlasmaConstructor pls pId = conflictedPlasma pId conflictPlayer pls
 
 data GrowMode = GrowOver Point
               | StopGrow
@@ -45,9 +63,12 @@ grow' bound pl acts w toPoint dir
         NoItems -> let act = addSingleActiveAction toPoint (plasmaConstructor pl)
                    in return (act : acts)
         items | isOnePlayerHere pl items -> Left (GrowOver toPoint)
-              | isObstacle items -> Left StopGrow
-              | otherwise -> let act = addSingleConflictedAction toPoint (plasmaConstructor pl) pl
-                             in return (act : acts)
+              | isObstacleItem items -> Left StopGrow
+              | otherwise -> let -- Enemies are here!
+                                 pls = L.union (getPlayers items) [pl]
+                                 conflAct = addSingleConflictedAction toPoint (conflictedPlasmaConstructor pls) pls
+                                 act = addSingleActiveAction toPoint (plasmaConstructor pl)
+                             in return (conflAct : act : acts)
 
 grow :: Bound
      -> Player

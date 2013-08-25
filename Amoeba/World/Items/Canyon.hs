@@ -5,6 +5,7 @@ import World.Player
 import World.Geometry
 import World.Stochastic
 import World.Constants
+import World.Types
 
 import Data.Word
 import System.Random

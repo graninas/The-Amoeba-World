@@ -5,15 +5,12 @@ import Linear
 type Radius = Double
 type Point = V3 Int
 
-type Position = (Int, Int)
-
 data Bound = Circle { circleCenter :: Point
                     , circleRadius ::  Radius }
 --           | Rectangle { rectangleLeftUp :: Point
 --                       , rectangleRightDown :: Point }
            | Pointed { pointPosition :: Point }
   deriving (Show, Read, Eq)
-
 
 class Bounded i where
     bounds :: i -> Point -> Bound

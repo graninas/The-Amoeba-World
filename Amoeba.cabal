@@ -47,7 +47,8 @@ library
                    World.Constants,
                    World.Items.Stone,
                    World.Items.Canyon,
-                   World.Items.Border
+                   World.Items.Border,
+                   World.Types
 
 executable Amoeba
   build-depends:   base >= 4
@@ -70,5 +71,6 @@ executable Amoeba
                    World.Constants,
                    World.Items.Stone,
                    World.Items.Canyon,
-                   World.Items.Border
+                   World.Items.Border,
+                   World.Types
 

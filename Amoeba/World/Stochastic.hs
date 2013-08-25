@@ -1,12 +1,10 @@
 module World.Stochastic where
 
 import World.Geometry
-import World.World
+import World.Types
 
 import System.Random
 import qualified Data.Maybe as Maybe
-
-type RandomNumber = Int
 
 data DirectionProbability = DirectionProbability
                             { probLeft  :: RandomNumber
@@ -15,8 +13,6 @@ data DirectionProbability = DirectionProbability
                             , probDown  :: RandomNumber }
   deriving (Show, Read, Eq)
     
-type ProbabilityRange = (RandomNumber, RandomNumber)
-
 type GrowProbabilities = [(Direction, DirectionProbability)]
 
 probabilityRange :: ProbabilityRange

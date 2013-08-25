@@ -5,12 +5,12 @@ import World.Player
 import World.Geometry
 import World.Stochastic
 import World.Constants
+import World.Types
 
 import Data.Word
 import System.Random
 import qualified Data.List as L
 import qualified Data.Either as E
-
 
 data Stone = Stone { stoneId :: ItemId
                    , stoneOwner :: Player }

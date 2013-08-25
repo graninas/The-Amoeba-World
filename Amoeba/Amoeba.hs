@@ -11,9 +11,9 @@ import qualified World.Items.Canyon as C
 
 import System.Random
 
-world = W.worldFromList (
+world = W.createWorld 100 (
        K.karyon 1 P.player1 100 (point 10 5 0)
-    ++ K.karyon 2 P.player1 100 (point (-10) 5 0)
+    ++ K.karyon 2 P.player2 100 (point (-10) 5 0)
     ++ S.stone 3 P.stonePlayer (point 1 2 0)
     ++ S.stone 4 P.stonePlayer (point 1 3 0)
     ++ S.stone 5 P.stonePlayer (point 1 4 0)
@@ -24,6 +24,13 @@ world = W.worldFromList (
     ++ C.canyon 10 P.canyonPlayer (point 2 5 0))
 
 
+step (g, w) = do
+    let res@(w', wm'@(W.WorldMutator acts g')) = W.activateWorld g w
+    putStrLn $ "New StdGen: " ++ show g'
+    putStrLn $ "Actions count: " ++ (show . length $ W.worldMutatorActions wm')
+    putStrLn $ unlines (map W.showAction (W.worldMutatorActions wm'))
+    return (g', w')
+
 main::IO ()
 main = do
 
@@ -32,10 +39,7 @@ main = do
     --boot
     
     let g = mkStdGen 100
-    let (_, wm) = W.activateWorld g world
-    putStrLn $ "Old StdGen: " ++ show g
-    putStrLn $ "New StdGen: " ++ show (W.worldMutatorRndGen wm)
-    putStrLn $ "Actions count: " ++ (show . length $ W.worldMutatorActions wm)
-    putStrLn $ unlines (map W.showAction (W.worldMutatorActions wm))
+    res1 <- step (g, world)
+    res2 <- step res1
     
     putStrLn "All Ok."
