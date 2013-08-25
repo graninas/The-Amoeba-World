@@ -6,6 +6,7 @@ import World.Geometry
 import World.Stochastic
 import World.Constants
 import World.Types
+import World.Id
 
 import Data.Word
 import System.Random
@@ -14,6 +15,7 @@ import qualified Data.Either as E
 
 data Stone = Stone { stoneId :: ItemId
                    , stoneOwner :: Player }
+  deriving (Show, Read)
 
 instance Id Stone where
     getId = stoneId
@@ -22,6 +24,8 @@ instance Active Stone where
     activate w p _ = inactive w p
     ownedBy = stoneOwner
     
+instance Descripted Stone where
+    description = show
     
-stone :: ItemId -> Player -> Point -> [(Point, Items)]
-stone sId pl p = [(p, makeItems [Stone sId pl])]
+stone :: ItemId -> Player -> Point -> [(Point, ActiveItems)]
+stone sId pl p = [(p, packItems [Stone sId pl])]

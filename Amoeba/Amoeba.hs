@@ -29,7 +29,9 @@ step (g, w) = do
     putStrLn $ "New StdGen: " ++ show g'
     putStrLn $ "Actions count: " ++ (show . length $ W.worldMutatorActions wm')
     putStrLn $ unlines (map W.showAction (W.worldMutatorActions wm'))
-    return (g', w')
+    
+    let w'' = W.mutateWorld w' wm'
+    return (g', w'')
 
 main::IO ()
 main = do

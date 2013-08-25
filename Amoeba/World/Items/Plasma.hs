@@ -8,8 +8,8 @@ import World.Geometry
 import World.Stochastic
 import World.Constants
 import World.Types
+import World.Id
 
-import Data.Word
 import System.Random
 import qualified Data.List as L
 import qualified Data.Either as E
@@ -19,6 +19,7 @@ data Plasma = Plasma { plasmaId :: ItemId
             | ConflictedPlasma { plasmaId :: ItemId
                                , conflictedOwner :: Player
                                , conflictedPlayers :: Players }
+  deriving (Show, Read)
 
 instance Id Plasma where
   getId = plasmaId
@@ -27,6 +28,9 @@ instance Active Plasma where
   activate w p _ = inactive w p
   ownedBy p@(Plasma{}) = plasmaPlayer p
   ownedBy p@(ConflictedPlasma{}) = conflictedOwner p
+
+instance Descripted Plasma where
+    description = show
 
 plasma :: Int -> Player -> Plasma
 plasma = Plasma
@@ -41,11 +45,11 @@ conflictatePlasma (Plasma plId pl) ps =
     ConflictedPlasma plId conflictPlayer ([pl] `L.union` ps)
   
 
-plasmaConstructor :: Player -> ItemId -> Plasma
-plasmaConstructor pl pId = plasma pId pl
+plasmaConstructor :: Player -> ItemId -> ActiveItem
+plasmaConstructor pl pId = packItem $ plasma pId pl
 
-conflictedPlasmaConstructor :: Players -> ItemId -> Plasma
-conflictedPlasmaConstructor pls pId = conflictedPlasma pId conflictPlayer pls
+conflictedPlasmaConstructor :: Players -> ItemId -> ActiveItem
+conflictedPlasmaConstructor pls pId = packItem $ conflictedPlasma pId conflictPlayer pls
 
 data GrowMode = GrowOver Point
               | StopGrow
@@ -60,9 +64,7 @@ grow' :: Bound
 grow' bound pl acts w toPoint dir
     | not $ inBounds toPoint bound = Left StopGrow
     | otherwise = case takeWorldItems toPoint w of
-        NoItems -> let act = addSingleActiveAction toPoint (plasmaConstructor pl)
-                   in return (act : acts)
-        items | isOnePlayerHere pl items -> Left (GrowOver toPoint)
+        items | isOnePlayerHere pl items || isNonePlayersHere pl items -> Left (GrowOver toPoint)
               | isObstacleItem items -> Left StopGrow
               | otherwise -> let -- Enemies are here!
                                  pls = L.union (getPlayers items) [pl]
