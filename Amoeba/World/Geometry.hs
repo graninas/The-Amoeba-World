@@ -5,15 +5,13 @@ import Linear
 type Radius = Double
 type Point = V3 Int
 
-type Position = (Int, Int)
-
 data Bound = Circle { circleCenter :: Point
                     , circleRadius ::  Radius }
 --           | Rectangle { rectangleLeftUp :: Point
 --                       , rectangleRightDown :: Point }
            | Pointed { pointPosition :: Point }
   deriving (Show, Read, Eq)
-
+type Bounds = [Bound]
 
 class Bounded i where
     bounds :: i -> Point -> Bound
@@ -31,10 +29,11 @@ intersecting c@(Circle _ _) (Pointed p) = intersecting c (Circle p 0)
 intersecting p@(Pointed _) c@(Circle _ _) = intersecting c p
 intersecting (Pointed _) (Pointed _) = False
 
-inBounds :: Point -> Bound -> Bool
-inBounds p = intersecting (Pointed p) 
+inBounds :: Point -> Bounds -> Bool
+inBounds p = any (intersecting (Pointed p)) 
 
 type Direction = Point
+type Directions = [Direction]
 type Shift = Point -> Point
 type Shifts = [Shift]
 

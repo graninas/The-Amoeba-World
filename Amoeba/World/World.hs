@@ -1,124 +1,159 @@
-{-# LANGUAGE ExistentialQuantification, NoMonomorphismRestriction #-}
+{-# LANGUAGE ExistentialQuantification, ExistentialQuantification, NoMonomorphismRestriction, FunctionalDependencies, MultiParamTypeClasses, TypeFamilies, FlexibleInstances #-} 
 
 module World.World where
 
 import Prelude hiding (Bounded)
 import qualified Data.Maybe as Maybe
 import qualified Data.Map as Map
+import qualified Data.List as L
+import qualified Control.Arrow as Arr (second)
 import System.Random
 
+import World.Types
 import World.Geometry
 import World.Player
+import World.Constants
+import World.Id
 
-type ItemId = Int
+{- Description -}
 
-class Id i where
-    getId :: i -> ItemId
+class Descripted a where
+    description :: a -> String
 
-class Id i => Active i where
+{- Active, ActiveItem -}
+
+class (Id i, Descripted i) => Active i where
     ownedBy :: i -> Player
-    activate :: World -> Point -> i -> WorldMutator -> WorldMutator
+    activate :: Point  -> i -> World -> (World, Annotations)
 
-data World = World { worldMap :: WorldMap }
+data ActiveItem = forall i. Active i => MkActiveItem i
+type ActiveItems = [ActiveItem]
 
+instance Id ActiveItem where
+    getId (MkActiveItem i) = getId i
 
-data Action = forall i. Active i => AddSingleActive { actionPoint :: Point
-                                                    , actionItemConstructor :: ItemId -> i }
-            | forall i. Active i => AddSingleConflicted { actionPoint :: Point
-                                                        , actionItemConstructor :: ItemId -> i
-                                                        , actionPlayer :: Player } 
-            | forall i. Active i => ModifyItem { actionPoint :: Point
-                                               , actionItem :: i
-                                               , actionModificatorId :: Int
-                                               , actionModificator :: i -> i }
-            | forall i. Active i => DeleteActive { actionPoint :: Point
-                                                 , actionItem :: i }
+instance Active ActiveItem where
+    ownedBy (MkActiveItem i) = ownedBy i
+    activate p (MkActiveItem i) = activate p i
 
-type Actions = [Action]
+instance Descripted ActiveItem where
+    description (MkActiveItem i) = description i
 
-showAction (ModifyItem p _ modId _) = "Point: " ++ show p ++ "\nModId: " ++ show modId
-showAction (AddSingleActive p _) = "Single active at: " ++ show p
-showAction (AddSingleConflicted p _ pl) = "Single action at: " ++ show p ++ " for player " ++ show pl
-showAction _ = "Not implemented." 
+instance Eq ActiveItem where
+    ai1 == ai2 = getId ai1 == getId ai2
 
-data WorldMutator = WorldMutator { worldMutatorActions :: Actions
-                                 , worldMutatorRndGen :: StdGen }
+packItem :: Active i => i -> ActiveItem
+packItem = MkActiveItem
 
-data Items = forall i. Active i => Items [i]
-                                 | NoItems
-data WorldMap = WorldMap (Map.Map Point Items)
+packItems :: Active i => [i] -> ActiveItems
+packItems = map packItem
 
-invalidId = -1
+appendActiveItem :: Active i => i -> ActiveItems -> ActiveItems
+appendActiveItem item its = packItem item : its
 
-instance Id Items where
-  getId _ = invalidId
-  
-instance Active Items where
-  ownedBy _ = dummyPlayer
-  activate _ _ NoItems wm = wm
-  activate w p (Items its) wm = foldr (activate w p) wm its
+packObject :: Active i => (Point, i) -> (Point, ActiveItem)
+packObject (p, i) = (p, packItem i)
 
-noItems :: Items
-noItems = NoItems
+(|>|) :: Active i => [(Point, i)] -> [(Point, ActiveItem)] -> [(Point, ActiveItem)]
+objects |>| items = map packObject objects ++ items
 
-makeItems :: forall i. Active i => [i] -> Items
-makeItems = Items
+(|>||) :: (Active i1, Active i2) => [(Point, i1)] -> [(Point, i2)] -> [(Point, ActiveItem)]
+objects1 |>|| objects2 = objects1 |>| (objects2 |>| [])
 
-worldMapFromList :: [(Point, Items)] -> WorldMap
-worldMapFromList l = WorldMap (Map.fromList l)
+infixr 5 |>|
+infixr 5 |>||
+{- World -}
 
-worldFromList :: [(Point, Items)] -> World
-worldFromList = World . worldMapFromList
+type WorldMap = Map.Map Point ActiveItems
+data World = World { worldMap :: WorldMap
+                   , worldLastItemId :: ItemId
+                   , worldStdGen :: StdGen }
+                   
+data Annotation = Annotation { annotationMessage :: String }
+type Annotations = [Annotation]
 
-inactive :: World -> Point -> WorldMutator -> WorldMutator
-inactive _ _ wm = wm
+itemToList i = [i]
+worldMapFromList :: [(Point, ActiveItem)] -> WorldMap
+worldMapFromList = Map.fromList . map (Arr.second itemToList)
 
+newWorld :: WorldMap -> ItemId -> StdGen -> World
+newWorld = World
 
-takeWorldItems :: Point -> World -> Items
-takeWorldItems p (World (WorldMap wolrdMap)) = Maybe.fromMaybe noItems $ Map.lookup p wolrdMap
+stepWorld :: World -> (World, Annotations)
+stepWorld world@(World wm _ _) = Map.foldrWithKey activateItems (world, []) wm
 
-isOnePlayerHere :: Player -> Items -> Bool
-isOnePlayerHere _ NoItems = False
-isOnePlayerHere pl (Items actives) = all ((pl ==) . ownedBy) actives
+activateItem :: Point -> ActiveItem -> (World, Annotations) -> (World, Annotations)
+activateItem p i (w, an) = let (w', an') = activate p i w
+                           in (w', an ++ an')  
 
-isObstacle :: Items -> Bool
-isObstacle NoItems = False
-isObstacle (Items actives) = any ( (`elem` obstaclePlayers) . ownedBy) actives
+activateItems :: Point -> ActiveItems -> (World, Annotations) -> (World, Annotations)
+activateItems p items (world, annotations) = let
+    (world', annotations') = foldr (activateItem p) (world, []) items
+    in (world', annotations ++ annotations')
+
+inactive :: Point -> i -> World -> (World, Annotations)
+inactive _ _ w = (w, [])
+
+annotation :: String -> Annotation
+annotation = Annotation
+
+showPointAndPlayer :: Point -> Player -> String
+showPointAndPlayer p pl = "[" ++ show p ++ ", " ++ show pl ++ "]"
+
+showPoint :: Point -> String
+showPoint p = "[" ++ show p ++ "]"
+
+{- World operations -}
+
+takeWorldItems :: Point -> World -> ActiveItems
+takeWorldItems p (World wm _ _) = Maybe.fromMaybe [] $ Map.lookup p wm
 
 isEmptyCell :: Point -> World -> Bool
-isEmptyCell p w = case takeWorldItems p w of
-    NoItems -> False
-    _ -> True
+isEmptyCell p w = null $ takeWorldItems p w
 
-emptyCellChecker p w =
-    if isEmptyCell p w
-    then Right ()
-    else Left "Cell not empty"
+getPlayers :: ActiveItems -> Players
+getPlayers activeIts = map ownedBy $ filter (isOrdinaryPlayer . ownedBy) activeIts
 
-createWorldMutator :: StdGen -> Actions -> WorldMutator
-createWorldMutator = flip WorldMutator
+{- WorldMap Updater -}
 
-emptyWorldMutator = WorldMutator []
+class WorldMapUpdater a where
+    updateFunc :: a -> Maybe ActiveItems -> Maybe ActiveItems
+    itemPoint :: a -> Point
 
-addSingleActiveAction :: Active i => Point -> (ItemId -> i) -> Action
-addSingleActiveAction = AddSingleActive
+--                    Incoming items   Existing items
+type ActiveItemsMerge = ActiveItems -> ActiveItems -> ActiveItems
 
-addSingleConflictedAction :: Active i => Point -> (ItemId -> i) -> Player -> Action
-addSingleConflictedAction = AddSingleConflicted
+data WorldMapFunction = WorldMapFunction 
+                        { worldMapFunctionP :: Point 
+                        , worldMapFunctionF :: Maybe ActiveItems -> Maybe ActiveItems }
 
-modifyItemAction :: Active i => Point -> i -> Int -> (i -> i) -> Action
-modifyItemAction = ModifyItem
+type WorldMapFunctions = [WorldMapFunction]
 
-getModificatorActions :: ItemId -> Int -> WorldMutator -> Actions
-getModificatorActions itemId mId (WorldMutator acts _) = filter (isMutatorAction itemId mId) acts
+instance WorldMapUpdater WorldMapFunction where
+    updateFunc = worldMapFunctionF
+    itemPoint = worldMapFunctionP
 
-isMutatorAction :: ItemId -> Int -> Action -> Bool
-isMutatorAction itemId mId (ModifyItem _ i mId' _) = (mId == mId') && (itemId == getId i)
-isMutatorAction _ _ _ = False
+worldMapFunction :: Point -> ActiveItem -> ActiveItemsMerge -> WorldMapFunction
+worldMapFunction p i mergeF = let wmFunc = Just . maybe [i] (mergeF [i])
+                              in WorldMapFunction p wmFunc
 
-activateWorld :: StdGen -> World -> (World, WorldMutator) -- TODO
-activateWorld g w@(World (WorldMap worldMap)) = let
-    emptyWm = emptyWorldMutator g
-    wm = Map.foldrWithKey (activate w) emptyWm worldMap 
-    in (w, wm)
+addItemFunc :: Active i => (Point, i) -> WorldMapFunction
+addItemFunc (p, i) = worldMapFunction p (packItem i) simpleMerge
+
+addItemsFunc :: Active i => [(Point, i)] -> WorldMapFunctions
+addItemsFunc = map addItemFunc
     
+replaceItemFunc :: Active i => (Point, i) -> WorldMapFunction
+replaceItemFunc (p, i) = worldMapFunction p (packItem i) replaceMerge
+
+alterItem :: WorldMapFunction -> WorldMap -> WorldMap
+alterItem wmFunc = Map.alter (updateFunc wmFunc) (itemPoint wmFunc)
+
+updateWorldMap :: WorldMapFunctions -> WorldMap -> WorldMap
+updateWorldMap wmFuncs wm = foldr alterItem wm wmFuncs
+
+simpleMerge :: ActiveItemsMerge
+simpleMerge = (++)
+
+replaceMerge :: ActiveItemsMerge
+replaceMerge = flip (L.\\)

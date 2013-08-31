@@ -7,72 +7,93 @@ import World.Player
 import World.Geometry
 import World.Stochastic
 import World.Constants
+import World.Types
+import World.Id
 
-import Data.Word
 import System.Random
 import qualified Data.List as L
 import qualified Data.Either as E
 
 data Plasma = Plasma { plasmaId :: ItemId
                      , plasmaPlayer :: Player }
+            | ConflictedPlasma { plasmaId :: ItemId
+                               , conflictedOwner :: Player
+                               , conflictedPlayers :: Players }
+  deriving (Show, Read)
 
 instance Id Plasma where
   getId = plasmaId
 
 instance Active Plasma where
-  activate w p _ = inactive w p
-  ownedBy = plasmaPlayer
+  activate = inactive
+  ownedBy p@(Plasma{}) = plasmaPlayer p
+  ownedBy p@(ConflictedPlasma{}) = conflictedOwner p
 
-plasma :: Int -> Player -> Plasma
-plasma = Plasma
+instance Descripted Plasma where
+    description = show
 
-plasmaConstructor :: Player -> ItemId -> Plasma
-plasmaConstructor pl pId = plasma pId pl
+plasma :: Point -> ItemId -> Player -> [(Point, Plasma)]
+plasma p pId pl = [(p, Plasma pId pl)]
 
-data GrowMode = GrowOver Point
-              | StopGrow
+conflictedPlasma :: Point -> ItemId -> Player -> Players -> [(Point, Plasma)]
+conflictedPlasma p pId pl pls = [(p, ConflictedPlasma pId pl pls)]
 
-grow' :: Bound
-     -> Player
-     -> Actions
-     -> World
-     -> Point
-     -> Direction
-     -> Either GrowMode Actions
-grow' bound pl acts w toPoint dir
-    | not $ inBounds toPoint bound = Left StopGrow
-    | otherwise = case takeWorldItems toPoint w of
-        NoItems -> let act = addSingleActiveAction toPoint (plasmaConstructor pl)
-                   in return (act : acts)
-        items | isOnePlayerHere pl items -> Left (GrowOver toPoint)
-              | isObstacle items -> Left StopGrow
-              | otherwise -> let act = addSingleConflictedAction toPoint (plasmaConstructor pl) pl
-                             in return (act : acts)
+data GrowResult = CreepOver
+                | GrowImpossible
+                | Grow
+                | TakeConflict Players
+                | AlreadyConflicted Players
+  deriving (Show, Read, Eq)
 
-grow :: Bound
-     -> Player
-     -> Actions
-     -> StdGen
-     -> World
-     -> Point
-     -> Direction
-     -> [Direction]
-     -> Either GrowMode WorldMutator
-grow bound pl acts g0 w fromPoint dir triedDirs = 
-    case chooseRandomDir growProbabilities g0 dir triedDirs of
-        Left _ -> Left StopGrow
-        Right (g1, rndDir) -> do
-            let growFunc = grow' bound pl acts w (movePoint fromPoint rndDir) dir
-            let nextDir = nextDirection dir
-            let tryNextDirectionFunc = grow bound pl acts g1 w fromPoint nextDir (dir : triedDirs)
-            let successedGrowFunc acts = Right $ createWorldMutator g1 acts
-            let tryGrowMode StopGrow = tryNextDirectionFunc
-            let tryGrowMode (GrowOver p) = grow bound pl acts g1 w p dir []
-            E.either tryGrowMode successedGrowFunc growFunc
+checkGrow :: Player -> Bounds -> Point -> World -> GrowResult
+checkGrow pl bounds toPoint w
+    | not $ inBounds toPoint bounds = GrowImpossible
+    | otherwise = let items = takeWorldItems toPoint w
+                  in case getPlayers items of
+        []    -> Grow
+        players | hasObstaclePlayer players -> GrowImpossible
+                | isPlayerAlone pl players -> CreepOver
+                | isPlayerHere pl players -> AlreadyConflicted (pl : players)
+                | otherwise -> TakeConflict (pl : players)
 
-growPlasma :: Bound -> Player -> WorldMutator -> World -> Point -> Direction -> Either String WorldMutator
-growPlasma bound pl wm@(WorldMutator acts g) w piecePoint dir = do
-    let growFunc = grow bound pl acts g w piecePoint dir []
-    let failGrow _ = Left "No grow possible" 
-    E.either failGrow return growFunc
+defaultGrowDirs = [left, up, down, right]
+
+conflictAnnotation p pls = annotation $ showPoint p ++ " Conflict of players: " ++ show pls
+addingPlasmaAnnotation p pl = annotation $ showPointAndPlayer p pl ++ " Adding plasma"
+addingConflictedPlasmaAnnotation p pl = annotation $ showPointAndPlayer p pl ++ " Adding conflicted plasma"
+
+addPlasma :: Player -> Point -> World -> (World, Annotations)
+addPlasma pl toPoint w@(World wm lId g) = let
+    ann = addingPlasmaAnnotation toPoint pl
+    newPlasma = plasma toPoint (lId + 1) pl
+    newItems = addItemsFunc newPlasma
+    in (World (updateWorldMap newItems wm) (lId + 1) g, [ann])
+
+addConflictedPlasma :: Player -> Point -> Players -> World -> (World, Annotations)
+addConflictedPlasma pl toPoint pls w@(World wm lId g) = let
+    anns = [ conflictAnnotation toPoint pls
+           , addingPlasmaAnnotation toPoint pl
+           , addingConflictedPlasmaAnnotation toPoint pl ]
+    newPlasma = plasma toPoint (lId + 1) pl
+    newConflictedPlasma = conflictedPlasma toPoint (lId + 2) pl pls
+    newItems = addItemsFunc (newPlasma ++ newConflictedPlasma)
+    in (World (updateWorldMap newItems wm) (lId + 2) g, anns)
+
+tryGrow :: Player -> Bounds -> (Point, Direction,  Directions)
+     -> World -> Either String (World, Annotations)
+tryGrow _ _ (_, _, []) _ = Left "No ways to grow"
+tryGrow pl bounds (fromPoint, dir, availableDirs) w@(World wm lId g0) =
+    case chooseRandomDir g0 availableDirs growProbabilities of
+        Nothing -> Left "Random dir choosing failed"
+        Just (g1, rndDir, restDirs) -> let toPoint = movePoint fromPoint rndDir
+                                           w' = World wm lId g1
+                                       in case checkGrow pl bounds toPoint w of
+                Grow -> Right $ addPlasma pl toPoint w'
+                CreepOver -> tryGrow pl bounds (toPoint, dir, defaultGrowDirs) w' -- Try next cell
+                GrowImpossible -> tryGrow pl bounds (fromPoint, dir, restDirs) w' -- try another direction
+                TakeConflict pls -> Right $ addConflictedPlasma pl toPoint pls w'
+                AlreadyConflicted pls -> Left $ "Already conflicted in point " ++ show toPoint
+
+growPlasma :: Player -> Bounds -> Point -> Direction -> World -> Either String (World, Annotations)
+growPlasma pl bounds piecePoint dir = tryGrow pl bounds (piecePoint, dir, defaultGrowDirs)
     

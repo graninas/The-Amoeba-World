@@ -1,12 +1,10 @@
 module World.Stochastic where
 
 import World.Geometry
-import World.World
+import World.Types
 
 import System.Random
 import qualified Data.Maybe as Maybe
-
-type RandomNumber = Int
 
 data DirectionProbability = DirectionProbability
                             { probLeft  :: RandomNumber
@@ -15,8 +13,6 @@ data DirectionProbability = DirectionProbability
                             , probDown  :: RandomNumber }
   deriving (Show, Read, Eq)
     
-type ProbabilityRange = (RandomNumber, RandomNumber)
-
 type GrowProbabilities = [(Direction, DirectionProbability)]
 
 probabilityRange :: ProbabilityRange
@@ -27,31 +23,24 @@ randomProbabilityNum = randomR probabilityRange
 
 zeroProbability = DirectionProbability 0 0 0 0
 
-getDirectionProbability baseDir probs = Maybe.fromMaybe zeroProbability (lookup baseDir probs)
+randomDirection :: RandomNumber -> DirectionProbability -> Maybe Direction
+randomDirection rndNum (DirectionProbability l u r d)
+    | rndNum >  0         && rndNum < l             && l /= 0 = Just left
+    | rndNum >= l         && rndNum < l + u         && u /= 0 = Just up
+    | rndNum >= l + u     && rndNum < l + u + r     && r /= 0 = Just right
+    | rndNum >= l + u + r && rndNum < l + u + r + d && d /= 0 = Just down
+    | otherwise = Nothing
 
-getRandomDirection :: RandomNumber -> DirectionProbability -> Direction
-getRandomDirection rndNum (DirectionProbability l u r d)
-    | rndNum >  0         && rndNum < l             && l /= 0 = left
-    | rndNum >= l         && rndNum < l + u         && u /= 0 = up
-    | rndNum >= l + u     && rndNum < l + u + r     && r /= 0 = right
-    | rndNum >= l + u + r && rndNum < l + u + r + d && d /= 0 = down
-    | otherwise = zeroPoint
-
-getSafeRandomDirection :: RandomNumber -> DirectionProbability -> Either String Direction
-getSafeRandomDirection rndNum prob@(DirectionProbability l u r d) = 
-    let dir = getRandomDirection rndNum prob in
-    if dir == zeroPoint
-    then Left ("Not applicable rndNum: " ++ show rndNum ++ " to prob: " ++ show prob)
-    else Right dir
-    
-triedDirsChecker :: [Direction] -> Either String ()  -- TODO: move it
-triedDirsChecker triedDirs | length triedDirs >= 3 = Left "3 directions tried"
-                           | otherwise = Right ()
-
-chooseRandomDir :: GrowProbabilities -> StdGen -> Direction -> [Direction] -> Either String (StdGen, Direction)
-chooseRandomDir probs g0 dir triedDirs = do
-    triedDirsChecker triedDirs -- TODO: move it
+chooseRandomDir :: StdGen -> Directions -> GrowProbabilities -> Maybe (StdGen, Direction, Directions)
+chooseRandomDir _ [] _ = Nothing
+chooseRandomDir g0 (dir:restDirs) probs =
     let (rndNum, g1) = randomProbabilityNum g0
-    let dirProb = getDirectionProbability dir probs
-    rndDir <- getSafeRandomDirection rndNum dirProb
-    return (g1, rndDir)
+        takeDirFunc = do rndDir <- lookup dir probs >>= randomDirection rndNum
+                         return (g1, rndDir, restDirs)
+    in case takeDirFunc of
+        Nothing -> chooseRandomDir g1 restDirs probs
+        result -> result
+        
+    
+    
+    
