@@ -61,6 +61,13 @@ defaultGrowDirs = [left, up, down, right]
 conflictAnnotation p pls = annotation $ showPoint p ++ " Conflict of players: " ++ show pls
 addingPlasmaAnnotation p pl = annotation $ showPointAndPlayer p pl ++ " Adding plasma"
 addingConflictedPlasmaAnnotation p pl = annotation $ showPointAndPlayer p pl ++ " Adding conflicted plasma"
+alreadyConflictedAnnotation p pl pls = annotation $ showPointAndPlayer p pl ++ " Already conflicted here with players " ++ show pls
+randomDirChoosingFailedAnnotation p pl dir dirs = showPointAndPlayer p pl
+    ++ " Random dir choosing failed."
+    ++ "\n  Dir: " ++ literateDirection dir
+    ++ "\n  Avaliable dirs: " ++ show dirs
+    
+nowGrowingWaysAnnotation p pl dir = showPointAndPlayer p pl ++ " No ways to grow in dir " ++ literateDirection dir
 
 addPlasma :: Player -> Point -> World -> (World, Annotations)
 addPlasma pl toPoint w@(World wm lId g) = let
@@ -80,11 +87,11 @@ addConflictedPlasma pl toPoint pls w@(World wm lId g) = let
     in (World (updateWorldMap newItems wm) (lId + 2) g, anns)
 
 tryGrow :: Player -> Bounds -> (Point, Direction,  Directions)
-     -> World -> Either String (World, Annotations)
-tryGrow _ _ (_, _, []) _ = Left "No ways to grow"
+     -> World -> Either Annotation (World, Annotations)
+tryGrow pl _ (p, dir, []) _ = Left $ annotation $ nowGrowingWaysAnnotation p pl dir
 tryGrow pl bounds (fromPoint, dir, availableDirs) w@(World wm lId g0) =
     case chooseRandomDir g0 availableDirs growProbabilities of
-        Nothing -> Left "Random dir choosing failed"
+        Nothing -> Left $ annotation $ randomDirChoosingFailedAnnotation fromPoint pl dir availableDirs
         Just (g1, rndDir, restDirs) -> let toPoint = movePoint fromPoint rndDir
                                            w' = World wm lId g1
                                        in case checkGrow pl bounds toPoint w of
@@ -92,8 +99,8 @@ tryGrow pl bounds (fromPoint, dir, availableDirs) w@(World wm lId g0) =
                 CreepOver -> tryGrow pl bounds (toPoint, dir, defaultGrowDirs) w' -- Try next cell
                 GrowImpossible -> tryGrow pl bounds (fromPoint, dir, restDirs) w' -- try another direction
                 TakeConflict pls -> Right $ addConflictedPlasma pl toPoint pls w'
-                AlreadyConflicted pls -> Left $ "Already conflicted in point " ++ show toPoint
+                AlreadyConflicted pls -> Left $ alreadyConflictedAnnotation toPoint pl pls
 
-growPlasma :: Player -> Bounds -> Point -> Direction -> World -> Either String (World, Annotations)
+growPlasma :: Player -> Bounds -> Point -> Direction -> World -> Either Annotation (World, Annotations)
 growPlasma pl bounds piecePoint dir = tryGrow pl bounds (piecePoint, dir, defaultGrowDirs)
     

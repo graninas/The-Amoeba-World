@@ -77,6 +77,9 @@ subShift2 sh = let (V3 _ x2 x3) = sh zero
 direction :: Shift -> Direction
 direction sh = sh zeroPoint
 
+subDirection1 = direction . subShift1
+subDirection2 = direction . subShift2
+
 ringSquareShifts :: Shifts
 ringSquareShifts = [shiftLeft, shiftRight, shiftUp, shiftDown
                    , shiftLeftUp, shiftLeftDown, shiftRightUp, shiftRightDown]
@@ -93,3 +96,13 @@ nextDirection dir | dir == left = up
                   
 movePoint :: Point -> Direction -> Point
 movePoint = (^+^)
+
+literateDirection dir | dir == left = "Left"
+                      | dir == up = "Up"
+                      | dir == right = "Right"
+                      | dir == down = "Down"
+                      | dir == leftUp = "Left Up"
+                      | dir == leftDown = "Left Down"
+                      | dir == rightUp = "Right Up"
+                      | dir == rightDown = "Right Down"
+                      | otherwise = "<Unknown direction>"

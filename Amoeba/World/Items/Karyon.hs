@@ -41,8 +41,8 @@ data SerializibleKaryon = SKaryon { sKaryonId :: ItemId
                                         , sKaryonFillerDir :: Direction }
   deriving (Show, Read)
     
-mkSerializableKaryon (Karyon kId pl e fs b) = SKaryon kId pl e (map mkSerializableKaryon fs) (b zeroPoint)
-mkSerializableKaryon (KaryonFiller kId pl sh) = SKaryonFiller kId pl (direction sh)
+mkSerializable (Karyon kId pl e fs b) = SKaryon kId pl e (map mkSerializable fs) (b zeroPoint)
+mkSerializable (KaryonFiller kId pl sh) = SKaryonFiller kId pl (direction sh)
 
 instance Id Karyon where
     getId = karyonId
@@ -52,10 +52,13 @@ instance Active Karyon where
     ownedBy = karyonPlayer
     
 instance Descripted Karyon where
-    description  = show . mkSerializableKaryon
+    description  = show . mkSerializable
     
 ordinalKaryonBound :: Point -> Bound
 ordinalKaryonBound p = Circle p ordinalGrow
+
+karyonEnergyUpdatedAnnotation p pl e = annotation $ showPointAndPlayer p pl ++ " Karyon energy updated: " ++ show e
+karyonActivatedAnnotation p pl k = annotation $ showPointAndPlayer p pl ++ " Karyon activated. " ++ (show . mkSerializable $ k)
 
 karyon :: ItemId -> Player -> Energy -> Point -> [(Point, Karyon)]
 karyon kId pl e pos = kayronCell : pointedFillers
@@ -66,7 +69,7 @@ karyon kId pl e pos = kayronCell : pointedFillers
     fillers = map snd pointedFillers
 
 updateKaryonEnergyAnnotation :: Point -> Karyon -> Annotation
-updateKaryonEnergyAnnotation p k@(Karyon _ pl e _ _) = annotation $ showPointAndPlayer p pl ++ " Karyon energy updated: " ++ show e
+updateKaryonEnergyAnnotation p k@(Karyon _ pl e _ _) = karyonEnergyUpdatedAnnotation p pl e
 updateKaryonEnergyAnnotation _ _ = error "Not implemented"
 
 updateKaryon :: Point -> Karyon -> (World, Annotations) -> (World, Annotations)
@@ -77,15 +80,28 @@ updateKaryon p k (w, anns) = let
 
 activateKaryon :: Point -> Karyon -> World -> (World, Annotations)
 activateKaryon p k@(KaryonFiller{}) w = inactive p k w
-activateKaryon p k@(Karyon kId _ e fillers _) w = let
+activateKaryon p k@(Karyon kId pl e fillers _) w = let
+    ann = karyonActivatedAnnotation p pl k
     shifts = map karyonFillerShift fillers
     f val = foldr (activatePiece p k) val shifts
-    iteraties = iterate f (w, [], e)
+    iteraties = iterate f (w, [ann], e)
     (w', anns, e') = head . drop karyonPieceActivateCount $ iteraties
     in updateKaryon p k { karyonEnergy = e' } (w', anns)
 
+activatePieceGrowing :: Player -> Bounds -> Point -> Direction -> (World, Annotations, Energy) -> (World, Annotations, Energy)
+activatePieceGrowing _ _ _ _ actRes@(w, anns, 0) = actRes 
+activatePieceGrowing pl bounds p dir (w, anns, e) = case growPlasmaFunc of
+        Left ann -> (w, anns ++ [ann], e)
+        Right (w', anns') -> (w', anns ++ anns', e-1)
+  where
+    growPlasmaFunc = growPlasma pl bounds p dir w
+
 activatePiece :: Point -> Karyon -> Shift -> (World, Annotations, Energy) -> (World, Annotations, Energy)
 activatePiece _ (KaryonFiller{}) _ r = r
-activatePiece p k@(Karyon _ pl _ _ bound) sh (w, anns, e) = undefined -- TODO
-
-
+activatePiece p k@(Karyon _ pl _ _ bound) sh activationData | isCornerShift sh = let
+    actFunc = activatePieceGrowing pl [bound p] p (subDirection2 sh)
+            . activatePieceGrowing pl [bound p] p (subDirection1 sh)
+    in actFunc activationData
+activatePiece p k@(Karyon _ pl _ _ bound) sh activationData = let
+    actFunc = activatePieceGrowing pl [bound p] p (direction sh)
+    in actFunc activationData

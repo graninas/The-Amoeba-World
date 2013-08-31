@@ -114,6 +114,11 @@ isEmptyCell p w = null $ takeWorldItems p w
 getPlayers :: ActiveItems -> Players
 getPlayers activeIts = map ownedBy $ filter (isOrdinaryPlayer . ownedBy) activeIts
 
+itemsCount :: World -> Int
+itemsCount (World wm _ _) = Map.fold f 0 wm
+  where
+    f items n = n + length items
+
 {- WorldMap Updater -}
 
 class WorldMapUpdater a where
