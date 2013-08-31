@@ -1,0 +1,40 @@
+module World.Items.Stone where
+
+import World.World
+import World.Player
+import World.Geometry
+import World.Stochastic
+import World.Constants
+import World.Types
+import World.Id
+
+import Data.Word
+import System.Random
+import qualified Data.List as L
+import qualified Data.Either as E
+
+data Stone = Stone { stoneId :: ItemId
+                   , stoneOwner :: Player }
+<<<<<<< HEAD
+  deriving (Show, Read, Eq)
+=======
+  deriving (Show, Read)
+>>>>>>> 5a5bf0e9d5641b9d1d94508f81abd6718683f8ef
+
+instance Id Stone where
+    getId = stoneId
+
+instance Active Stone where
+    activate = inactive
+    ownedBy = stoneOwner
+    
+instance Descripted Stone where
+    description = show
+    
+<<<<<<< HEAD
+stone :: ItemId -> Player -> Point -> [(Point, Stone)]
+stone sId pl p = [(p, Stone sId pl)]
+=======
+stone :: ItemId -> Player -> Point -> [(Point, ActiveItems)]
+stone sId pl p = [(p, packItems [Stone sId pl])]
+>>>>>>> 5a5bf0e9d5641b9d1d94508f81abd6718683f8ef
