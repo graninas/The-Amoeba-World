@@ -1,0 +1,6 @@
+*.hi
+*.o
+.buildDir
+.dist-buildwrapper
+bin
+.project~

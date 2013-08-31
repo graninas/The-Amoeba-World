@@ -32,24 +32,8 @@ instance Active Plasma where
 instance Descripted Plasma where
     description = show
 
-instance Descripted Plasma where
-    description = show
-
 plasma :: Point -> ItemId -> Player -> [(Point, Plasma)]
 plasma p pId pl = [(p, Plasma pId pl)]
-
-conflictatePlasma :: Plasma -> Players -> Plasma
-conflictatePlasma (ConflictedPlasma plId owner ps1) ps2 = 
-    ConflictedPlasma plId owner (ps1 `L.union` ps2)
-conflictatePlasma (Plasma plId pl) ps =
-    ConflictedPlasma plId conflictPlayer ([pl] `L.union` ps)
-  
-
-plasmaConstructor :: Player -> ItemId -> ActiveItem
-plasmaConstructor pl pId = packItem $ plasma pId pl
-
-conflictedPlasmaConstructor :: Players -> ItemId -> ActiveItem
-conflictedPlasmaConstructor pls pId = packItem $ conflictedPlasma pId conflictPlayer pls
 
 conflictedPlasma :: Point -> ItemId -> Player -> Players -> [(Point, Plasma)]
 conflictedPlasma p pId pl pls = [(p, ConflictedPlasma pId pl pls)]
@@ -60,7 +44,6 @@ data GrowResult = CreepOver
                 | TakeConflict Players
                 | AlreadyConflicted Players
   deriving (Show, Read, Eq)
-                             in return (conflAct : act : acts)
 
 checkGrow :: Player -> Bounds -> Point -> World -> GrowResult
 checkGrow pl bounds toPoint w
