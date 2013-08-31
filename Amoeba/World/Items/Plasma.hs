@@ -37,10 +37,11 @@ plasma :: Point -> ItemId -> Player -> [(Point, Plasma)]
 plasma p pId pl = [(p, Plasma pId pl)]
 
 conflictedPlasma :: Point -> ItemId -> Player -> Players -> [(Point, Plasma)]
-conflictedPlasma p pId pl pls = [(p, ConflictedPlasma pId pl pls)]
+conflictedPlasma p pId pl pls = [(p, ConflictedPlasma pId pl (L.nub pls))]
 
 data GrowResult = CreepOver
                 | GrowImpossible
+                | BoundsReached
                 | Grow
                 | TakeConflict Players
                 | AlreadyConflicted Players
@@ -48,7 +49,7 @@ data GrowResult = CreepOver
 
 checkGrow :: Player -> Bounds -> Point -> World -> GrowResult
 checkGrow pl bounds toPoint w
-    | not $ inBounds toPoint bounds = GrowImpossible
+    | not $ inBounds toPoint bounds = BoundsReached
     | otherwise = let items = takeWorldItems toPoint w
                   in case getPlayers items of
         []    -> Grow
@@ -99,6 +100,7 @@ tryGrow pl bounds (fromPoint, dir, availableDirs) w@(World wm lId g0) =
                 Grow -> Right $ addPlasma pl toPoint w'
                 CreepOver -> tryGrow pl bounds (toPoint, dir, defaultGrowDirs) w' -- Try next cell
                 GrowImpossible -> tryGrow pl bounds (fromPoint, dir, restDirs) w' -- try another direction
+                BoundsReached -> tryGrow pl bounds (fromPoint, dir, restDirs) w' -- try another direction
                 TakeConflict pls -> Right $ addConflictedPlasma pl toPoint pls w'
                 AlreadyConflicted pls -> Left $ alreadyConflictedAnnotation toPoint pl pls
 

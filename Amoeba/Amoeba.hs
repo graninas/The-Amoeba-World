@@ -14,7 +14,7 @@ import System.Random
 
 itemsList :: [(Point, ActiveItem)]
 itemsList =      K.karyon 1 P.player1 100 (point 10 5 0)
-            |>|  K.karyon 2 P.player2 100 (point (-10) 5 0)
+            |>|  K.karyon 2 P.player2 100 (point 5 7 0)
             |>|  S.stone 3 P.stonePlayer (point 1 2 0)
             |>|  S.stone 4 P.stonePlayer (point 1 3 0)
             |>|  S.stone 5 P.stonePlayer (point 1 4 0)
@@ -36,12 +36,15 @@ step w currentMove = do
 
 eval w 0 = return ()
 eval w n = do
-    let currentMove = movesCount - n
-    (w', anns) <- step w currentMove
-    appendFile gameLogFile ("\n=========" ++ show currentMove ++ "=========")
-    appendFile gameLogFile ("\n  Items count: " ++ show (itemsCount w') ++ "\n")
-    appendFile gameLogFile (unlines . map annotationMessage $ anns)
+    let currentMove = movesCount - n + 1
+    res@(w', anns) <- step w currentMove
+    logWorld res currentMove
     eval w' (n-1)
+
+logWorld (w, anns) currentMove = do
+    appendFile gameLogFile ("\n=========" ++ show currentMove ++ "=========")
+    appendFile gameLogFile ("\n  Items count: " ++ show (itemsCount w) ++ "\n")
+    appendFile gameLogFile (unlines . map annotationMessage $ anns)
 
 gameLogFile = "moves.txt"
 movesCount = 30
@@ -53,7 +56,7 @@ main = do
     writeFile gameLogFile "Game moves:"
     --boot
     let w = world (mkStdGen 100)
-    
+    logWorld (w,[]) 0
     eval w movesCount
     
     putStrLn "All Ok."

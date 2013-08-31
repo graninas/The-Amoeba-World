@@ -18,6 +18,11 @@ import qualified Data.Either as E
 karyonPieceActivateCount = 1
 
 -- TODO: World bounds, conflicting cells, other deals
+-- TODO: energy collecting.
+-- TODO: annotations on impossible grow.
+-- TODO: testing!
+-- TODO: fix bug with multiple players in annotation:
+-- [V3 6 6 0, Player 1] Already conflicted here with players [Player 1,Player 1,Player 1,Player 2]
 
 -- TODO: next plasma growing - with bounds, but with A* algorithm wich should
 -- search the nearest possible cell for growing.
