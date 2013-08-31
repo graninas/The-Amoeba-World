@@ -25,9 +25,10 @@ instance Id Plasma where
   getId = plasmaId
 
 instance Active Plasma where
-  activate = inactive
+  activate p i w = (w, [activationAnnotation p i])
   ownedBy p@(Plasma{}) = plasmaPlayer p
   ownedBy p@(ConflictedPlasma{}) = conflictedOwner p
+  name _ = "Plasma"
 
 instance Descripted Plasma where
     description = show

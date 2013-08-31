@@ -50,6 +50,7 @@ instance Id Karyon where
 instance Active Karyon where
     activate = activateKaryon
     ownedBy = karyonPlayer
+    name _ = "Karyon"
     
 instance Descripted Karyon where
     description  = show . mkSerializable
@@ -58,7 +59,6 @@ ordinalKaryonBound :: Point -> Bound
 ordinalKaryonBound p = Circle p ordinalGrow
 
 karyonEnergyUpdatedAnnotation p pl e = annotation $ showPointAndPlayer p pl ++ " Karyon energy updated: " ++ show e
-karyonActivatedAnnotation p pl k = annotation $ showPointAndPlayer p pl ++ " Karyon activated. " ++ (show . mkSerializable $ k)
 
 karyon :: ItemId -> Player -> Energy -> Point -> [(Point, Karyon)]
 karyon kId pl e pos = kayronCell : pointedFillers
@@ -81,10 +81,9 @@ updateKaryon p k (w, anns) = let
 activateKaryon :: Point -> Karyon -> World -> (World, Annotations)
 activateKaryon p k@(KaryonFiller{}) w = inactive p k w
 activateKaryon p k@(Karyon kId pl e fillers _) w = let
-    ann = karyonActivatedAnnotation p pl k
     shifts = map karyonFillerShift fillers
     f val = foldr (activatePiece p k) val shifts
-    iteraties = iterate f (w, [ann], e)
+    iteraties = iterate f (w, [activationAnnotation p k], e)
     (w', anns, e') = head . drop karyonPieceActivateCount $ iteraties
     in updateKaryon p k { karyonEnergy = e' } (w', anns)
 

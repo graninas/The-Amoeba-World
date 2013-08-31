@@ -27,22 +27,23 @@ itemsList =      K.karyon 1 P.player1 100 (point 10 5 0)
 
 world = newWorld (worldMapFromList itemsList) 10
 
-step w = do
-    let (w', anns) = stepWorld w
-    let cnt = itemsCount w'
-    putStrLn $ "Items count: " ++ show cnt
+step w currentMove = do
+    putStrLn $ "\n=========" ++ show currentMove ++ "========="
+    let res@(w', anns) = stepWorld w
+    putStrLn $ "Items count: " ++ show (itemsCount w')
     mapM_ (putStrLn . annotationMessage) anns
-    appendFile gameLogFile (unlines . map annotationMessage $ anns)
-    return w'
+    return res
 
 eval w 0 = return ()
 eval w n = do
-    putStrLn $ "\n=========" ++ show (movesCount - n) ++ "========="
-    w' <- step w
+    let currentMove = movesCount - n
+    (w', anns) <- step w currentMove
+    appendFile gameLogFile ("\n=========" ++ show currentMove ++ "=========")
+    appendFile gameLogFile (unlines . map annotationMessage $ anns)
     eval w' (n-1)
 
 gameLogFile = "moves.txt"
-movesCount = 30
+movesCount = 3
 
 main::IO ()
 main = do

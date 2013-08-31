@@ -22,8 +22,9 @@ instance Id Border where
     getId = borderId
 
 instance Active Border where
-    activate = inactive
+    activate p i w = (w, [activationAnnotation p i])
     ownedBy = borderPlayer
+    name _ = "Border"
 
 instance Descripted Border where
     description = show

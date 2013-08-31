@@ -20,8 +20,9 @@ instance Id Canyon where
     getId = canyonId
 
 instance Active Canyon where
-    activate = inactive
+    activate p i w = (w, [activationAnnotation p i])
     ownedBy = canyonOwner
+    name _ = "Canyon"
     
 instance Descripted Canyon where
     description = show

@@ -25,6 +25,7 @@ class Descripted a where
 class (Id i, Descripted i) => Active i where
     ownedBy :: i -> Player
     activate :: Point  -> i -> World -> (World, Annotations)
+    name :: i -> String
 
 data ActiveItem = forall i. Active i => MkActiveItem i
 type ActiveItems = [ActiveItem]
@@ -35,6 +36,7 @@ instance Id ActiveItem where
 instance Active ActiveItem where
     ownedBy (MkActiveItem i) = ownedBy i
     activate p (MkActiveItem i) = activate p i
+    name (MkActiveItem i) = name i
 
 instance Descripted ActiveItem where
     description (MkActiveItem i) = description i
@@ -84,12 +86,10 @@ stepWorld world@(World wm _ _) = Map.foldrWithKey activateItems (world, []) wm
 
 activateItem :: Point -> ActiveItem -> (World, Annotations) -> (World, Annotations)
 activateItem p i (w, an) = let (w', an') = activate p i w
-                           in (w', an ++ an')  
+                           in (w', an ++ an')
 
 activateItems :: Point -> ActiveItems -> (World, Annotations) -> (World, Annotations)
-activateItems p items (world, annotations) = let
-    (world', annotations') = foldr (activateItem p) (world, []) items
-    in (world', annotations ++ annotations')
+activateItems p items activationData = foldr (activateItem p) activationData items
 
 inactive :: Point -> i -> World -> (World, Annotations)
 inactive _ _ w = (w, [])
@@ -102,6 +102,8 @@ showPointAndPlayer p pl = "[" ++ show p ++ ", " ++ show pl ++ "]"
 
 showPoint :: Point -> String
 showPoint p = "[" ++ show p ++ "]"
+
+activationAnnotation p i = annotation $ showPointAndPlayer p (ownedBy i) ++ " " ++ name i ++ ": activated"
 
 {- World operations -}
 
@@ -161,4 +163,4 @@ simpleMerge :: ActiveItemsMerge
 simpleMerge = (++)
 
 replaceMerge :: ActiveItemsMerge
-replaceMerge = flip (L.\\)
+replaceMerge newIts oldIts = newIts ++ (oldIts L.\\ newIts) 

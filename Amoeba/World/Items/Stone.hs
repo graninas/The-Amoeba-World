@@ -21,8 +21,9 @@ instance Id Stone where
     getId = stoneId
 
 instance Active Stone where
-    activate = inactive
+    activate p i w = (w, [activationAnnotation p i])
     ownedBy = stoneOwner
+    name _ = "Stone"
     
 instance Descripted Stone where
     description = show
