@@ -68,7 +68,7 @@ randomDirChoosingFailedAnnotation p pl dir dirs = showPointAndPlayer p pl
     ++ "\n  Dir: " ++ literateDirection dir
     ++ "\n  Avaliable dirs: " ++ show dirs
     
-nowGrowingWaysAnnotation p pl dir = showPointAndPlayer p pl ++ " No ways to grow in dir " ++ literateDirection dir
+nowGrowingWaysAnnotation p pl dir = showPointAndPlayer p pl ++ " No ways to grow in " ++ literateDirection dir
 
 addPlasma :: Player -> Point -> World -> (World, Annotations)
 addPlasma pl toPoint w@(World wm lId g) = let

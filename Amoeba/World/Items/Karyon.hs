@@ -85,7 +85,8 @@ activateKaryon p k@(Karyon kId pl e fillers _) w = let
     f val = foldr (activatePiece p k) val shifts
     iteraties = iterate f (w, [activationAnnotation p k], e)
     (w', anns, e') = head . drop karyonPieceActivateCount $ iteraties
-    in updateKaryon p k { karyonEnergy = e' } (w', anns)
+    in if e' /= e then updateKaryon p k { karyonEnergy = e' } (w', anns)
+                  else (w', anns)
 
 activatePieceGrowing :: Player -> Bounds -> Point -> Direction -> (World, Annotations, Energy) -> (World, Annotations, Energy)
 activatePieceGrowing _ _ _ _ actRes@(w, anns, 0) = actRes 
