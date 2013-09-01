@@ -4,8 +4,8 @@ import Application.Environment
 import Application.Constants
 import Application.MainLoop
 
-boot startWorld = withEnvironment $ do
+boot world = withEnvironment $ do
     writeFile logFile "Log."
     setupScreen screenSettings "The Amoeba World"
-    startMainLoop mainLoopWire startWorld
+    startMainLoop mainWire world
     putStrLn "Be seen you..."

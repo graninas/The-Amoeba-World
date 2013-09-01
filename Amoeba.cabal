@@ -41,7 +41,6 @@ library
                    World.Player,
                    World.Geometry,
                    World.Stochastic,
-                   World.Test,
                    World.Items.Karyon,
                    World.Items.Plasma,
                    World.Constants,
@@ -54,7 +53,8 @@ library
                    Testing.BattleField,
                    Testing.FieldItem,
                    Testing.Factory,
-                   Testing.ActiveItem
+                   Testing.ActiveItem,
+                   World.Utils
 
 executable Amoeba
   build-depends:   base >= 4
@@ -71,7 +71,6 @@ executable Amoeba
                    World.Player,
                    World.Geometry,
                    World.Stochastic,
-                   World.Test,
                    World.Items.Karyon,
                    World.Items.Plasma,
                    World.Constants,
@@ -84,5 +83,6 @@ executable Amoeba
                    Testing.BattleField,
                    Testing.FieldItem,
                    Testing.Factory,
-                   Testing.ActiveItem
+                   Testing.ActiveItem,
+                   World.Utils
 
