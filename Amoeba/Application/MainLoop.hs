@@ -7,7 +7,7 @@ import Control.Monad.State
 import Prelude hiding ((.), id)
 
 import Application.Constants                      
-import World.World
+import qualified World.World as W
 
 data GameFlow = GameFlow { gameFlowMove :: Int
                          , gameFlowEvents :: [(Time, Int, String)]
@@ -27,13 +27,20 @@ game w session gf = do
         Left ex -> return ()
         Right gf' -> game w' session' gf'
 
-type WStateIO = StateT World IO
+type WStateIO = StateT W.World IO
 type WWire a b = Wire () WStateIO a b
 
 mainWire :: WWire GameFlow GameFlow
-mainWire = for 15 . (move <|> run)
+mainWire = for 15 . (   move
+                    <|> runWorld
+                    <|> idle
+                    )
 
 addThisMoveEvent gf@(GameFlow m evs) dt msg = GameFlow m ((dt, m, msg) : evs)
+addAnnotationsEvent gf@(GameFlow m evs) dt anns = let
+    preEvent = (dt, m, "World stepped. Annotations:")
+    annsEvent = map (\a -> (dt, m, W.annotationMessage a)) anns
+    in GameFlow m (preEvent : annsEvent ++ evs)
 
 printGameFlow :: GameFlow -> IO ()
 printGameFlow (GameFlow m evs) = do
@@ -55,11 +62,23 @@ nextMove = mkFixM $ \dt gf@(GameFlow m evs) -> do
     return . Right $ newGf
 
 move :: WWire GameFlow GameFlow
-move = (nextMove . periodicallyI 3) <|> (reportMove . periodically 1)
+move = (nextMove . periodicallyI 10) <|> (reportMove . periodically 1)
 
-run :: WWire GameFlow GameFlow
-run = mkFix $ \dt gf -> let
-    newGf = addThisMoveEvent gf dt "run"
-    in Right newGf
+runWorld :: WWire GameFlow GameFlow
+runWorld = worldUpdate . periodically 1
+
+idle :: WWire GameFlow GameFlow
+idle = mkFix $ const Right
+
+stepWorldState = do
+    (w, anns) <- get >>= return . W.stepWorld
+    put w
+    return anns
+
+worldUpdate :: WWire GameFlow GameFlow
+worldUpdate = mkFixM $ \dt gf -> do
+    anns <- stepWorldState
+    let newGf = addAnnotationsEvent gf dt anns
+    return $ Right newGf
 
 
