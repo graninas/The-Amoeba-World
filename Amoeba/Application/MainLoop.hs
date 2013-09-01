@@ -2,6 +2,7 @@ module Application.MainLoop where
 
 import qualified Application.Wire as W
 
+import World.World
 
 
 -- | Evals main loop. Takes a wire to loop and start world.
@@ -13,4 +14,5 @@ startMainLoop wire = loop wire W.clockSession
           Left ex -> error "Inhibition is undefined."
           Right newWorld -> loop w' session' newWorld
           
-mainLoopWire = undefined 
+mainLoopWire :: W.Wire () IO World World
+mainLoopWire = undefined

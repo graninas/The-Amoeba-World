@@ -1,6 +1,10 @@
 module Main where
 
 import Application.Boot
+import Application.Environment
+import Application.Constants
+import Application.MainLoop
+import qualified Application.Wire as W
 
 import World.Geometry
 import World.World
@@ -51,11 +55,12 @@ movesCount = 30
 
 main::IO ()
 main = do
-
     putStrLn "Loading..."
-    writeFile gameLogFile "Game moves:"
-    --boot
+    
     let w = world (mkStdGen 100)
+    --boot w
+    
+    writeFile gameLogFile "Game moves:"
     logWorld (w,[]) 0
     eval w movesCount
     

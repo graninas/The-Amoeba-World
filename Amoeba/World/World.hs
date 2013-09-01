@@ -1,4 +1,4 @@
-{-# LANGUAGE ExistentialQuantification, ExistentialQuantification, NoMonomorphismRestriction, FunctionalDependencies, MultiParamTypeClasses, TypeFamilies, FlexibleInstances #-} 
+{-# LANGUAGE ExistentialQuantification #-}
 
 module World.World where
 

@@ -6,7 +6,7 @@ import qualified Graphics.UI.SDL.TTF.General as TTF
 import Control.Exception (bracket_, bracket)
 
 
-withTtf action = bracket_ (TTF.init) (TTF.quit) action
+withTtf = bracket_ TTF.init TTF.quit
 
 withEnvironment action = withTtf (withInit [InitEverything] action)
 

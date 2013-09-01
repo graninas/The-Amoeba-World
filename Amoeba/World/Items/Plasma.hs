@@ -13,6 +13,7 @@ import World.Id
 import System.Random
 import qualified Data.List as L
 import qualified Data.Either as E
+import qualified Control.Monad.Reader as R
 
 data Plasma = Plasma { plasmaId :: ItemId
                      , plasmaPlayer :: Player }
