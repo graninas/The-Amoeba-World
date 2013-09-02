@@ -80,16 +80,16 @@ runPieceActivation p k sh actData = let
 
 askIsCornerPiece :: R.Reader ActivationContext Bool
 askIsCornerPiece = do
-    sh <- R.ask >>= return . activationPieceShift
+    sh <- liftM activationPieceShift R.ask
     return $ isCornerShift sh
 
 askSubDirections :: R.Reader ActivationContext (Direction, Direction)
 askSubDirections = do
-    sh <- R.ask >>= return . activationPieceShift
+    sh <- liftM activationPieceShift R.ask
     return (subDirection1 sh, subDirection2 sh)
 
 askDirection :: R.Reader ActivationContext Direction
-askDirection = R.ask >>= return . direction . activationPieceShift 
+askDirection = liftM (direction . activationPieceShift) R.ask 
 
 activatePiece :: ActivationData -> R.Reader ActivationContext ActivationData
 activatePiece actData = do

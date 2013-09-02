@@ -36,7 +36,6 @@ library
                    Application.Constants,
                    Application.Environment,
                    Application.MainLoop,
-                   Application.Wire,
                    World.World,
                    World.Player,
                    World.Geometry,
@@ -54,7 +53,9 @@ library
                    Testing.FieldItem,
                    Testing.Factory,
                    Testing.ActiveItem,
-                   World.Utils
+                   World.Utils,
+                   GameView.Render,
+                   Middleware.Wire
 
 executable Amoeba
   build-depends:   base >= 4
@@ -66,7 +67,6 @@ executable Amoeba
                    Application.Constants,
                    Application.Environment,
                    Application.MainLoop,
-                   Application.Wire,
                    World.World,
                    World.Player,
                    World.Geometry,
@@ -84,5 +84,7 @@ executable Amoeba
                    Testing.FieldItem,
                    Testing.Factory,
                    Testing.ActiveItem,
-                   World.Utils
+                   World.Utils,
+                   GameView.Render,
+                   Middleware.Wire
 

@@ -1,11 +1,6 @@
 module Main where
 
 import Application.Boot
-import Application.Environment
-import Application.Constants
-import Application.MainLoop
-import qualified Application.Wire as W
-
 import World.Geometry
 import World.World
 import World.Utils
