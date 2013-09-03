@@ -55,7 +55,8 @@ library
                    Testing.ActiveItem,
                    World.Utils,
                    GameView.Render,
-                   Middleware.Wire
+                   Middleware.Wire,
+                   Application.GameFlow
 
 executable Amoeba
   build-depends:   base >= 4
@@ -86,5 +87,6 @@ executable Amoeba
                    Testing.ActiveItem,
                    World.Utils,
                    GameView.Render,
-                   Middleware.Wire
+                   Middleware.Wire,
+                   Application.GameFlow
 

@@ -7,8 +7,9 @@ import Control.Monad.State
 import Prelude hiding ((.), id)
 
 import Middleware.Wire
+import GameView.Render
 import Application.Constants
-import GameView.Render                 
+import Application.GameFlow                 
 import qualified World.World as W
 
 -- | Evals main loop. Takes a wire to loop and start world.
@@ -25,8 +26,9 @@ game w session gf = do
         Right gf' -> game w' session' gf'
 
 mainWire :: WWire GameFlow GameFlow
-mainWire = for 15 . (   move
+mainWire = for 15 . (   runMove
                     <|> runWorld
+                    <|> runRender
                     <|> idle
                     )
 
@@ -42,11 +44,14 @@ nextMove = mkFixM $ \dt gf@(GameFlow m evs) -> do
     let newGf = GameFlow (succ m) [(dt, m, "playerMove")]
     return . Right $ newGf
 
-move :: WWire GameFlow GameFlow
-move = (nextMove . periodicallyI 10) <|> (reportMove . periodically 1)
+runMove :: WWire GameFlow GameFlow
+runMove = (nextMove . periodicallyI 10) <|> (reportMove . periodically 1)
 
 runWorld :: WWire GameFlow GameFlow
-runWorld = render . worldUpdate . periodically 1
+runWorld = worldUpdate . periodically 1
+
+runRender :: WWire GameFlow GameFlow
+runRender = render . periodically 0.1 -- TODO: Adjust FPS
 
 idle :: WWire GameFlow GameFlow
 idle = mkFix $ const Right
