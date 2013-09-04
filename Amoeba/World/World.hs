@@ -6,7 +6,7 @@ import Prelude hiding (Bounded)
 import qualified Data.Maybe as Maybe
 import qualified Data.Map as Map
 import qualified Data.List as L
-import qualified Control.Arrow as Arr (second)
+import qualified Control.Arrow as Arr (second, (***))
 import System.Random
 
 import World.Types
@@ -64,7 +64,7 @@ infixr 5 |>||
 {- World -}
 
 data WorldMap = WorldMap { wmMap :: Map.Map Point ActiveItems
-                         , wmBounds :: Bounds
+                         , wmBounds :: Bound
                          }
 data World = World { worldMap :: WorldMap
                    , worldLastItemId :: ItemId
@@ -73,12 +73,17 @@ data World = World { worldMap :: WorldMap
 data Annotation = Annotation { annotationMessage :: String }
 type Annotations = [Annotation]
 
-itemToList i = [i]
 worldMapFromList :: [(Point, ActiveItem)] -> WorldMap
 worldMapFromList list = WorldMap wm b
   where
-    wm = Map.fromList . map (Arr.second itemToList) $ list
-    b = undefined -- TODO: calc bounds
+    newList = map (Arr.second itemToList) list
+    itemToList i = [i]
+    wm = Map.fromList newList
+    b = calculateBounds (map fst list)
+    
+calculateBounds :: Points -> Bound
+calculateBounds [] = NoBound
+calculateBounds (p:ps) = foldr updateRectBound (rectBound p p) ps
 
 newWorld :: WorldMap -> ItemId -> StdGen -> World
 newWorld = World
@@ -96,6 +101,8 @@ activateItems p items activationData = foldr (activateItem p) activationData ite
 inactive :: Point -> i -> World -> (World, Annotations)
 inactive _ _ w = (w, [])
 
+{- World operations -}
+
 annotation :: String -> Annotation
 annotation = Annotation
 
@@ -106,8 +113,6 @@ showPoint :: Point -> String
 showPoint p = "[" ++ show p ++ "]"
 
 activationAnnotation p i = annotation $ showPointAndPlayer p (ownedBy i) ++ " " ++ name i ++ ": activated"
-
-{- World operations -}
 
 takeWorldItems :: Point -> World -> ActiveItems
 takeWorldItems p (World wm _ _) = Maybe.fromMaybe [] $ Map.lookup p (wmMap wm)

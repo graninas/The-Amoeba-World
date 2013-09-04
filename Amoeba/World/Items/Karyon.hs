@@ -138,7 +138,7 @@ updateKaryon :: Point -> Karyon -> (World, Annotations) -> (World, Annotations)
 updateKaryon p k (w, anns) = let
     updIts = replaceItemFunc (p, k)
     ann = updateKaryonEnergyAnnotation p k
-    in (w { worldMap = updateWorldMap [updIts] (worldMap w) }, anns ++ [ann])
+    in (w { worldMap = alterWorldMap [updIts] (worldMap w) }, anns ++ [ann])
     
 ordinalKaryonBound :: Point -> Bound
 ordinalKaryonBound p = circleBound p ordinalGrow

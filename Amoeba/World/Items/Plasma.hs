@@ -79,7 +79,7 @@ addPlasma pl toPoint w@(World wm lId g) = let
     ann = addingPlasmaAnnotation toPoint pl
     newPlasma = plasma toPoint (lId + 1) pl
     newItems = addItemsFunc newPlasma
-    in (World (updateWorldMap newItems wm) (lId + 1) g, [ann])
+    in (World (alterWorldMap newItems wm) (lId + 1) g, [ann])
 
 addConflictedPlasma :: Player -> Point -> Players -> World -> (World, Annotations)
 addConflictedPlasma pl toPoint pls w@(World wm lId g) = let
@@ -89,7 +89,7 @@ addConflictedPlasma pl toPoint pls w@(World wm lId g) = let
     newPlasma = plasma toPoint (lId + 1) pl
     newConflictedPlasma = conflictedPlasma toPoint (lId + 2) pl pls
     newItems = addItemsFunc (newPlasma ++ newConflictedPlasma)
-    in (World (updateWorldMap newItems wm) (lId + 2) g, anns)
+    in (World (alterWorldMap newItems wm) (lId + 2) g, anns)
 
 tryGrow :: Player -> Bounds -> (Point, Direction,  Directions)
      -> World -> Either Annotation (World, Annotations)

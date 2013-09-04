@@ -11,11 +11,13 @@ data Bound = Circled { circleCenter :: Point
            | Rectangled { rectangleLeftUp :: Point
                        , rectangleRightDown :: Point }
            | Pointed { pointPosition :: Point }
+           | NoBound
   deriving (Show, Read, Eq)
 type Bounds = [Bound]
 
 type Radius = Double
-type Point = L.V3 Int    
+type Point = L.V3 Int
+type Points = [Point]
 type Direction = Point
 type Directions = [Direction]
 type Shift = Point -> Point
@@ -30,15 +32,19 @@ normIntV3  = L.norm . toDoubleV3
 inSegment :: (Int, Int) -> Int -> Bool
 inSegment (x, y) z = (z <= max x y) && (z >= min x y)
 
-minMaxPoint (x1, y1) (x2, y2) = point (min x1 x2) (max y1 y2) 0
-maxMinPoint (x1, y1) (x2, y2) = point (max x1 x2) (min y1 y2) 0
+minMax (L.V3 x1 y1 _) (L.V3 x2 y2 _) = point (min x1 x2) (max y1 y2) 0
+maxMin (L.V3 x1 y1 _) (L.V3 x2 y2 _) = point (max x1 x2) (min y1 y2) 0
 
-rectBound :: (Int, Int) -> (Int, Int) -> Bound
-rectBound c1 c2 = Rectangled (minMaxPoint c1 c2) (maxMinPoint c1 c2)
+rectBound :: Point -> Point -> Bound
+rectBound p1 p2 = Rectangled (minMax p1 p2) (maxMin p1 p2)
 pointBound :: (Int, Int) -> Bound
 pointBound (x1, y1) = Pointed (point x1 y1 0)
 circleBound :: Point -> Radius -> Bound
 circleBound = Circled
+noBound = NoBound
+
+updateRectBound p (Rectangled p1 p2) = Rectangled (minMax p1 p) (maxMin p2 p)
+updateRectBound _ _ = error "This function is only for rectangled bounds"
 
 intersecting :: Bound -> Bound -> Bool
 intersecting (Circled c1 r1) (Circled c2 r2) = normIntV3 (c1 - c2) < (r1 + r2)
@@ -48,6 +54,8 @@ intersecting (Pointed _) (Pointed _) = False
 intersecting (Rectangled lu@(L.V3 x1 x2 _) rd@(L.V3 y1 y2 _)) (Pointed p@(L.V3 p1 p2 _)) =
     inSegment (x1, y1) p1 && inSegment (x2, y2) p2
 intersecting p@(Pointed {}) r@(Rectangled {}) = intersecting r p
+intersecting NoBound _ = True
+intersecting _ NoBound = True
 intersecting b1 b2 = error $ "Intersecting not implemented for " ++ show b1 ++ " and " ++ show b2
 
 

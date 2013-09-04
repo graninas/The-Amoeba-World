@@ -24,10 +24,17 @@ instance WorldMapUpdater WorldMapFunction where
     updateFunc = worldMapFunctionF
     itemPoint = worldMapFunctionP
 
-worldMapFunction :: Point -> ActiveItem -> ActiveItemsMerge -> WorldMapFunction
-worldMapFunction p i mergeF = let wmFunc = Just . maybe [i] (mergeF [i])
-                              in WorldMapFunction p wmFunc
+-- | Updates wordlmap with a functions.    
+alterWorldMap :: WorldMapFunctions -> WorldMap -> WorldMap
+alterWorldMap wmFuncs wm = foldr alterItem wm wmFuncs
 
+alterItem :: WorldMapFunction -> WorldMap -> WorldMap
+alterItem wmFunc (WorldMap wm b) = WorldMap (f wm) b'
+  where
+    f = Map.alter (updateFunc wmFunc) (itemPoint wmFunc)
+    b' = updateRectBound (worldMapFunctionP wmFunc) b
+
+-- | Altering functions can be used in alterWorldMap.
 addItemFunc :: Active i => (Point, i) -> WorldMapFunction
 addItemFunc (p, i) = worldMapFunction p (packItem i) simpleMerge
 
@@ -36,15 +43,14 @@ addItemsFunc = map addItemFunc
     
 replaceItemFunc :: Active i => (Point, i) -> WorldMapFunction
 replaceItemFunc (p, i) = worldMapFunction p (packItem i) replaceMerge
+    
 
-alterItem :: WorldMapFunction -> WorldMap -> WorldMap
-alterItem wmFunc (WorldMap wm b) = WorldMap (f wm) b
-  where
-    f = Map.alter (updateFunc wmFunc) (itemPoint wmFunc)
+-- | Generic world map updating function with merge strategy.
+worldMapFunction :: Point -> ActiveItem -> ActiveItemsMerge -> WorldMapFunction
+worldMapFunction p i mergeF = let wmFunc = Just . maybe [i] (mergeF [i])
+                              in WorldMapFunction p wmFunc
 
-updateWorldMap :: WorldMapFunctions -> WorldMap -> WorldMap
-updateWorldMap wmFuncs wm = foldr alterItem wm wmFuncs
-
+-- | Merge functions
 simpleMerge :: ActiveItemsMerge
 simpleMerge = (++)
 
