@@ -12,13 +12,13 @@ import Control.Wire
 import Graphics.UI.SDL
 import Prelude hiding ((.), id)
 
-data Scale = ScaleNormal | ScaleSmall1 | ScaleSmall2
+data Scale = Scale Float
   deriving (Show, Read, Eq)
 
 data View = View { viewPlayer :: Player
                  , viewCenter :: Point
                  , viewScale :: Scale
-                 }  
+                 }
   deriving (Show, Read, Eq)
 
 render :: WWire GameFlow GameFlow

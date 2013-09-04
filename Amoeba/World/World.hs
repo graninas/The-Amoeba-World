@@ -13,12 +13,8 @@ import World.Types
 import World.Geometry
 import World.Player
 import World.Constants
+import World.Descripted
 import World.Id
-
-{- Description -}
-
-class Descripted a where
-    description :: a -> String
 
 {- Active, ActiveItem -}
 
@@ -64,25 +60,31 @@ objects1 |>|| objects2 = objects1 |>| (objects2 |>| [])
 
 infixr 5 |>|
 infixr 5 |>||
+
 {- World -}
 
-type WorldMap = Map.Map Point ActiveItems
+data WorldMap = WorldMap { wmMap :: Map.Map Point ActiveItems
+                         , wmBounds :: Bounds
+                         }
 data World = World { worldMap :: WorldMap
                    , worldLastItemId :: ItemId
                    , worldStdGen :: StdGen }
-                   
+
 data Annotation = Annotation { annotationMessage :: String }
 type Annotations = [Annotation]
 
 itemToList i = [i]
 worldMapFromList :: [(Point, ActiveItem)] -> WorldMap
-worldMapFromList = Map.fromList . map (Arr.second itemToList)
+worldMapFromList list = WorldMap wm b
+  where
+    wm = Map.fromList . map (Arr.second itemToList) $ list
+    b = undefined -- TODO: calc bounds
 
 newWorld :: WorldMap -> ItemId -> StdGen -> World
 newWorld = World
 
 stepWorld :: World -> (World, Annotations)
-stepWorld world@(World wm _ _) = Map.foldrWithKey activateItems (world, []) wm
+stepWorld world@(World wm _ _) = Map.foldrWithKey activateItems (world, []) (wmMap wm)
 
 activateItem :: Point -> ActiveItem -> (World, Annotations) -> (World, Annotations)
 activateItem p i (w, an) = let (w', an') = activate p i w
@@ -108,7 +110,7 @@ activationAnnotation p i = annotation $ showPointAndPlayer p (ownedBy i) ++ " " 
 {- World operations -}
 
 takeWorldItems :: Point -> World -> ActiveItems
-takeWorldItems p (World wm _ _) = Maybe.fromMaybe [] $ Map.lookup p wm
+takeWorldItems p (World wm _ _) = Maybe.fromMaybe [] $ Map.lookup p (wmMap wm)
 
 isEmptyCell :: Point -> World -> Bool
 isEmptyCell p w = null $ takeWorldItems p w
@@ -117,50 +119,6 @@ getPlayers :: ActiveItems -> Players
 getPlayers activeIts = map ownedBy $ filter (isOrdinaryPlayer . ownedBy) activeIts
 
 itemsCount :: World -> Int
-itemsCount (World wm _ _) = Map.fold f 0 wm
+itemsCount (World wm _ _) = Map.fold f 0 (wmMap wm)
   where
     f items n = n + length items
-
-{- WorldMap Updater -}
-
-class WorldMapUpdater a where
-    updateFunc :: a -> Maybe ActiveItems -> Maybe ActiveItems
-    itemPoint :: a -> Point
-
---                    Incoming items   Existing items
-type ActiveItemsMerge = ActiveItems -> ActiveItems -> ActiveItems
-
-data WorldMapFunction = WorldMapFunction 
-                        { worldMapFunctionP :: Point 
-                        , worldMapFunctionF :: Maybe ActiveItems -> Maybe ActiveItems }
-
-type WorldMapFunctions = [WorldMapFunction]
-
-instance WorldMapUpdater WorldMapFunction where
-    updateFunc = worldMapFunctionF
-    itemPoint = worldMapFunctionP
-
-worldMapFunction :: Point -> ActiveItem -> ActiveItemsMerge -> WorldMapFunction
-worldMapFunction p i mergeF = let wmFunc = Just . maybe [i] (mergeF [i])
-                              in WorldMapFunction p wmFunc
-
-addItemFunc :: Active i => (Point, i) -> WorldMapFunction
-addItemFunc (p, i) = worldMapFunction p (packItem i) simpleMerge
-
-addItemsFunc :: Active i => [(Point, i)] -> WorldMapFunctions
-addItemsFunc = map addItemFunc
-    
-replaceItemFunc :: Active i => (Point, i) -> WorldMapFunction
-replaceItemFunc (p, i) = worldMapFunction p (packItem i) replaceMerge
-
-alterItem :: WorldMapFunction -> WorldMap -> WorldMap
-alterItem wmFunc = Map.alter (updateFunc wmFunc) (itemPoint wmFunc)
-
-updateWorldMap :: WorldMapFunctions -> WorldMap -> WorldMap
-updateWorldMap wmFuncs wm = foldr alterItem wm wmFuncs
-
-simpleMerge :: ActiveItemsMerge
-simpleMerge = (++)
-
-replaceMerge :: ActiveItemsMerge
-replaceMerge newIts oldIts = newIts ++ (oldIts L.\\ newIts) 

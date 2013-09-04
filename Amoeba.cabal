@@ -56,7 +56,9 @@ library
                    World.Utils,
                    GameView.Render,
                    Middleware.Wire,
-                   Application.GameFlow
+                   Application.GameFlow,
+                   World.Descripted,
+                   World.WorldMapUpdater
 
 executable Amoeba
   build-depends:   base >= 4
@@ -88,5 +90,7 @@ executable Amoeba
                    World.Utils,
                    GameView.Render,
                    Middleware.Wire,
-                   Application.GameFlow
+                   Application.GameFlow,
+                   World.Descripted,
+                   World.WorldMapUpdater
 

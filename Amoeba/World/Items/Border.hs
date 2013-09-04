@@ -6,6 +6,7 @@ import World.Player
 import World.Geometry
 import World.Stochastic
 import World.Constants
+import World.Descripted
 import World.Id
 
 import Data.Word
