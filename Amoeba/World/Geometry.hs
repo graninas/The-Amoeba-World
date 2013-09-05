@@ -37,8 +37,8 @@ maxMin (L.V3 x1 y1 _) (L.V3 x2 y2 _) = point (max x1 x2) (min y1 y2) 0
 
 rectBound :: Point -> Point -> Bound
 rectBound p1 p2 = Rectangled (minMax p1 p2) (maxMin p1 p2)
-pointBound :: (Int, Int) -> Bound
-pointBound (x1, y1) = Pointed (point x1 y1 0)
+pointBound :: Point -> Bound
+pointBound (L.V3 x y z) = Pointed (point x y z)
 circleBound :: Point -> Radius -> Bound
 circleBound = Circled
 noBound = NoBound
@@ -50,7 +50,7 @@ intersecting :: Bound -> Bound -> Bool
 intersecting (Circled c1 r1) (Circled c2 r2) = normIntV3 (c1 - c2) < (r1 + r2)
 intersecting c@(Circled _ _) (Pointed p) = intersecting c (Circled p 0)
 intersecting p@(Pointed _) c@(Circled _ _) = intersecting c p
-intersecting (Pointed _) (Pointed _) = False
+intersecting (Pointed p1) (Pointed p2) = p1 == p2
 intersecting (Rectangled lu@(L.V3 x1 x2 _) rd@(L.V3 y1 y2 _)) (Pointed p@(L.V3 p1 p2 _)) =
     inSegment (x1, y1) p1 && inSegment (x2, y2) p2
 intersecting p@(Pointed {}) r@(Rectangled {}) = intersecting r p

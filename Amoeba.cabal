@@ -48,17 +48,13 @@ library
                    World.Items.Border,
                    World.Types,
                    World.Id,
-                   Testing.Fort,
-                   Testing.BattleField,
-                   Testing.FieldItem,
-                   Testing.Factory,
-                   Testing.ActiveItem,
                    World.Utils,
                    GameView.Render,
                    Middleware.Wire,
                    Application.GameFlow,
                    World.Descripted,
-                   World.WorldMapUpdater
+                   World.WorldMapUpdater,
+                   Test.GeometryTest
 
 executable Amoeba
   build-depends:   base >= 4
@@ -82,15 +78,11 @@ executable Amoeba
                    World.Items.Border,
                    World.Types,
                    World.Id,
-                   Testing.Fort,
-                   Testing.BattleField,
-                   Testing.FieldItem,
-                   Testing.Factory,
-                   Testing.ActiveItem,
                    World.Utils,
                    GameView.Render,
                    Middleware.Wire,
                    Application.GameFlow,
                    World.Descripted,
-                   World.WorldMapUpdater
+                   World.WorldMapUpdater,
+                   Test.GeometryTest
 

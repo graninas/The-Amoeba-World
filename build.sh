@@ -1,6 +1,6 @@
 #!/bin/bash
 
 cd Amoeba
-ghc -threaded --make -outputdir ../bin -o ../Temp/Amoeba Amoeba.hs
+ghc -threaded --make -outputdir ../bin -o ../bin/Amoeba Amoeba.hs
 cd ..
 
