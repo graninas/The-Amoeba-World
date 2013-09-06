@@ -54,7 +54,8 @@ library
                    Application.GameFlow,
                    World.Descripted,
                    World.WorldMapUpdater,
-                   Test.GeometryTest
+                   Test.GeometryTest,
+                   Test.SceneGraphTest
 
 executable Amoeba
   build-depends:   base >= 4
@@ -84,5 +85,6 @@ executable Amoeba
                    Application.GameFlow,
                    World.Descripted,
                    World.WorldMapUpdater,
-                   Test.GeometryTest
+                   Test.GeometryTest,
+                   Test.SceneGraphTest
 
