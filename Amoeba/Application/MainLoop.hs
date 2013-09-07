@@ -51,7 +51,7 @@ runWorld :: WWire GameFlow GameFlow
 runWorld = worldUpdate . periodically 1
 
 runRender :: WWire GameFlow GameFlow
-runRender = render . periodically 0.1 -- TODO: Adjust FPS
+runRender = renderScene . periodically 0.1 -- TODO: Adjust FPS
 
 idle :: WWire GameFlow GameFlow
 idle = mkFix $ const Right
@@ -68,6 +68,32 @@ worldUpdate = mkFixM $ \dt gf -> do
     let newGf = addAnnotationsEvent gf dt anns
     return $ Right newGf
 
+renderScene :: WWire GameFlow GameFlow
+renderScene = mkFixM $ \dt gf -> do
+--    surface <- liftIO getVideoSurface
+    return . Right $ gf
+
+
+{-
+render :: SDL.Surface -> SDLTTF.Font -> Frame -> IO ()
+render screen font Frame{..} = do
+  void $ SDL.mapRGB (SDL.surfaceGetPixelFormat screen) 0 0 0 >>=
+    SDL.fillRect screen Nothing
+
+  mapM_ renderAsteroid fAsteroids
+  mapM_ (renderBounds . bounds) fBullets
+  mapM_ renderPoint fParticles
+  mapM_ renderUfo fUfo
+  renderShip fShip
+
+  scoreS <-
+    SDLTTF.renderTextSolid font ("SCORE: " ++ show fScore)
+      (SDL.Color 255 255 255)
+
+  SDL.blitSurface scoreS Nothing screen (Just $ SDL.Rect 20 20 100 50)
+
+  SDL.flip screen
+-}
 
 addThisMoveEvent gf@(GameFlow m evs) dt msg = GameFlow m ((dt, m, msg) : evs)
 addAnnotationsEvent gf@(GameFlow m evs) dt anns = let

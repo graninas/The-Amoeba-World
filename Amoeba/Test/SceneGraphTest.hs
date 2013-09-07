@@ -9,41 +9,13 @@ import Control.Monad
 import Data.Monoid
 
 import GameView.Render
+import GameView.SceneGraph
 import World.Id
 
 
-{-
-
-class Id r => Render r where
-    rend :: r -> IO ()
---    domain :: a -> Bound
-
-data Renderable = forall r. Render r => MkRenderable r
-type Renderables = [Renderable]
-
-data SceneGraph = SceneGraph { sceneGraphLayer :: Renderables
-                             , sceneGraphBasement :: SceneGraph }
-                | Basement
-
-
-instance Monoid SceneGraph where
-    mempty = Basement
-    Basement `mappend` sc = sc
-    sc `mappend` Basement = sc
-    (SceneGraph l1 b1) `mappend` (SceneGraph l2 b2) = let
-        ls = l1 ++ l2
-        bs = b1 `mappend` b2
-        in SceneGraph ls bs
-
---    mappend mempty x = x
---    mappend x mempty = x
---    mappend x (mappend y z) = mappend (mappend x y) z
---    mconcat = foldr mappend mempty
--}
-
 data Dummy = Dummy Int
 instance Render Dummy where
-    rend (Dummy i) = print i
+    render (Dummy i) = print i
 
 instance Id Dummy where
     getId (Dummy i) = i
