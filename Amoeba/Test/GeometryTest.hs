@@ -27,6 +27,24 @@ prop_inBoundsSelf1 p _ = inBounds p [pointBound p]
 prop_inBoundsSelf2 p bs = inBounds p $ pointBound p : bs 
 prop_inBoundsNoBounds p bs = inBounds p $ noBound : bs
 
+point1 = point 0 (-10) 0
+point2 = point 3 (-3) 0
+point3 = point (-10) 0 0
+point4 = point 5 (-3) 0
+point5 = point (-10) (-3) 0
+point6 = point 5 0 0
+
+rect1 = rectBound point2 point6
+rect2 = rectBound point5 point6
+
+prop_rectBound1 = rectBound point1 point2 == Rectangled point1 point2
+prop_rectBound2 = rectBound point3 point4 == Rectangled point5 point6
+prop_rectInRect = inRect rect1 rect2
+
+prop_updateRectBound ps = rect1 `inRect` newRect
+  where
+    newRect = foldr updateRectBound rect1 ps
+
 runTests :: IO Bool
 runTests = $quickCheckAll
 

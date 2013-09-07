@@ -64,7 +64,7 @@ infixr 5 |>||
 {- World -}
 
 data WorldMap = WorldMap { wmMap :: Map.Map Point ActiveItems
-                         , wmBounds :: Bound
+                         , wmBound :: Bound
                          }
 data World = World { worldMap :: WorldMap
                    , worldLastItemId :: ItemId

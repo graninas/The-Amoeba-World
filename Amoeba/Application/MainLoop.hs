@@ -7,25 +7,25 @@ import Control.Monad.State
 import Prelude hiding ((.), id)
 
 import Middleware.Wire
-import GameView.Render
-import GameView.SceneGraph
 import GameLogic.Scene
+import Application.Environment
 import Application.Constants
 import Application.GameFlow                 
 import qualified World.World as W
 
 -- | Evals main loop. Takes a wire to loop and start world.
 startMainLoop wire world = do
+    setupScreen screenSettings applicationName
     let gf = GameFlow 1 []
-    let w = game wire clockSession
+    let w = gameLoop wire clockSession
     writeFile logFile "Wire executing log:\n"
     execStateT (w gf) world
 
-game w session gf = do
+gameLoop w session gf = do
     (mx, w', session') <- stepSession w session gf
     case mx of
         Left ex -> return ()
-        Right gf' -> game w' session' gf'
+        Right gf' -> gameLoop w' session' gf'
 
 mainWire :: WWire GameFlow GameFlow
 mainWire = for 15 . (   runMove
@@ -75,30 +75,6 @@ renderScene = mkFixM $ \dt gf -> do
     w <- get
     liftIO $ renderSceneGraph scene w
     return . Right $ gf
-
-renderSceneGraph :: SceneGraph -> W.World -> IO ()
-renderSceneGraph = undefined
-
-{-
-render :: SDL.Surface -> SDLTTF.Font -> Frame -> IO ()
-render screen font Frame{..} = do
-  void $ SDL.mapRGB (SDL.surfaceGetPixelFormat screen) 0 0 0 >>=
-    SDL.fillRect screen Nothing
-
-  mapM_ renderAsteroid fAsteroids
-  mapM_ (renderBounds . bounds) fBullets
-  mapM_ renderPoint fParticles
-  mapM_ renderUfo fUfo
-  renderShip fShip
-
-  scoreS <-
-    SDLTTF.renderTextSolid font ("SCORE: " ++ show fScore)
-      (SDL.Color 255 255 255)
-
-  SDL.blitSurface scoreS Nothing screen (Just $ SDL.Rect 20 20 100 50)
-
-  SDL.flip screen
--}
 
 addThisMoveEvent gf@(GameFlow m evs) dt msg = GameFlow m ((dt, m, msg) : evs)
 addAnnotationsEvent gf@(GameFlow m evs) dt anns = let

@@ -2,14 +2,17 @@ module World.Geometry where
 
 -- Inspired by https://github.com/ocharles/netwire-classics/blob/master/asteroids/Asteroids.hs
 import qualified Linear as L
+import qualified Control.Arrow as Arr
 
 class Bounded i where
     bounds :: i -> Point -> Bound
 
+-- TODO: extract shapes data types (Rectangle, Circle, etc.) from Bound.
+
 data Bound = Circled { circleCenter :: Point
-                    , circleRadius ::  Radius }
-           | Rectangled { rectangleLeftUp :: Point
-                       , rectangleRightDown :: Point }
+                     , circleRadius ::  Radius }
+           | Rectangled { rectedLU :: Point
+                        , rectedRD :: Point }
            | Pointed { pointPosition :: Point }
            | NoBound
   deriving (Show, Read, Eq)
@@ -34,17 +37,24 @@ inSegment (x, y) z = (z <= max x y) && (z >= min x y)
 
 minMax (L.V3 x1 y1 _) (L.V3 x2 y2 _) = point (min x1 x2) (max y1 y2) 0
 maxMin (L.V3 x1 y1 _) (L.V3 x2 y2 _) = point (max x1 x2) (min y1 y2) 0
+minMin (L.V3 x1 y1 _) (L.V3 x2 y2 _) = point (min x1 x2) (min y1 y2) 0
+maxMax (L.V3 x1 y1 _) (L.V3 x2 y2 _) = point (max x1 x2) (max y1 y2) 0
 
 rectBound :: Point -> Point -> Bound
-rectBound p1 p2 = Rectangled (minMax p1 p2) (maxMin p1 p2)
+rectBound p1 p2 = Rectangled (minMin p1 p2) (maxMax p1 p2)
 pointBound :: Point -> Bound
 pointBound (L.V3 x y z) = Pointed (point x y z)
 circleBound :: Point -> Radius -> Bound
 circleBound = Circled
 noBound = NoBound
 
-updateRectBound p (Rectangled p1 p2) = Rectangled (minMax p1 p) (maxMin p2 p)
+updateRectBound p (Rectangled p1 p2) = Rectangled (minMin p1 p) (maxMax p2 p)
 updateRectBound _ _ = error "This function is only for rectangled bounds"
+inRect r1 r2 = leftUpIn && rightDownIn
+  where
+    leftUpIn = uncurry (withCoords (>=)) ((Arr.***) rectedLU rectedLU (r1, r2))
+    rightDownIn = uncurry (withCoords (<=)) ((Arr.***) rectedRD rectedRD (r1, r2))
+    withCoords f (L.V3 x1 y1 _) (L.V3 x2 y2 _) = f x1 x2 && f y1 y2
 
 intersecting :: Bound -> Bound -> Bool
 intersecting (Circled c1 r1) (Circled c2 r2) = normIntV3 (c1 - c2) < (r1 + r2)
