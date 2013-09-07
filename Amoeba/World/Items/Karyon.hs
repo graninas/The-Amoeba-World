@@ -46,7 +46,8 @@ instance Id Karyon where
 instance Active Karyon where
     activate = activateKaryon
     ownedBy = karyonPlayer
-    name _ = "Karyon"
+    name (Karyon{}) = "Karyon"
+    name (KaryonFiller{}) = "KaryonFiller"
     
 instance Descripted Karyon where
     description  = show . mkSerializable

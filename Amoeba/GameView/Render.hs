@@ -2,10 +2,15 @@
 
 module GameView.Render where
 
+import qualified Graphics.UI.SDL.Video as SDL
+import qualified Graphics.UI.SDL.Rect as SDL
+import qualified Graphics.UI.SDL.Color as SDL
+import qualified Graphics.UI.SDL.Types as SDL
+
 import World.Id
 
 class Id r => Render r where
-    render :: r -> IO ()
+    render :: SDL.Surface -> SDL.Rect -> r -> IO ()
 --    domain :: r -> Bound
 
 data Renderable = forall r. Render r => MkRenderable r

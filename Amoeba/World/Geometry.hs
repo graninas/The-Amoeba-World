@@ -85,6 +85,13 @@ right = L.V3 1 0 0 :: L.V3 Int
 up    = L.V3 0 (-1) 0 :: L.V3 Int
 down  = L.V3 0 1 0 :: L.V3 Int
 
+pointX (L.V3 x _ _) = x
+pointY (L.V3 _ y _) = y
+pointZ (L.V3 _ _ z) = z
+movePoint :: Point -> Direction -> Point
+movePoint = (L.^+^)
+
+
 shiftNone      = (L.^+^) L.zero
 shiftLeft      = (L.^+^) left
 shiftRight     = (L.^+^) right
@@ -128,9 +135,6 @@ nextDirection dir | dir == left = up
                   | dir == right = down
                   | dir == down = left
                   | otherwise = L.zero
-                  
-movePoint :: Point -> Direction -> Point
-movePoint = (L.^+^)
 
 literateDirection dir | dir == left = "Left"
                       | dir == up = "Up"

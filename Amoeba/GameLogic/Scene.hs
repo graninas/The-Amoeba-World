@@ -3,6 +3,7 @@ module GameLogic.Scene where
 import GameView.Render
 import GameView.SceneGraph
 import GameView.View
+import GameView.Items
 import World.Player
 import World.World
 import World.Geometry
@@ -13,8 +14,6 @@ import qualified Graphics.UI.SDL.Rect as SDL
 import qualified Graphics.UI.SDL.Color as SDL
 import qualified Graphics.UI.SDL.Types as SDL
 import Data.Monoid
-import Data.Word
-import Data.Bits
 import qualified Data.Map as Map
 
 -- TODO
@@ -28,17 +27,19 @@ rStartNewGame = undefined
 rQuit = undefined
 rWorld = undefined
 
--- From here, for tests: https://github.com/ocharles/netwire-classics/blob/master/asteroids/Asteroids.hs
-rgbColor :: Word8 -> Word8 -> Word8 -> SDL.Pixel
-rgbColor r g b = SDL.Pixel (shiftL (fi r) 24 .|.
-                            shiftL (fi g) 16 .|.
-                            shiftL (fi b) 8 .|.
-                            255)
-  where fi = fromIntegral
+scale = 20
 
-scale = 10
+toSdlRect :: Point -> SDL.Rect
+toSdlRect p = SDL.Rect x y w h
+  where
+    x = scale * pointX p
+    y = scale * pointY p
+    w = scale
+    h = scale
 
-renderCell v@(View surf (Screen w h)) c@(p, its) = undefined
+
+renderCell _ (_, []) = return ()
+renderCell v@(View surf (Screen w h)) c@(p, its) = render surf (toSdlRect p) (head its)
     
 
 baseFill w@(World (WorldMap wm b) _ _)
