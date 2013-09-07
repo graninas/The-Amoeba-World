@@ -6,7 +6,7 @@ import World.Id
 
 class Id r => Render r where
     render :: r -> IO ()
---    domain :: a -> Bound
+--    domain :: r -> Bound
 
 data Renderable = forall r. Render r => MkRenderable r
 type Renderables = [Renderable]

@@ -1,1 +1,1 @@
-./Temp/Amoeba
+./bin/Amoeba

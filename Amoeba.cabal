@@ -57,7 +57,7 @@ library
                    Test.GeometryTest,
                    Test.SceneGraphTest,
                    GameView.SceneGraph,
-                   GameView.Scene
+                   GameLogic.Scene
 
 executable Amoeba
   build-depends:   base >= 4
@@ -90,5 +90,5 @@ executable Amoeba
                    Test.GeometryTest,
                    Test.SceneGraphTest,
                    GameView.SceneGraph,
-                   GameView.Scene
+                   GameLogic.Scene
 

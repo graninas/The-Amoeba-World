@@ -1,7 +1,11 @@
-module GameView.Scene where
+module GameLogic.Scene where
 
-import Render
-import SceneGraph
+import GameView.Render
+import GameView.SceneGraph
+import World.Player
+import World.Geometry
+
+import Data.Monoid
 
 data Scale = Scale Float
   deriving (Show, Read, Eq)

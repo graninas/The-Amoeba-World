@@ -8,6 +8,8 @@ import Prelude hiding ((.), id)
 
 import Middleware.Wire
 import GameView.Render
+import GameView.SceneGraph
+import GameLogic.Scene
 import Application.Constants
 import Application.GameFlow                 
 import qualified World.World as W
@@ -48,7 +50,7 @@ runMove :: WWire GameFlow GameFlow
 runMove = (nextMove . periodicallyI 10) <|> (reportMove . periodically 1)
 
 runWorld :: WWire GameFlow GameFlow
-runWorld = worldUpdate . periodically 1
+runWorld = updateWorld . periodically 1
 
 runRender :: WWire GameFlow GameFlow
 runRender = renderScene . periodically 0.1 -- TODO: Adjust FPS
@@ -62,17 +64,20 @@ stepWorldState = do
     put w
     return anns
 
-worldUpdate :: WWire GameFlow GameFlow
-worldUpdate = mkFixM $ \dt gf -> do
+updateWorld :: WWire GameFlow GameFlow
+updateWorld = mkFixM $ \dt gf -> do
     anns <- stepWorldState
     let newGf = addAnnotationsEvent gf dt anns
     return $ Right newGf
 
 renderScene :: WWire GameFlow GameFlow
 renderScene = mkFixM $ \dt gf -> do
---    surface <- liftIO getVideoSurface
+    w <- get
+    liftIO $ renderSceneGraph scene w
     return . Right $ gf
 
+renderSceneGraph :: SceneGraph -> W.World -> IO ()
+renderSceneGraph = undefined
 
 {-
 render :: SDL.Surface -> SDLTTF.Font -> Frame -> IO ()
