@@ -7,6 +7,7 @@ import GameView.Items
 import World.Player
 import World.World
 import World.Geometry
+import World.WorldMap
 
 import qualified Graphics.UI.SDL.Video as SDL
 import qualified Graphics.UI.SDL.Primitives as SDL

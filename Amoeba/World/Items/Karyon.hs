@@ -10,7 +10,7 @@ import World.Stochastic
 import World.Constants
 import World.Items.Plasma
 import World.Descripted
-import World.WorldMapUpdater
+import World.GameMapUpdater
 import World.Id
 
 import System.Random
@@ -139,7 +139,7 @@ updateKaryon :: Point -> Karyon -> (World, Annotations) -> (World, Annotations)
 updateKaryon p k (w, anns) = let
     updIts = replaceItemFunc (p, k)
     ann = updateKaryonEnergyAnnotation p k
-    in (w { worldMap = alterWorldMap [updIts] (worldMap w) }, anns ++ [ann])
+    in (w { worldMap = alterGameMap [updIts] (worldMap w) }, anns ++ [ann])
     
 ordinalKaryonBound :: Point -> Bound
 ordinalKaryonBound p = circleBound p ordinalGrow

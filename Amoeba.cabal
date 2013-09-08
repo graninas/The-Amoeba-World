@@ -53,7 +53,6 @@ library
                    Middleware.Wire,
                    Application.GameFlow,
                    World.Descripted,
-                   World.WorldMapUpdater,
                    Test.GeometryTest,
                    Test.SceneGraphTest,
                    GameView.SceneGraph,
@@ -65,7 +64,9 @@ library
                    Test.Dummy,
                    Test.Arbitraries,
                    Test.Data,
-                   World.Items.KaryonTest
+                   World.Items.KaryonTest,
+                   World.WorldMap,
+                   World.GameMapUpdater
 
 executable Amoeba
   build-depends:   base >= 4
@@ -94,7 +95,6 @@ executable Amoeba
                    Middleware.Wire,
                    Application.GameFlow,
                    World.Descripted,
-                   World.WorldMapUpdater,
                    Test.GeometryTest,
                    Test.SceneGraphTest,
                    GameView.SceneGraph,
@@ -106,5 +106,7 @@ executable Amoeba
                    Test.Dummy,
                    Test.Arbitraries,
                    Test.Data,
-                   World.Items.KaryonTest
+                   World.Items.KaryonTest,
+                   World.WorldMap,
+                   World.GameMapUpdater
 

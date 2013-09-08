@@ -22,11 +22,10 @@ echo Running tests...
 cd ./.bin/Test/
 FILES=`ls`
 
-# TODO: print failed cases as well.
 for f in $FILES
 do
     echo $f
-    ./$f | egrep -wi 'Failed|All tests passed.|==='
+    ./$f
 done
 
 cd ../..

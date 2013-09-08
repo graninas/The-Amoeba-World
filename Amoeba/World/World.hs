@@ -11,6 +11,7 @@ import System.Random
 
 import World.Types
 import World.Geometry
+import World.WorldMap
 import World.Player
 import World.Constants
 import World.Descripted
@@ -69,28 +70,21 @@ infixr 5 |>||
 
 {- World -}
 
-data WorldMap = WorldMap { wmMap :: Map.Map Point ActiveItems
-                         , wmBound :: Bound }
-
-data World = World { worldMap :: WorldMap
+type GameMap = WorldMap ActiveItems
+data World = World { worldMap :: GameMap
                    , worldLastItemId :: ItemId
                    , worldStdGen :: StdGen }
 
 data Annotation = Annotation { annotationMessage :: String }
 type Annotations = [Annotation]
-
-worldMapFromList :: [(Point, ActiveItem)] -> WorldMap
-worldMapFromList list = WorldMap wm b
-  where
-    newList = map (Arr.second itemToList) list
-    itemToList i = [i]
-    wm = Map.fromList newList
-    b = occupiedArea (map fst list)
-    
-newWorld :: WorldMap -> ItemId -> StdGen -> World
+   
+newWorld :: GameMap -> ItemId -> StdGen -> World
 newWorld = World
 
-worldFromList l = newWorld (worldMapFromList l)
+worldFromList l = let
+    itemToList i = [i]
+    newList = map (Arr.second itemToList) l
+    in newWorld (worldMapFromList newList)
 
 stepWorld :: World -> (World, Annotations)
 stepWorld world@(World wm _ _) = Map.foldrWithKey activateItems (world, []) (wmMap wm)

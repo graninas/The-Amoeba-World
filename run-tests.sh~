@@ -2,8 +2,8 @@
 
 #echo Building tests...
 
-#rm -rf "./bin/TestBin/*"
-#rm -rf "./bin/Test/*"
+#rm -rf "./.bin/TestBin/*"
+#rm -rf "./.bin/Test/*"
 
 cd ./Amoeba/Test/
 FILES=`ls | grep Test`
@@ -11,20 +11,21 @@ cd ..
 
 #for f in $FILES
 #do
-#    ghc -threaded -outputdir ../bin/TestBin -o ../bin/Test/${f%%.hs}.bin ./Test/$f
+#    ghc -threaded -outputdir ../.bin/TestBin -o ../.bin/Test/${f%%.hs}.bin ./Test/$f
 #done
 
-#chmod u+x ../bin/Test/*.bin
+#chmod u+x ../.bin/Test/*.bin
 cd ..
 
 echo Running tests...
 
-cd ./bin/Test/
+cd ./.bin/Test/
 FILES=`ls`
 
 for f in $FILES
 do
-    ./$f
+    echo $f
+    ./$f | egrep -wi 'Failed|All tests passed.|==='
 done
 
 cd ../..
