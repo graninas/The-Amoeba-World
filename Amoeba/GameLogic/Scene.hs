@@ -27,20 +27,22 @@ rStartNewGame = undefined
 rQuit = undefined
 rWorld = undefined
 
-scale = 20
+-- This is temporary solutions.
+
+scale = 5
+translationX = 300
+translationY = 100
 
 toSdlRect :: Point -> SDL.Rect
 toSdlRect p = SDL.Rect x y w h
   where
-    x = scale * pointX p
-    y = scale * pointY p
+    x = (scale * pointX p) + translationX
+    y = (scale * pointY p) + translationY
     w = scale
     h = scale
 
-
 renderCell _ (_, []) = return ()
 renderCell v@(View surf (Screen w h)) c@(p, its) = render surf (toSdlRect p) (head its)
-    
 
 baseFill w@(World (WorldMap wm b) _ _)
          v@(View surf scr) = do

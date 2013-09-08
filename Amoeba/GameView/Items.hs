@@ -17,8 +17,13 @@ import Control.Monad (void)
 
 -- This is temporary solutions.
 
+reduceRect (SDL.Rect x y w h) = SDL.Rect (x+1) (y+1) (w-1) (h-1)
+
 instance Render ActiveItem where
-    render surf rect (MkActiveItem i) = void $ SDL.box surf rect (getColorByName . name $ i)
+    render surf rect (MkActiveItem i) = do
+        let col = getColorByName $ name i
+        let shape = reduceRect rect
+        void $ SDL.box surf shape col
 
 getColorByName "Karyon" = col1
 getColorByName "KaryonFiller" = col2

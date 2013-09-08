@@ -15,8 +15,8 @@ import World.Id
 
 data Dummy = Dummy Int
 instance Render Dummy where
-    render (Dummy i) = print i
-
+    render _ _ (Dummy i) = print i
+    
 instance Id Dummy where
     getId (Dummy i) = i
 
