@@ -11,17 +11,7 @@ import Data.Monoid
 import GameView.Render
 import GameView.SceneGraph
 import World.Id
-
-
-data Dummy = Dummy Int
-instance Render Dummy where
-    render _ _ (Dummy i) = print i
-    
-instance Id Dummy where
-    getId (Dummy i) = i
-
-instance Arbitrary Dummy where
-    arbitrary = liftM Dummy arbitrary
+import Test.Dummy
 
 instance Arbitrary SceneGraph where
     arbitrary = oneof [ return Basement

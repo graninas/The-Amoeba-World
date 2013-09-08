@@ -39,6 +39,9 @@ instance Descripted ActiveItem where
 
 instance Eq ActiveItem where
     ai1 == ai2 = getId ai1 == getId ai2
+    
+instance Ord ActiveItem where
+    ai1 <= ai2 = getId ai1 <= getId ai2
 
 packItem :: Active i => i -> ActiveItem
 packItem = MkActiveItem
@@ -52,6 +55,9 @@ appendActiveItem item its = packItem item : its
 packObject :: Active i => (Point, i) -> (Point, ActiveItem)
 packObject (p, i) = (p, packItem i)
 
+packObjects :: Active i => [(Point, i)] -> [(Point, ActiveItem)]
+packObjects = map packObject
+
 (|>|) :: Active i => [(Point, i)] -> [(Point, ActiveItem)] -> [(Point, ActiveItem)]
 objects |>| items = map packObject objects ++ items
 
@@ -64,8 +70,8 @@ infixr 5 |>||
 {- World -}
 
 data WorldMap = WorldMap { wmMap :: Map.Map Point ActiveItems
-                         , wmBound :: Bound
-                         }
+                         , wmBound :: Bound }
+
 data World = World { worldMap :: WorldMap
                    , worldLastItemId :: ItemId
                    , worldStdGen :: StdGen }
@@ -79,14 +85,12 @@ worldMapFromList list = WorldMap wm b
     newList = map (Arr.second itemToList) list
     itemToList i = [i]
     wm = Map.fromList newList
-    b = calculateBounds (map fst list)
+    b = occupiedArea (map fst list)
     
-calculateBounds :: Points -> Bound
-calculateBounds [] = NoBound
-calculateBounds (p:ps) = foldr updateRectBound (rectBound p p) ps
-
 newWorld :: WorldMap -> ItemId -> StdGen -> World
 newWorld = World
+
+worldFromList l = newWorld (worldMapFromList l)
 
 stepWorld :: World -> (World, Annotations)
 stepWorld world@(World wm _ _) = Map.foldrWithKey activateItems (world, []) (wmMap wm)
@@ -114,11 +118,14 @@ showPoint p = "[" ++ show p ++ "]"
 
 activationAnnotation p i = annotation $ showPointAndPlayer p (ownedBy i) ++ " " ++ name i ++ ": activated"
 
-takeWorldItems :: Point -> World -> ActiveItems
-takeWorldItems p (World wm _ _) = Maybe.fromMaybe [] $ Map.lookup p (wmMap wm)
+itemsAt :: Point -> World -> ActiveItems
+itemsAt p (World wm _ _) = Maybe.fromMaybe [] $ Map.lookup p (wmMap wm)
+
+worldItems :: World -> ActiveItems
+worldItems (World wm _ _) = Map.foldr (++) [] (wmMap wm)
 
 isEmptyCell :: Point -> World -> Bool
-isEmptyCell p w = null $ takeWorldItems p w
+isEmptyCell p = null . itemsAt p
 
 getPlayers :: ActiveItems -> Players
 getPlayers activeIts = map ownedBy $ filter (isOrdinaryPlayer . ownedBy) activeIts

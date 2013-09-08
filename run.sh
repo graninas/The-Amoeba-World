@@ -1,1 +1,1 @@
-./bin/Amoeba
+./.bin/Amoeba

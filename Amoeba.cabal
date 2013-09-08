@@ -1,4 +1,4 @@
-name:           The Amoeba world
+name:           The-Amoeba-World
 version:        0.1
 cabal-version:  >= 1.2
 build-type:     Simple
@@ -60,7 +60,11 @@ library
                    GameLogic.Scene,
                    GameView.View,
                    GameView.Items,
-                   GameView.Color
+                   GameView.Color,
+                   Test.WorldTest,
+                   Test.Dummy,
+                   Test.Arbitraries,
+                   Test.Data
 
 executable Amoeba
   build-depends:   base >= 4
@@ -96,5 +100,9 @@ executable Amoeba
                    GameLogic.Scene,
                    GameView.View,
                    GameView.Items,
-                   GameView.Color
+                   GameView.Color,
+                   Test.WorldTest,
+                   Test.Dummy,
+                   Test.Arbitraries,
+                   Test.Data
 

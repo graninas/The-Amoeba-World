@@ -53,7 +53,7 @@ data GrowResult = CreepOver
 checkGrow :: Player -> Bounds -> Point -> World -> GrowResult
 checkGrow pl bounds toPoint w
     | not $ inBounds toPoint bounds = BoundsReached
-    | otherwise = let items = takeWorldItems toPoint w
+    | otherwise = let items = itemsAt toPoint w
                   in case getPlayers items of
         []    -> Grow
         players | hasObstaclePlayer players -> GrowImpossible

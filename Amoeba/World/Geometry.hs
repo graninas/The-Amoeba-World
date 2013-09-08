@@ -56,6 +56,10 @@ inRect r1 r2 = leftUpIn && rightDownIn
     rightDownIn = uncurry (withCoords (<=)) ((Arr.***) rectedRD rectedRD (r1, r2))
     withCoords f (L.V3 x1 y1 _) (L.V3 x2 y2 _) = f x1 x2 && f y1 y2
 
+occupiedArea :: Points -> Bound
+occupiedArea [] = NoBound
+occupiedArea (p:ps) = foldr updateRectBound (rectBound p p) ps
+
 intersecting :: Bound -> Bound -> Bool
 intersecting (Circled c1 r1) (Circled c2 r2) = normIntV3 (c1 - c2) < (r1 + r2)
 intersecting c@(Circled _ _) (Pointed p) = intersecting c (Circled p 0)

@@ -2,17 +2,17 @@
 
 echo Building tests...
 
-rm -rf "./bin/TestBin/*"
-rm -rf "./bin/Test/*"
+rm -rf "./.bin/TestBin/*"
+rm -rf "./.bin/Test/*"
 
 cd ./Amoeba/Test/
-FILES=`ls`
+FILES=`ls | grep Test`
 cd ..
 
 for f in $FILES
 do
-    ghc -threaded -outputdir ../bin/TestBin -o ../bin/Test/${f%%.hs}.bin ./Test/$f
+    ghc -threaded -outputdir ../.bin/TestBin -o ../.bin/Test/${f%%.hs}.bin ./Test/$f
 done
 
-chmod u+x ../bin/Test/*.bin
+chmod u+x ../.bin/Test/*.bin
 cd ..
