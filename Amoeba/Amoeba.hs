@@ -28,13 +28,17 @@ itemsList =      K.karyon 1 P.player1 100 (point 10 5 0)
             |>|  C.canyon 10 P.canyonPlayer (point 2 5 0)
             |>|| B.border 11 P.player1 (point 1 1 1)
 
-world = newWorld (worldMapFromList itemsList) 10
+itemsList2 :: [(Point, ActiveItem)]
+itemsList2 = packObjects $ K.karyon 1 P.player1 100 (point 0 0 0)
+
+
+world = worldFromList itemsList2 50
 
 step w currentMove = do
-    --putStrLn $ "\n=========" ++ show currentMove ++ "========="
+    putStrLn $ "\n=========" ++ show currentMove ++ "========="
     let res@(w', anns) = stepWorld w
-    --putStrLn $ "Items count: " ++ show (itemsCount w')
-    --mapM_ (putStrLn . annotationMessage) anns
+    putStrLn $ "Items count: " ++ show (itemsCount w')
+    mapM_ (putStrLn . annotationMessage) anns
     return res
 
 eval w 0 = return ()
@@ -49,10 +53,10 @@ main = do
     putStrLn "Loading..."
     
     let w = world (mkStdGen 100)
-    boot w
+    --boot w
     
-    --writeFile gameLogFile "Game moves:"
-    --logWorld gameLogFile (w,[]) 0
-    --eval w movesCount
+    writeFile gameLogFile "Game moves:"
+    logWorld gameLogFile (w,[]) 0
+    eval w movesCount
     
     putStrLn "All Ok."

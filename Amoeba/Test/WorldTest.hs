@@ -45,7 +45,7 @@ setupKaryonGrowingTest seed p energy = let
     k = K.karyon 1 P.player1 energy p
     g = mkStdGen seed
     w = worldFromList (packObjects k) 1 g
-    (steppedW, anns) = stepWorld w(map snd 
+    (steppedW, anns) = stepWorld w
     in (worldItems w, worldItems steppedW)
 
 prop_karyonIsGrowing seed p = length newIts > length its

@@ -32,6 +32,8 @@ prop_occupiedArea2 ps = let
     area = occupiedArea ps
     in all (\p -> inBounds p [area]) ps
 
+prop_shift1 = shiftNone zeroPoint == zeroPoint
+
 runTests :: IO Bool
 runTests = $quickCheckAll
 

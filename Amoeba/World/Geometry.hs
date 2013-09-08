@@ -126,9 +126,10 @@ direction sh = sh zeroPoint
 subDirection1 = direction . subShift1
 subDirection2 = direction . subShift2
 
+sideShifts = [shiftLeft, shiftRight, shiftUp, shiftDown]
+cornerShifts = [shiftLeftUp, shiftLeftDown, shiftRightUp, shiftRightDown]
 ringSquareShifts :: Shifts
-ringSquareShifts = [shiftLeft, shiftRight, shiftUp, shiftDown
-                   , shiftLeftUp, shiftLeftDown, shiftRightUp, shiftRightDown]
+ringSquareShifts = sideShifts ++ cornerShifts
 
 ringSquareFiller, fullSquareFiller :: Point -> [Point]
 ringSquareFiller point = map ($ point) ringSquareShifts
