@@ -95,7 +95,11 @@ pointZ (L.V3 _ _ z) = z
 movePoint :: Point -> Direction -> Point
 movePoint = (L.^+^)
 
+relativeCorners = [leftUp, leftDown, rightUp, rightDown]
+relativeSides = [left, right, up, down]
 
+-- Shifts
+-- TODO: is Shift ~ Direction ?
 shiftNone      = (L.^+^) L.zero
 shiftLeft      = (L.^+^) left
 shiftRight     = (L.^+^) right
@@ -105,9 +109,6 @@ shiftLeftUp    = (L.^+^) leftUp
 shiftLeftDown  = (L.^+^) leftDown
 shiftRightUp   = (L.^+^) rightUp
 shiftRightDown = (L.^+^) rightDown
-
-relativeCorners = [leftUp, leftDown, rightUp, rightDown]
-relativeSides = [left, right, up, down]
 
 isCornerShift, isSideShift, isSingleShift :: Shift -> Bool
 isCornerShift sh = sh L.zero `elem` relativeCorners
@@ -128,12 +129,12 @@ subDirection2 = direction . subShift2
 
 sideShifts = [shiftLeft, shiftRight, shiftUp, shiftDown]
 cornerShifts = [shiftLeftUp, shiftLeftDown, shiftRightUp, shiftRightDown]
-ringSquareShifts :: Shifts
-ringSquareShifts = sideShifts ++ cornerShifts
+neighboursShifts :: Shifts
+neighboursShifts = sideShifts ++ cornerShifts
 
-ringSquareFiller, fullSquareFiller :: Point -> [Point]
-ringSquareFiller point = map ($ point) ringSquareShifts
-fullSquareFiller point = map ($ point) (shiftNone : ringSquareShifts)
+neighbours, fullSquareFiller :: Point -> [Point]
+neighbours point = map ($ point) neighboursShifts
+fullSquareFiller point = map ($ point) (shiftNone : neighboursShifts) -- TODO: remove or give good name.
 
 nextDirection dir | dir == left = up
                   | dir == up = right

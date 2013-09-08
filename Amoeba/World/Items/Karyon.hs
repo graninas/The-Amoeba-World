@@ -56,7 +56,7 @@ karyon :: ItemId -> Player -> Energy -> Point -> [(Point, Karyon)]
 karyon kId pl e pos = kayronCell : pointedFillers
   where
     kayronCell = (pos, Karyon kId pl e fillers ordinalKaryonBound)
-    pointedFillers = map makePointedFiller ringSquareShifts
+    pointedFillers = map makePointedFiller neighboursShifts
     makePointedFiller sh = (sh pos, KaryonFiller kId pl sh)
     fillers = map snd pointedFillers
 

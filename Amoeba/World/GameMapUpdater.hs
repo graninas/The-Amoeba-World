@@ -8,6 +8,7 @@ import World.Geometry
 import qualified Data.Map as Map
 import qualified Data.List as L
 
+-- TODO: seems unnecessary, remove it.
 class GameMapUpdater a where
     updateFunc :: a -> Maybe ActiveItems -> Maybe ActiveItems
     itemPoint :: a -> Point

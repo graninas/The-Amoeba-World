@@ -9,9 +9,9 @@ import qualified Data.List as L
 import qualified Control.Arrow as Arr (second, (***))
 import System.Random
 
+import World.WorldMap as WM
 import World.Types
 import World.Geometry
-import World.WorldMap
 import World.Player
 import World.Constants
 import World.Descripted
@@ -84,7 +84,7 @@ newWorld = World
 worldFromList l = let
     itemToList i = [i]
     newList = map (Arr.second itemToList) l
-    in newWorld (worldMapFromList newList)
+    in newWorld (WM.fromList newList)
 
 stepWorld :: World -> (World, Annotations)
 stepWorld world@(World wm _ _) = Map.foldrWithKey activateItems (world, []) (wmMap wm)
