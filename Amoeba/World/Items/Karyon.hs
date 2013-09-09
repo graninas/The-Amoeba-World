@@ -19,7 +19,13 @@ import qualified Data.Either as E
 import qualified Control.Monad.Reader as R
 import Control.Monad (liftM)
 
-karyonPieceActivateCount = 1
+plasmaCost :: Energy
+plasmaCost = 1
+
+plasmaEmitent = let
+    sqList = 0 : [x * x | x <- [1,3..]]
+    ringsList = zipWith (-) (tail sqList) sqList
+    in drop 1 ringsList
 
 -- TODO: World bounds, conflicting cells, other deals
 -- TODO: energy collecting.
@@ -34,11 +40,8 @@ karyonPieceActivateCount = 1
 data Karyon = Karyon { karyonId :: ItemId
                      , karyonPlayer :: Player
                      , karyonEnergy :: Energy
-                     , karyonFillers :: [Karyon]
+                     , karyonAge :: Int
                      , karyonBound :: Point -> Bound }
-            | KaryonFiller { karyonId :: ItemId
-                           , karyonPlayer :: Player
-                           , karyonFillerShift :: Shift }
 
 instance Id Karyon where
     getId = karyonId
@@ -47,18 +50,14 @@ instance Active Karyon where
     activate = activateKaryon
     ownedBy = karyonPlayer
     name (Karyon{}) = "Karyon"
-    name (KaryonFiller{}) = "KaryonFiller"
     
 instance Descripted Karyon where
     description  = show . mkSerializable
 
 karyon :: ItemId -> Player -> Energy -> Point -> [(Point, Karyon)]
-karyon kId pl e pos = kayronCell : pointedFillers
+karyon kId pl e pos = [kayronCell]
   where
-    kayronCell = (pos, Karyon kId pl e fillers ordinalKaryonBound)
-    pointedFillers = map makePointedFiller neighboursShifts
-    makePointedFiller sh = (sh pos, KaryonFiller kId pl sh)
-    fillers = map snd pointedFillers
+    kayronCell = (pos, Karyon kId pl e ordinalKaryonBound)
 
 data ActivationContext = ActivationContext { activationItem :: Karyon
                                            , activationPiecePoint :: Point
@@ -67,14 +66,18 @@ data ActivationContext = ActivationContext { activationItem :: Karyon
 type ActivationData = (World, Annotations, Energy)
 
 activateKaryon :: Point -> Karyon -> World -> (World, Annotations)
-activateKaryon p k@(KaryonFiller{}) w = inactive p k w
-activateKaryon p k@(Karyon kId pl e fillers _) w = let
-    shifts = map karyonFillerShift fillers
-    f actData = foldr (runPieceActivation p k) actData shifts
-    iteraties = iterate f (w, [activationAnnotation p k], e)
-    (w', anns, e') = head . drop karyonPieceActivateCount $ iteraties
-    in if e' /= e then updateKaryon p k { karyonEnergy = e' } (w', anns)
-                  else (w', anns)
+activateKaryon p k@(Karyon kId pl e age _) w = let
+    (w', anns, e') = emitKaryonPlasma p k w
+    res = updateKaryon p k { karyonEnergy = e', karyonAge = (age + 1) } (w', anns)
+    in res
+
+calcPlasmaEmitent age e = let
+    emitent = head . drop age $ plasmaEmitent
+    in min (emitent * plasmaCost) e
+
+emitKaryonPlasma p k@(Karyon kId pl e age _) w = let
+    plasmaCount = calcPlasmaEmitent age e
+
 
 runPieceActivation :: Point -> Karyon -> Shift -> ActivationData -> ActivationData
 runPieceActivation p k sh actData = let
