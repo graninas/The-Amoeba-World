@@ -48,6 +48,12 @@ aStar :: (Cell c, Ord d, Num d)
       -> Maybe [Node c]
 aStar = AStar.aStar
 
+ordinaryDistance _ _ = 1
+
+search (WorldMap m _) distToGoal goal = let
+
+    fromMaybe [] $ aStar (graph m) ordinaryDistance
+
 {-
 -- From here: http://hackage.haskell.org/packages/archive/astar/0.1/doc/html/src/Data-Graph-AStar.html#aStar
 aStar

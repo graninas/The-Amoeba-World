@@ -7,6 +7,9 @@ import qualified Control.Arrow as Arr
 class Bounded i where
     bounds :: i -> Point -> Bound
 
+class ToVector i where
+    toVector :: i -> Point
+
 -- TODO: extract shapes data types (Rectangle, Circle, etc.) from Bound.
 
 data Bound = Circled { circleCenter :: Point
@@ -21,7 +24,9 @@ type Bounds = [Bound]
 type Radius = Double
 type Point = L.V3 Int
 type Points = [Point]
-type Direction = Point
+data Direction = Left | Right | Up | Down
+               | LeftUp | RightDown | LeftDown | RightUp
+    deriving (Show, Read, Eq)
 type Directions = [Direction]
 type Shift = Point -> Point
 type Shifts = [Shift]
@@ -80,20 +85,41 @@ point :: Int -> Int -> Int -> L.V3 Int
 point = L.V3
 zeroPoint = L.V3 0 0 0 :: L.V3 Int
 
-leftUp    = L.V3 (-1) (-1) 0 :: L.V3 Int
-leftDown  = L.V3 (-1) 1 0 :: L.V3 Int
-rightUp   = L.V3 1 (-1) 0 :: L.V3 Int
-rightDown = L.V3 1 1 0 :: L.V3 Int
-left  = L.V3 (-1) 0 0 :: L.V3 Int
-right = L.V3 1 0 0 :: L.V3 Int
-up    = L.V3 0 (-1) 0 :: L.V3 Int
-down  = L.V3 0 1 0 :: L.V3 Int
+-- Directions
+leftUp    = LeftUp
+leftDown  = LeftDown
+rightUp   = RightUp
+rightDown = RightDown
+left  = Left
+right = Right
+up    = Up
+down  = Down
+
+instance ToVector Direction where
+    toVector Left = leftP
+    toVector Right = rightP
+    toVector Up = upP
+    toVector Down = downP
+    toVector LeftUp = leftUpP
+    toVector RightDown = rightDownP
+    toVector LeftDown = leftDownP
+    toVector RightUp = rightUpP
+
+leftUpP    = L.V3 (-1) (-1) 0 :: L.V3 Int
+leftDownP  = L.V3 (-1) 1 0 :: L.V3 Int
+rightUpP   = L.V3 1 (-1) 0 :: L.V3 Int
+rightDownP = L.V3 1 1 0 :: L.V3 Int
+leftP  = L.V3 (-1) 0 0 :: L.V3 Int
+rightP = L.V3 1 0 0 :: L.V3 Int
+upP    = L.V3 0 (-1) 0 :: L.V3 Int
+downP  = L.V3 0 1 0 :: L.V3 Int
 
 pointX (L.V3 x _ _) = x
 pointY (L.V3 _ y _) = y
 pointZ (L.V3 _ _ z) = z
 movePoint :: Point -> Direction -> Point
-movePoint = (L.^+^)
+movePoint p dir = p (L.^+^) (toVector dir)
+addPoint = (L.^+^)
 
 relativeCorners = [leftUp, leftDown, rightUp, rightDown]
 relativeSides = [left, right, up, down]

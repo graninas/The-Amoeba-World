@@ -66,7 +66,9 @@ library
                    Test.Data,
                    World.Items.KaryonTest,
                    World.WorldMap,
-                   World.GameMapUpdater
+                   World.GameMapUpdater,
+                   World.Properties,
+                   Test.PropertiesTest
 
 executable Amoeba
   build-depends:   base >= 4
@@ -108,5 +110,7 @@ executable Amoeba
                    Test.Data,
                    World.Items.KaryonTest,
                    World.WorldMap,
-                   World.GameMapUpdater
+                   World.GameMapUpdater,
+                   World.Properties,
+                   Test.PropertiesTest
 

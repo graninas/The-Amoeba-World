@@ -12,6 +12,8 @@ import World.Descripted
 import World.Types
 import World.Id
 
+import World.WorldMap
+
 import System.Random
 import qualified Data.List as L
 import qualified Data.Either as E
@@ -36,11 +38,11 @@ instance Active Plasma where
 instance Descripted Plasma where
     description = show
 
-plasma :: Point -> ItemId -> Player -> [(Point, Plasma)]
-plasma p pId pl = [(p, Plasma pId pl)]
+plasma :: Point -> ItemId -> Player -> (Point, Plasma)
+plasma p pId pl = (p, Plasma pId pl)
 
-conflictedPlasma :: Point -> ItemId -> Player -> Players -> [(Point, Plasma)]
-conflictedPlasma p pId pl pls = [(p, ConflictedPlasma pId pl (L.nub pls))]
+conflictedPlasma :: Point -> ItemId -> Player -> Players -> (Point, Plasma)
+conflictedPlasma p pId pl pls = (p, ConflictedPlasma pId pl (L.nub pls))
 
 data GrowResult = CreepOver
                 | GrowImpossible
@@ -49,6 +51,14 @@ data GrowResult = CreepOver
                 | TakeConflict Players
                 | AlreadyConflicted Players
   deriving (Show, Read, Eq)
+  
+
+emitPlasma :: Energy -> Point -> Player -> World -> (World, Annotations)
+emitPlasma 0 _ _ w = (w, [])
+emitPlasma n p pl w = let
+    
+
+
 
 checkGrow :: Player -> Bounds -> Point -> World -> GrowResult
 checkGrow pl bounds toPoint w

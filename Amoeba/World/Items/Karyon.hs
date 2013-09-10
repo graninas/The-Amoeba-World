@@ -19,9 +19,6 @@ import qualified Data.Either as E
 import qualified Control.Monad.Reader as R
 import Control.Monad (liftM)
 
-plasmaCost :: Energy
-plasmaCost = 1
-
 plasmaEmitent = let
     sqList = 0 : [x * x | x <- [1,3..]]
     ringsList = zipWith (-) (tail sqList) sqList
@@ -54,10 +51,8 @@ instance Active Karyon where
 instance Descripted Karyon where
     description  = show . mkSerializable
 
-karyon :: ItemId -> Player -> Energy -> Point -> [(Point, Karyon)]
-karyon kId pl e pos = [kayronCell]
-  where
-    kayronCell = (pos, Karyon kId pl e ordinalKaryonBound)
+karyon :: ItemId -> Player -> Energy -> Point -> (Point, Karyon)
+karyon kId pl e pos = (pos, Karyon kId pl e ordinalKaryonBound)
 
 data ActivationContext = ActivationContext { activationItem :: Karyon
                                            , activationPiecePoint :: Point
@@ -68,62 +63,15 @@ type ActivationData = (World, Annotations, Energy)
 activateKaryon :: Point -> Karyon -> World -> (World, Annotations)
 activateKaryon p k@(Karyon kId pl e age _) w = let
     (w', anns, e') = emitKaryonPlasma p k w
-    res = updateKaryon p k { karyonEnergy = e', karyonAge = (age + 1) } (w', anns)
+    res = updateKaryon p k { karyonEnergy = e', karyonAge = age + 1 } (w', anns)
     in res
 
-calcPlasmaEmitent age e = let
-    emitent = head . drop age $ plasmaEmitent
-    in min (emitent * plasmaCost) e
-
+emitKaryonPlasma :: Point -> Karyon -> World -> (World, Annotations, Energy)
 emitKaryonPlasma p k@(Karyon kId pl e age _) w = let
-    plasmaCount = calcPlasmaEmitent age e
-
-
-runPieceActivation :: Point -> Karyon -> Shift -> ActivationData -> ActivationData
-runPieceActivation p k sh actData = let
-    actContext = ActivationContext k p sh
-    in R.runReader (activatePiece actData) actContext
-
-askIsCornerPiece :: R.Reader ActivationContext Bool
-askIsCornerPiece = do
-    sh <- liftM activationPieceShift R.ask
-    return $ isCornerShift sh
-
-askSubDirections :: R.Reader ActivationContext (Direction, Direction)
-askSubDirections = do
-    sh <- liftM activationPieceShift R.ask
-    return (subDirection1 sh, subDirection2 sh)
-
-askDirection :: R.Reader ActivationContext Direction
-askDirection = liftM (direction . activationPieceShift) R.ask 
-
-activatePiece :: ActivationData -> R.Reader ActivationContext ActivationData
-activatePiece actData = do
-    isCornerPiece <- askIsCornerPiece
-    if isCornerPiece then activateCornerPiece actData
-                     else activateOrdinaryPiece actData
-
-activateCornerPiece :: ActivationData -> R.Reader ActivationContext ActivationData
-activateCornerPiece actData = do
-    (subDir1, subDir2) <- askSubDirections
-    activatePieceGrowing subDir1 actData >>= activatePieceGrowing subDir2
-
-activateOrdinaryPiece :: ActivationData -> R.Reader ActivationContext ActivationData
-activateOrdinaryPiece actData = do
-    dir <- askDirection
-    activatePieceGrowing dir actData
-
-activatePieceGrowing :: Direction -> ActivationData -> R.Reader ActivationContext ActivationData
-activatePieceGrowing _   actData@(w, anns, 0) = return actData
-activatePieceGrowing dir actData@(w, anns, e) = do
-    (pl, bounds, p) <- askLocals
-    case growPlasma pl bounds p dir w of
-        Left ann -> return (w, anns ++ [ann], e)
-        Right (w', anns') -> return (w', anns ++ anns', e-1)
-  where
-    askLocals = do
-        (ActivationContext k p _) <- R.ask
-        return (karyonPlayer k, [karyonBound k p], p)
+    ageEmitent = head . drop age $ plasmaEmitent
+    emitent = min e ageEmitent
+    (w', anns) = emitPlasma emitent p pl w
+    in (w', anns, e - emitent)
 
 data SerializibleKaryon = SKaryon { sKaryonId :: ItemId
                                   , sKaryonPlayer :: Player

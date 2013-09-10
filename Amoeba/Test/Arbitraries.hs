@@ -16,3 +16,7 @@ instance Arbitrary Bound where
                       , liftM2 rectBound arbitrary arbitrary
                       , liftM2 circleBound arbitrary arbitrary
                       , return noBound ]
+                      
+instance Arbitrary Direction where
+    arbitrary = oneof $ map return [ left, right, up, down,
+                                     leftUp, rightDown, leftDown, rightUp ]
