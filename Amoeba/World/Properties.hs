@@ -2,8 +2,12 @@ module World.Properties where
 
 import World.Geometry
 
-data Property = Moving
-              | Energetics
+data Property = PEmpty
+              | PDurability Durability
+              | PPassability Passability
+              | PDislocation Point
+              | PBattery Capacity Energy
+              | POwnership Player
 
 type Properties = [Property]
 
@@ -12,17 +16,18 @@ type Speed = Int
 type Energy = Int
 type Capacity = Energy
 type Durability = Int
+type Structure = Durability
 
 data Passability = AbleToFly | AbleToCreep | AbleToDrill
 
-passability :: Passability -> Property
-dislocation :: Point -> Property
-battery :: Capacity -> Energy -> Property
-ownership :: Player -> Property
-durability :: Durability -> Property
+pDurability :: Durability -> Structure -> Property
+pPassability :: Passability -> Property
+pBattery :: Capacity -> Energy -> Property
+pOwnership :: Player -> Property
+pEmpty :: Property
 
 
-
+pDislocation :: Point -> Property
 moving :: Direction -> Property
 
 -- Can we add not Energy but generic resource, and 'energy' - one of resources?

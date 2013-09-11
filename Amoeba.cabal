@@ -36,7 +36,6 @@ library
                    Application.Constants,
                    Application.Environment,
                    Application.MainLoop,
-                   World.World,
                    World.Player,
                    World.Geometry,
                    World.Stochastic,
@@ -65,10 +64,12 @@ library
                    Test.Arbitraries,
                    Test.Data,
                    World.Items.KaryonTest,
-                   World.WorldMap,
                    World.GameMapUpdater,
                    World.Properties,
-                   Test.PropertiesTest
+                   Test.PropertiesTest,
+                   World.WorldOld,
+                   World.GenericWorld,
+                   World.World
 
 executable Amoeba
   build-depends:   base >= 4
@@ -80,7 +81,6 @@ executable Amoeba
                    Application.Constants,
                    Application.Environment,
                    Application.MainLoop,
-                   World.World,
                    World.Player,
                    World.Geometry,
                    World.Stochastic,
@@ -109,8 +109,10 @@ executable Amoeba
                    Test.Arbitraries,
                    Test.Data,
                    World.Items.KaryonTest,
-                   World.WorldMap,
                    World.GameMapUpdater,
                    World.Properties,
-                   Test.PropertiesTest
+                   Test.PropertiesTest,
+                   World.WorldOld,
+                   World.GenericWorld,
+                   World.World
 

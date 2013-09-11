@@ -1,25 +1,39 @@
-module World.WorldMap where
+module World.GenericWorld where
 
 import qualified Data.Map as Map
 import qualified Data.Set as Set
 import qualified Data.Graph.AStar as AStar
-import Data.Maybe (fromMaybe)
+import Data.Maybe (fromMaybe, maybe)
+import Data.Monoid
 
 import World.Geometry
 
-data WorldMap i = WorldMap { wmMap :: Map.Map Point i
-                           , wmBound :: Bound }
+data GenericWorld i = GenericWorld { worldMap :: Map.Map Point i
+                                   , worldBound :: Bound }
 
-fromList :: [(Point, i)] -> WorldMap i
-fromList list = WorldMap wm b
+fromList :: [(Point, i)] -> GenericWorld i
+fromList list = GenericWorld wm b
   where
     wm = Map.fromList list
     b = occupiedArea (map fst list)
 
--- Graph
+class GenericCell c where
+    null :: c -> Bool
+    pos :: c -> Point
 
-class Cell c where
-    empty :: c
+
+alterWorld :: (Cell c, Monoid c) => GenericWorld c -> [c] -> GenericWorld c
+alterWorld = foldl alterCell
+
+alterCell :: (Cell c, Monoid c) => GenericWorld c -> c -> GenericWorld c
+alterCell c (GenericWorld m b) = GenericWorld (f m) b'
+  where
+    cellPos = pos c
+    alteringFunc = Just . maybe c (mappend c)
+    f = Map.alter alteringFunc cellPos
+    b' = updateRectBound cellPos b
+
+-- Graph
 
 data Node c = Node Point c
 type NodeSet c = Set.Set (Node c)
@@ -30,10 +44,10 @@ instance Ord (Node c) where
 instance Eq (Node c) where
     (Node p1 _) == (Node p2 _) = p1 == p2
 
-lookupNode :: Cell c => WorldMap c -> Point -> Node c
-lookupNode (WorldMap wm _) p = Node p (fromMaybe empty $ Map.lookup p wm)
+lookupNode :: Monoid c => GenericWorld c -> Point -> Node c
+lookupNode (GenericWorld wm _) p = Node p (fromMaybe mempty $ Map.lookup p wm)
 
-graph :: Cell c => WorldMap c -> Point -> NodeSet c
+graph :: Cell c => GenericWorld c -> Point -> NodeSet c
 graph wm p = let
     ps = neighbours p
     nodes = map (lookupNode wm) ps
@@ -47,12 +61,6 @@ aStar :: (Cell c, Ord d, Num d)
       -> Node c
       -> Maybe [Node c]
 aStar = AStar.aStar
-
-ordinaryDistance _ _ = 1
-
-search (WorldMap m _) distToGoal goal = let
-
-    fromMaybe [] $ aStar (graph m) ordinaryDistance
 
 {-
 -- From here: http://hackage.haskell.org/packages/archive/astar/0.1/doc/html/src/Data-Graph-AStar.html#aStar
