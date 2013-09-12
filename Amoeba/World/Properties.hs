@@ -3,7 +3,7 @@ module World.Properties where
 import World.Geometry
 
 data Property = PEmpty
-              | PDurability Durability
+              | PDurability Durability Structure
               | PPassability Passability
               | PDislocation Point
               | PBattery Capacity Energy

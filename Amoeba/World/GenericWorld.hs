@@ -8,8 +8,10 @@ import Data.Monoid
 
 import World.Geometry
 
-data GenericWorld i = GenericWorld { worldMap :: Map.Map Point i
-                                   , worldBound :: Bound }
+type PointMap i = Map.Map Point i
+
+data GenericWorld map = GenericWorld { worldMap :: map
+                                     , worldBound :: Bound }
 
 fromList :: [(Point, i)] -> GenericWorld i
 fromList list = GenericWorld wm b

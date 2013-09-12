@@ -5,19 +5,20 @@ import System.Random
 
 import World.GenericWorld
 
-
-type World = GenericWorld Cell
-
-
+type WorldMap = GW.PointMap Int
+type World = GenericWorld WorldMap
 
 data Game = Game { _world :: World
                  , _rndGen :: StdGen }
+                 
 
-objects.traversed.pos :: Traversal' World Point
-objects.traversed.properties :: Traversal' World Spec
+map :: L.Lens' World WorldMap
+map = L.lens GW.worldMap (\w wm -> w { GW.worldMap = wm } )
 
-objects :: L.Lens' World Cells
-objects = L.lens GW.cells GW.alterWorld
+bound :: L.Getter World Bound
+bound = L.to GW.worldBound
+
+-- Tip: use Control.Lens.At for Map-like structures.
 
 world :: L.Lens' Game World
 world = L.lens _world (\game w -> game { _world = w })
