@@ -4,7 +4,7 @@ import World.Geometry
 
 data Property = PEmpty
               | PDurability Durability Structure
-              | PPassability Passability
+              | PPassability 
               | PDislocation Point
               | PBattery Capacity Energy
               | POwnership Player
@@ -19,6 +19,7 @@ type Durability = Int
 type Structure = Durability
 
 data Passability = AbleToFly | AbleToCreep | AbleToDrill
+type Passabilities = [Passability]
 
 pDurability :: Durability -> Structure -> Property
 pPassability :: Passability -> Property

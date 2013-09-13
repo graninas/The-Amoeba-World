@@ -24,8 +24,8 @@ type Bounds = [Bound]
 type Radius = Double
 type Point = L.V3 Int
 type Points = [Point]
-data Direction = Left | Right | Up | Down
-               | LeftUp | RightDown | LeftDown | RightUp
+data Direction = DirLeft | DirRight | DirUp | DirDown
+               | DirLeftUp | DirRightDown | DirLeftDown | DirRightUp
     deriving (Show, Read, Eq)
 type Directions = [Direction]
 type Shift = Point -> Point
@@ -86,24 +86,24 @@ point = L.V3
 zeroPoint = L.V3 0 0 0 :: L.V3 Int
 
 -- Directions
-leftUp    = LeftUp
-leftDown  = LeftDown
-rightUp   = RightUp
-rightDown = RightDown
-left  = Left
-right = Right
-up    = Up
-down  = Down
+leftUp    = DirLeftUp
+leftDown  = DirLeftDown
+rightUp   = DirRightUp
+rightDown = DirRightDown
+left  = DirLeft
+right = DirRight
+up    = DirUp
+down  = DirDown
 
 instance ToVector Direction where
-    toVector Left = leftP
-    toVector Right = rightP
-    toVector Up = upP
-    toVector Down = downP
-    toVector LeftUp = leftUpP
-    toVector RightDown = rightDownP
-    toVector LeftDown = leftDownP
-    toVector RightUp = rightUpP
+    toVector DirLeft = leftP
+    toVector DirRight = rightP
+    toVector DirUp = upP
+    toVector DirDown = downP
+    toVector DirLeftUp = leftUpP
+    toVector DirRightDown = rightDownP
+    toVector DirLeftDown = leftDownP
+    toVector DirRightUp = rightUpP
 
 leftUpP    = L.V3 (-1) (-1) 0 :: L.V3 Int
 leftDownP  = L.V3 (-1) 1 0 :: L.V3 Int
@@ -118,62 +118,10 @@ pointX (L.V3 x _ _) = x
 pointY (L.V3 _ y _) = y
 pointZ (L.V3 _ _ z) = z
 movePoint :: Point -> Direction -> Point
-movePoint p dir = p (L.^+^) (toVector dir)
-addPoint = (L.^+^)
+movePoint p dir = (L.^+^) p (toVector dir)
+addPoint = (L.^+^) :: Point -> Point -> Point
 
-relativeCorners = [leftUp, leftDown, rightUp, rightDown]
-relativeSides = [left, right, up, down]
+relativeCorners = [leftUpP, leftDownP, rightUpP, rightDownP]
+relativeSides = [leftP, rightP, upP, downP]
 
--- Shifts
--- TODO: is Shift ~ Direction ?
-shiftNone      = (L.^+^) L.zero
-shiftLeft      = (L.^+^) left
-shiftRight     = (L.^+^) right
-shiftUp        = (L.^+^) up
-shiftDown      = (L.^+^) down
-shiftLeftUp    = (L.^+^) leftUp
-shiftLeftDown  = (L.^+^) leftDown
-shiftRightUp   = (L.^+^) rightUp
-shiftRightDown = (L.^+^) rightDown
-
-isCornerShift, isSideShift, isSingleShift :: Shift -> Bool
-isCornerShift sh = sh L.zero `elem` relativeCorners
-isSideShift sh = sh L.zero `elem` relativeSides
-isSingleShift = isSideShift
-
-subShift1, subShift2 :: Shift -> Shift
-subShift1 sh = let (L.V3 x1 _ x3) = sh L.zero
-               in  (L.^+^) $ L.V3 x1 0 x3
-subShift2 sh = let (L.V3 _ x2 x3) = sh L.zero
-               in  (L.^+^) $ L.V3 0 x2 x3
-
-direction :: Shift -> Direction
-direction sh = sh zeroPoint
-
-subDirection1 = direction . subShift1
-subDirection2 = direction . subShift2
-
-sideShifts = [shiftLeft, shiftRight, shiftUp, shiftDown]
-cornerShifts = [shiftLeftUp, shiftLeftDown, shiftRightUp, shiftRightDown]
-neighboursShifts :: Shifts
-neighboursShifts = sideShifts ++ cornerShifts
-
-neighbours, fullSquareFiller :: Point -> [Point]
-neighbours point = map ($ point) neighboursShifts
-fullSquareFiller point = map ($ point) (shiftNone : neighboursShifts) -- TODO: remove or give good name.
-
-nextDirection dir | dir == left = up
-                  | dir == up = right
-                  | dir == right = down
-                  | dir == down = left
-                  | otherwise = L.zero
-
-literateDirection dir | dir == left = "Left"
-                      | dir == up = "Up"
-                      | dir == right = "Right"
-                      | dir == down = "Down"
-                      | dir == leftUp = "Left Up"
-                      | dir == leftDown = "Left Down"
-                      | dir == rightUp = "Right Up"
-                      | dir == rightDown = "Right Down"
-                      | otherwise = "<Unknown direction>"
+neighbours p = map (p L.^+^) $ relativeCorners ++ relativeSides

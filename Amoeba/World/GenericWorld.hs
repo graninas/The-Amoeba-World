@@ -8,27 +8,36 @@ import Data.Monoid
 
 import World.Geometry
 
-type PointMap i = Map.Map Point i
+type GenericMap c = Map.Map Point c
+data GenericWorld mp = GenericWorld { _worldMap :: mp
+                                    , _worldBound :: Bound }
 
-data GenericWorld map = GenericWorld { worldMap :: map
-                                     , worldBound :: Bound }
+type CelledWorld c = GenericWorld (GenericMap c)
 
-fromList :: [(Point, i)] -> GenericWorld i
+fromList :: [(Point, c)] -> CelledWorld c
 fromList list = GenericWorld wm b
   where
     wm = Map.fromList list
     b = occupiedArea (map fst list)
 
+worldMap :: (GenericCell c, Monoid c) => CelledWorld c -> GenericMap c
+worldMap = _worldMap
+
+worldBound :: (GenericCell c, Monoid c) => CelledWorld c -> Bound
+worldBound = _worldBound
+
+resetWorldMap :: (GenericCell c, Monoid c) => CelledWorld c -> GenericMap c -> CelledWorld c
+resetWorldMap w wm = w { _worldMap = wm }
+
 class GenericCell c where
     null :: c -> Bool
     pos :: c -> Point
 
-
-alterWorld :: (Cell c, Monoid c) => GenericWorld c -> [c] -> GenericWorld c
+alterWorld :: (GenericCell c, Monoid c) => CelledWorld c -> [c] -> CelledWorld c
 alterWorld = foldl alterCell
 
-alterCell :: (Cell c, Monoid c) => GenericWorld c -> c -> GenericWorld c
-alterCell c (GenericWorld m b) = GenericWorld (f m) b'
+alterCell :: (GenericCell c, Monoid c) => CelledWorld c -> c -> CelledWorld c
+alterCell (GenericWorld m b) c = GenericWorld (f m) b'
   where
     cellPos = pos c
     alteringFunc = Just . maybe c (mappend c)
@@ -46,16 +55,16 @@ instance Ord (Node c) where
 instance Eq (Node c) where
     (Node p1 _) == (Node p2 _) = p1 == p2
 
-lookupNode :: Monoid c => GenericWorld c -> Point -> Node c
+lookupNode :: Monoid c => CelledWorld c -> Point -> Node c
 lookupNode (GenericWorld wm _) p = Node p (fromMaybe mempty $ Map.lookup p wm)
 
-graph :: Cell c => GenericWorld c -> Point -> NodeSet c
+graph :: (Monoid c, GenericCell c) => CelledWorld c -> Point -> NodeSet c
 graph wm p = let
     ps = neighbours p
     nodes = map (lookupNode wm) ps
     in Set.fromList nodes
 
-aStar :: (Cell c, Ord d, Num d)
+aStar :: (GenericCell c, Ord d, Num d)
       => (Node c -> NodeSet c)
       -> (Node c -> Node c -> d)
       -> (Node c -> d)
