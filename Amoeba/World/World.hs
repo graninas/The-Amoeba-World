@@ -42,3 +42,5 @@ rndGen :: L.Lens' Game StdGen
 rndGen = L.lens _rndGen (\game g -> game { _rndGen = g})
 
 cellTest p = L.at p L.?~ plasma player1
+
+

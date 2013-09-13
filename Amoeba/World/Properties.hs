@@ -1,33 +1,37 @@
+{-# LANGUAGE TemplateHaskell #-}
+
 module World.Properties where
 
 import World.Geometry
+import World.Player
 
-data Property = PEmpty
-              | PDurability Durability Structure
-              | PPassability 
-              | PDislocation Point
-              | PBattery Capacity Energy
-              | POwnership Player
-
-type Properties = [Property]
+import qualified Data.Map as Map
+import Control.Lens
 
 type Target = Point
 type Speed = Int
 type Energy = Int
 type Capacity = Energy
 type Durability = Int
-type Structure = Durability
-
-data Passability = AbleToFly | AbleToCreep | AbleToDrill
+data Passability = AbleToFly | AbleToCreep | AbleToUndermine
 type Passabilities = [Passability]
 
-pDurability :: Durability -> Structure -> Property
-pPassability :: Passability -> Property
-pBattery :: Capacity -> Energy -> Property
-pOwnership :: Player -> Property
-pEmpty :: Property
+data PropertyDef = PDurability { __durability :: (Durability, Durability) }
+                 | PPassabilities { __passabilities :: Passabilities }
+                 | PBattery { __battery :: (Capacity, Energy) }
+                 | POwnership { __ownership :: Player }
+                 | PDislocation { __dislocation :: Point }
 
+makeLenses ''PropertyDef
 
+type Properties = Map.Map String PropertyDef
+
+pDurability = "durability"
+pPassabilities = "passability"
+pBattery = "battery"
+pOwnership = "ownership"
+
+{-
 pDislocation :: Point -> Property
 moving :: Direction -> Property
 
@@ -49,3 +53,4 @@ type ProductionAlg = Properties -> Property
 type PlacementAlg = Property -> Properties -> Point -> Bool 
 
 fabric :: ProductionAlg -> PlacementAlg -> Property
+-}
