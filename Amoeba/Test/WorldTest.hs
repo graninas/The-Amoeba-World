@@ -2,8 +2,10 @@
 
 module Main where
 
-import qualified Control.Lens as L
-import qualified Data.Map as Map
+import qualified Data.Set as S
+import qualified Data.Map as M
+import Data.Foldable (foldMap)
+import Control.Lens
 import Test.QuickCheck
 import Test.QuickCheck.All
 
@@ -11,12 +13,13 @@ import World.World
 import World.Geometry
 import Test.Data
 
-w :: PropertiesMap
-w = Map.fromList [(point1, PropertyLens 1)]
+m = M.fromList [('a',1), ('b',2), ('c',3)]
+k = S.fromList "bce"
+r1 = m ^.. foldMap at k
+r2 = m ^.. foldMap ix k
 
-prop_cellTest = True
-  where
-    t = cellTest point2
+r3 = M.fromList [(1,"world")] ^.at 1
+r4 = at 1 ?~ "hello" $ M.empty
 
 runTests :: IO Bool
 runTests = $quickCheckAll

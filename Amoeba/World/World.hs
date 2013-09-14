@@ -7,10 +7,9 @@ import System.Random
 
 import qualified World.GenericWorld as GW
 import World.Geometry
+import World.Properties
 import World.Objects
 import World.Player
-
-data Properties = PropertyLens Int -- temporary
 
 type World = GW.CelledWorld Properties
 type PropertiesMap = GW.GenericMap Properties
@@ -18,14 +17,9 @@ type PropertiesMap = GW.GenericMap Properties
 data Game = Game { _world :: World
                  , _rndGen :: StdGen }
                  
-
--- temporary:
 instance GW.GenericCell Properties where
-    null _ = True
-    pos _ = point 1 1 1
-instance Monoid Properties where
-    mempty = PropertyLens 0
-    (PropertyLens p1) `mappend` (PropertyLens p2) = PropertyLens $ p1 + p2
+    empty = noProperty
+    merge = mergeProperties
 
 worldMap :: L.Lens' World PropertiesMap
 worldMap = L.lens GW.worldMap GW.resetWorldMap

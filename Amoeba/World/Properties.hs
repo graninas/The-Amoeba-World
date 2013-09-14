@@ -2,11 +2,12 @@
 
 module World.Properties where
 
+import Data.Monoid
+import Control.Lens
+import qualified Data.Map as Map
+
 import World.Geometry
 import World.Player
-
-import qualified Data.Map as Map
-import Control.Lens
 
 type Target = Point
 type Speed = Int
@@ -14,22 +15,36 @@ type Energy = Int
 type Capacity = Energy
 type Durability = Int
 data Passability = AbleToFly | AbleToCreep | AbleToUndermine
+  deriving (Show, Read, Eq)
 type Passabilities = [Passability]
 
-data PropertyDef = PDurability { __durability :: (Durability, Durability) }
-                 | PPassabilities { __passabilities :: Passabilities }
-                 | PBattery { __battery :: (Capacity, Energy) }
-                 | POwnership { __ownership :: Player }
-                 | PDislocation { __dislocation :: Point }
+data Property 
+            = PDurability { __durability :: (Durability, Durability) }
+            | PPassabilities { __passabilities :: Passabilities }
+            | PBattery { __battery :: (Capacity, Energy) }
+            | POwnership { __ownership :: Player }
+            | PDislocation { __dislocation :: Point }
+  deriving (Show, Read, Eq)
 
-makeLenses ''PropertyDef
+makeLenses ''Property
 
-type Properties = Map.Map String PropertyDef
+type PropertyMap = Map.Map Int Property
+data Properties = Properties PropertyMap
+                | NoProperty
+  deriving (Show, Read, Eq)
+  
+mergeProperties NoProperty p = p
+mergeProperties p NoProperty = p
+mergeProperties (Properties ps1) (Properties ps2) = Properties $ Map.union ps1 ps2
 
-pDurability = "durability"
-pPassabilities = "passability"
-pBattery = "battery"
-pOwnership = "ownership"
+noProperty = NoProperty
+
+kDurability = 1 :: Int
+pDurability = PDurability
+ 
+pPassabilities = 2
+pBattery = 3
+pOwnership = 4
 
 {-
 pDislocation :: Point -> Property

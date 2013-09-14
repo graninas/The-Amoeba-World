@@ -3,8 +3,8 @@ module World.GenericWorld where
 import qualified Data.Map as Map
 import qualified Data.Set as Set
 import qualified Data.Graph.AStar as AStar
+import Prelude hiding (null)
 import Data.Maybe (fromMaybe, maybe)
-import Data.Monoid
 
 import World.Geometry
 
@@ -20,29 +20,29 @@ fromList list = GenericWorld wm b
     wm = Map.fromList list
     b = occupiedArea (map fst list)
 
-worldMap :: (GenericCell c, Monoid c) => CelledWorld c -> GenericMap c
+worldMap :: GenericCell c => CelledWorld c -> GenericMap c
 worldMap = _worldMap
 
-worldBound :: (GenericCell c, Monoid c) => CelledWorld c -> Bound
+worldBound :: GenericCell c => CelledWorld c -> Bound
 worldBound = _worldBound
 
-resetWorldMap :: (GenericCell c, Monoid c) => CelledWorld c -> GenericMap c -> CelledWorld c
+resetWorldMap :: GenericCell c => CelledWorld c -> GenericMap c -> CelledWorld c
 resetWorldMap w wm = w { _worldMap = wm }
 
-class GenericCell c where
-    null :: c -> Bool
-    pos :: c -> Point
+class Eq c => GenericCell c where
+    empty :: c
+    merge :: c -> c -> c
 
-alterWorld :: (GenericCell c, Monoid c) => CelledWorld c -> [c] -> CelledWorld c
+alterWorld :: GenericCell c => CelledWorld c -> [(Point, c)] -> CelledWorld c
 alterWorld = foldl alterCell
 
-alterCell :: (GenericCell c, Monoid c) => CelledWorld c -> c -> CelledWorld c
-alterCell (GenericWorld m b) c = GenericWorld (f m) b'
+alterCell :: GenericCell c => CelledWorld c -> (Point, c) -> CelledWorld c
+alterCell (GenericWorld m b) (p, c) = GenericWorld (f m) b'
   where
-    cellPos = pos c
-    alteringFunc = Just . maybe c (mappend c)
-    f = Map.alter alteringFunc cellPos
-    b' = updateRectBound cellPos b
+    alteringFunc oldCell | empty == c = Nothing
+                         | otherwise = Just . maybe c (merge c) $ oldCell
+    f = Map.alter alteringFunc p
+    b' = updateRectBound p b
 
 -- Graph
 
@@ -55,10 +55,10 @@ instance Ord (Node c) where
 instance Eq (Node c) where
     (Node p1 _) == (Node p2 _) = p1 == p2
 
-lookupNode :: Monoid c => CelledWorld c -> Point -> Node c
-lookupNode (GenericWorld wm _) p = Node p (fromMaybe mempty $ Map.lookup p wm)
+lookupNode :: GenericCell c => CelledWorld c -> Point -> Node c
+lookupNode (GenericWorld wm _) p = Node p (fromMaybe empty $ Map.lookup p wm)
 
-graph :: (Monoid c, GenericCell c) => CelledWorld c -> Point -> NodeSet c
+graph :: GenericCell c => CelledWorld c -> Point -> NodeSet c
 graph wm p = let
     ps = neighbours p
     nodes = map (lookupNode wm) ps
