@@ -26,21 +26,18 @@ data Property
             | PDislocation { __dislocation :: Point }
   deriving (Show, Read, Eq)
 
-makeLenses ''Property
-
 type PropertyMap = Map.Map Int Property
-data Properties = Properties PropertyMap
-                | NoProperty
+data Properties = Properties { _propertyMap :: PropertyMap }
   deriving (Show, Read, Eq)
-  
-mergeProperties NoProperty p = p
-mergeProperties p NoProperty = p
-mergeProperties (Properties ps1) (Properties ps2) = Properties $ Map.union ps1 ps2
 
-noProperty = NoProperty
+makeLenses ''Property
+makeLenses ''Properties
+
+  
+mergeProperties (Properties ps1) (Properties ps2) = Properties $ Map.union ps1 ps2
+noProperty = Properties Map.empty
 
 kDurability = 1 :: Int
-pDurability = PDurability
  
 pPassabilities = 2
 pBattery = 3

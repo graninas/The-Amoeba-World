@@ -29,8 +29,8 @@ fullPassable = ableToFly >> ableToCreep >> ableToUndermine
 -- maybe :: b -> (a -> b) -> Maybe a -> b
 -- at :: Index m -> IndexedLens' (Index m) m (Maybe (IxValue m))
 
-durability :: Lens' a b
-durability = undefined
+durability :: Traversal' Properties (Durability, Durability)
+durability = propertyMap . at kDurability . traverse . _durability
 
 
 plasma :: Player -> State Properties ()
@@ -41,7 +41,6 @@ plasma pl = do
 
 karyon :: Player -> State Properties ()
 karyon pl = do
-    durability .= (100, 100)
     battery .= (50, 30)
     ableToFly >> ableToUndermine
     ownership .= pl
