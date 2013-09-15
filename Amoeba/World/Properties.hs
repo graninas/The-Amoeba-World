@@ -4,8 +4,12 @@
 module World.Properties where
 
 import Data.Monoid
+import Data.Maybe
 import Control.Lens
+import Control.Monad.State
+import Control.Monad
 import qualified Data.Map as Map
+import qualified Data.Sequence as Seq
 
 import World.Geometry
 import World.Player
@@ -15,15 +19,20 @@ type Speed = Int
 type Energy = Int
 type Capacity = Energy
 type Durability = Int
-data Passability = AbleToFly | AbleToCreep | AbleToUndermine
+data Passable = Passable { __ableToFly :: Bool
+                         , __ableToWalk :: Bool
+                         , __ableToUndermine :: Bool }
   deriving (Show, Read, Eq)
-type Passabilities = [Passability]
 
+data PassRestriction = NoFly | NoWalk | NoUndermine
+  deriving (Show, Read, Eq)
+  
 data Property = PDurability { __durability :: (Durability, Durability) }
-              | PPassabilities { __passabilities :: Passabilities }
+              | PPassability { __passability :: Passable }
               | PBattery { __battery :: (Capacity, Energy) }
               | POwnership { __ownership :: Player }
               | PDislocation { __dislocation :: Point }
+              | PPassRestriction { __passRestriction :: Seq.Seq PassRestriction }
   deriving (Show, Read, Eq)
 
 type PropertyKey = Int
@@ -33,7 +42,7 @@ data Properties = Properties { _propertyMap :: PropertyMap }
 
   
 mergeProperties (Properties ps1) (Properties ps2) = Properties $ Map.union ps1 ps2
-noProperty = Properties Map.empty
+emptyProperties = Properties Map.empty
 
 
 
@@ -44,15 +53,44 @@ data PAccessor a = PAccessor { key :: PropertyKey
 
 makeLenses ''Property
 makeLenses ''Properties
-
-property accessor = propertyMap . at (key accessor) . traverse . val accessor
-
-durability = property $ PAccessor 1 _durability
-battery = property $ PAccessor 2 _battery
-ownership = property $ PAccessor 3 _ownership
+makeLenses ''Passable
 
 maxVal = _1
 curVal = _2
+
+property accessor = propertyMap . at (key accessor) . traverse . val accessor
+
+durability  = property $ PAccessor 1 _durability
+battery     = property $ PAccessor 2 _battery
+ownership   = property $ PAccessor 3 _ownership
+passability = property $ PAccessor 4 _passability
+ableToFly = passability . _ableToFly
+ableToWalk = passability . _ableToWalk
+ableToUndermine = passability . _ableToUndermine
+
+flyIndex = 1
+walkIndex = 2
+undermineIndex = 3
+{-
+passRestriction = property $ PAccessor 5 _passRestriction
+noFly = passRestriction . ix flyIndex .~ NoFly
+noWalk = passRestriction . ix walkIndex .~ NoWalk
+noUndermine = passRestriction . ix undermineIndex .~ NoUndermine
+-}
+noFly = undefined
+noWalk = undefined
+noUndermine = undefined
+noPass :: State Properties ()
+noPass = do
+    noFly
+    noWalk
+    noUndermine
+
+fullPassable :: State Properties ()
+fullPassable = do
+    ableToFly .= True
+    ableToWalk .= True
+    ableToUndermine .= True
 
 {-
 pDislocation :: Point -> Property

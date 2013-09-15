@@ -18,7 +18,7 @@ data Game = Game { _world :: World
                  , _rndGen :: StdGen }
                  
 instance GW.GenericCell Properties where
-    empty = noProperty
+    empty = emptyProperties
     merge = mergeProperties
 
 worldMap :: L.Lens' World PropertiesMap

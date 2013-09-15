@@ -52,7 +52,6 @@ library
                    Middleware.Wire,
                    Application.GameFlow,
                    World.Descripted,
-                   Test.GeometryTest,
                    GameView.SceneGraph,
                    GameLogic.Scene,
                    GameView.View,
@@ -67,11 +66,13 @@ library
                    World.WorldOld,
                    World.GenericWorld,
                    World.World,
-                   Test.Properties,
                    Test.SceneGraph,
                    Test.WorldOld,
                    Test.WorldTest,
-                   World.Objects
+                   World.Objects,
+                   Test.PropertiesTest,
+                   Test.Geometry,
+                   Test.Test
 
 executable Amoeba
   build-depends:   base >= 4
@@ -99,7 +100,6 @@ executable Amoeba
                    Middleware.Wire,
                    Application.GameFlow,
                    World.Descripted,
-                   Test.GeometryTest,
                    GameView.SceneGraph,
                    GameLogic.Scene,
                    GameView.View,
@@ -114,9 +114,11 @@ executable Amoeba
                    World.WorldOld,
                    World.GenericWorld,
                    World.World,
-                   Test.Properties,
                    Test.SceneGraph,
                    Test.WorldOld,
                    Test.WorldTest,
-                   World.Objects
+                   World.Objects,
+                   Test.PropertiesTest,
+                   Test.Geometry,
+                   Test.Test
 
