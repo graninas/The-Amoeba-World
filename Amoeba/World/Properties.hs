@@ -1,13 +1,15 @@
 {-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE NoMonomorphismRestriction #-}
+{-# LANGUAGE ExistentialQuantification #-}
 
 module World.Properties where
 
 import Data.Monoid
 import Data.Maybe
 import Control.Lens
-import Control.Monad.State
 import Control.Monad
+import Control.Monad.State
+import Control.Applicative
 import qualified Data.Map as Map
 import qualified Data.Sequence as Seq
 
@@ -35,16 +37,9 @@ type PropertyMap = Map.Map PropertyKey Property
 data Properties = Properties { _propertyMap :: PropertyMap }
   deriving (Show, Read, Eq)
 
-emptyProperties = Properties Map.empty
-
--- Lenses
-
-data PAccessor a = PAccessor { key :: PropertyKey,
-                               constr :: a -> Property }
-
-makeLenses ''Property
-makeLenses ''Properties
-
+data PAccessor a = PAccessor { key :: PropertyKey
+                             , constr :: a -> Property }
+                             
 (|=) accessor v = do
     props <- get
     let oldPropMap = _propertyMap props
@@ -54,12 +49,27 @@ makeLenses ''Properties
 setProperty :: PAccessor a -> a -> State Properties ()
 setProperty = (|=)
 
+emptyProperties = Properties Map.empty
+mergeProperties (Properties pm1) (Properties pm2) = Properties $ Map.union pm1 pm2
 
+-- Lenses
+makeLenses ''Properties
+makeLenses ''Property
 
-durability      = PAccessor 1 PDurability
-battery         = PAccessor 2 PBattery
-ownership       = PAccessor 3 POwnership
-passRestriction = PAccessor 4 PPassRestriction
+property k l = propertyMap . at k . traverse . l
+
+-- Properties itself
+
+durabilityA      = PAccessor 1 PDurability
+batteryA         = PAccessor 2 PBattery
+ownershipA       = PAccessor 3 POwnership
+passRestrictionA = PAccessor 4 PPassRestriction
+
+durability      = property (key durabilityA)      _durability
+battery         = property (key batteryA)         _battery
+ownership       = property (key ownershipA)       _ownership
+passRestriction = property (key passRestrictionA) _passRestriction
+
 
 {-
 ableToFly = passability . _ableToFly

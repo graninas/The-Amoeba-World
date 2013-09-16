@@ -21,12 +21,9 @@ import Test.Arbitraries
 p = Properties $ Map.fromList [(1, PDurability (0,0))]
 p' = Properties $ Map.fromList [(1, PDurability (10,10))]
 
-
 prop_durability (m, c) = ps /= emptyProperties
     where 
-        st :: State Properties ()
-        st = do v <- get
-                durability .= (m, c)
+        st = durabilityA |= (m, c)
         ps = execState st emptyProperties
 
 runTests :: IO Bool
