@@ -12,20 +12,16 @@ instance Monoid r => Monoid (Accessor r a) where
   mempty = Accessor mempty
   mappend (Accessor a) (Accessor b) = Accessor $ a <> b
 
-s p v = p .= v
-
 plasma :: Player -> State Properties ()
 plasma pl = do
-    s durability (10, 10)
-    fullPassable
-    ownership .= pl
+    durability |= (10, 10)
+    --fullPassable
+    ownership |= pl
 
-{-
 karyon :: Player -> State Properties ()
 karyon pl = do
-    battery .= (50, 30)
-    durability .= (10, 10)
+    battery |= (50, 30)
+    durability |= (10, 10)
     --ableToFly .= True
     --ableToUndermine .= True
-    ownership .= pl
--}
+    ownership |= pl

@@ -19,16 +19,11 @@ type Speed = Int
 type Energy = Int
 type Capacity = Energy
 type Durability = Int
-data Passable = Passable { __ableToFly :: Bool
-                         , __ableToWalk :: Bool
-                         , __ableToUndermine :: Bool }
-  deriving (Show, Read, Eq)
 
 data PassRestriction = NoFly | NoWalk | NoUndermine
   deriving (Show, Read, Eq)
   
 data Property = PDurability { __durability :: (Durability, Durability) }
-              | PPassability { __passability :: Passable }
               | PBattery { __battery :: (Capacity, Energy) }
               | POwnership { __ownership :: Player }
               | PDislocation { __dislocation :: Point }
@@ -40,30 +35,33 @@ type PropertyMap = Map.Map PropertyKey Property
 data Properties = Properties { _propertyMap :: PropertyMap }
   deriving (Show, Read, Eq)
 
-  
-mergeProperties (Properties ps1) (Properties ps2) = Properties $ Map.union ps1 ps2
 emptyProperties = Properties Map.empty
-
-
 
 -- Lenses
 
-data PAccessor a = PAccessor { key :: PropertyKey
-                             , val :: a }
+data PAccessor a = PAccessor { key :: PropertyKey,
+                               constr :: a -> Property }
 
 makeLenses ''Property
 makeLenses ''Properties
-makeLenses ''Passable
 
-maxVal = _1
-curVal = _2
+(|=) accessor v = do
+    props <- get
+    let oldPropMap = _propertyMap props
+    let newPropMap = Map.insert (key accessor) (constr accessor v) oldPropMap
+    put $ props { _propertyMap = newPropMap }
 
-property accessor = propertyMap . at (key accessor) . traverse . val accessor
+setProperty :: PAccessor a -> a -> State Properties ()
+setProperty = (|=)
 
-durability  = property $ PAccessor 1 _durability
-battery     = property $ PAccessor 2 _battery
-ownership   = property $ PAccessor 3 _ownership
-passability = property $ PAccessor 4 _passability
+
+
+durability      = PAccessor 1 PDurability
+battery         = PAccessor 2 PBattery
+ownership       = PAccessor 3 POwnership
+passRestriction = PAccessor 4 PPassRestriction
+
+{-
 ableToFly = passability . _ableToFly
 ableToWalk = passability . _ableToWalk
 ableToUndermine = passability . _ableToUndermine
@@ -71,12 +69,14 @@ ableToUndermine = passability . _ableToUndermine
 flyIndex = 1
 walkIndex = 2
 undermineIndex = 3
+-}
 {-
 passRestriction = property $ PAccessor 5 _passRestriction
 noFly = passRestriction . ix flyIndex .~ NoFly
 noWalk = passRestriction . ix walkIndex .~ NoWalk
 noUndermine = passRestriction . ix undermineIndex .~ NoUndermine
 -}
+{-
 noFly = undefined
 noWalk = undefined
 noUndermine = undefined
@@ -91,7 +91,7 @@ fullPassable = do
     ableToFly .= True
     ableToWalk .= True
     ableToUndermine .= True
-
+-}
 {-
 pDislocation :: Point -> Property
 moving :: Direction -> Property
