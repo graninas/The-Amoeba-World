@@ -9,9 +9,10 @@ import Control.Lens
 import Test.QuickCheck
 import Test.QuickCheck.All
 
+import Test.Utils.Data
+
 import World.World
 import World.Geometry
-import Test.Data
 
 m = M.fromList [('a',1), ('b',2), ('c',3)]
 k = S.fromList "bce"

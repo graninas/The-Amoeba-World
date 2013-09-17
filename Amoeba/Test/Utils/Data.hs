@@ -1,4 +1,4 @@
-module Test.Data where
+module Test.Utils.Data where
 
 import World.Geometry
 

@@ -57,9 +57,6 @@ library
                    GameView.View,
                    GameView.Items,
                    GameView.Color,
-                   Test.Dummy,
-                   Test.Arbitraries,
-                   Test.Data,
                    World.Items.KaryonTest,
                    World.GameMapUpdater,
                    World.Properties,
@@ -71,8 +68,10 @@ library
                    Test.WorldTest,
                    World.Objects,
                    Test.PropertiesTest,
-                   Test.Geometry,
-                   Test.Test
+                   Test.GeometryTest,
+                   Test.Utils.Arbitraries,
+                   Test.Utils.Data,
+                   Test.Utils.Dummy
 
 executable Amoeba
   build-depends:   base >= 4
@@ -105,9 +104,6 @@ executable Amoeba
                    GameView.View,
                    GameView.Items,
                    GameView.Color,
-                   Test.Dummy,
-                   Test.Arbitraries,
-                   Test.Data,
                    World.Items.KaryonTest,
                    World.GameMapUpdater,
                    World.Properties,
@@ -119,6 +115,8 @@ executable Amoeba
                    Test.WorldTest,
                    World.Objects,
                    Test.PropertiesTest,
-                   Test.Geometry,
-                   Test.Test
+                   Test.GeometryTest,
+                   Test.Utils.Arbitraries,
+                   Test.Utils.Data,
+                   Test.Utils.Dummy
 

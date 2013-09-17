@@ -1,4 +1,4 @@
-module Test.Dummy where
+module Test.Utils.Dummy where
 
 import GameView.Render
 import World.Id

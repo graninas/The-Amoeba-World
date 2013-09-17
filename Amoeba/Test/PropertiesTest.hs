@@ -3,6 +3,7 @@
 module Main where
 
 import Data.Monoid
+import Data.Default
 import Control.Lens
 import qualified Data.Map as Map
 import qualified Data.Sequence as Seq
@@ -15,15 +16,21 @@ import World.Properties
 import World.Objects
 import World.Geometry
 
-import Test.Data
-import Test.Arbitraries
+import Test.Utils.Data
+import Test.Utils.Arbitraries
 
-p = Properties $ Map.fromList [(1, PDurability (0,0))]
-p' = Properties $ Map.fromList [(1, PDurability (10,10))]
+prop_durability d = ps == expected
+    where
+        durKey = key durabilityA
+        expected = Properties $ Map.fromList [(durKey, constr durabilityA d)]
+        st = durabilityA |= d
+        ps = execState st emptyProperties
 
-prop_durability (m, c) = ps /= emptyProperties
-    where 
-        st = durabilityA |= (m, c)
+prop_battery b = ps == expected
+    where
+        batKey = key batteryA
+        expected = Properties $ Map.fromList [(batKey, constr batteryA b)]
+        st = batteryA |= b
         ps = execState st emptyProperties
 
 runTests :: IO Bool

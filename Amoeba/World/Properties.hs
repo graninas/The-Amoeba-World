@@ -13,14 +13,11 @@ import Control.Applicative
 import qualified Data.Map as Map
 import qualified Data.Sequence as Seq
 
+import World.Types
 import World.Geometry
 import World.Player
 
 type Target = Point
-type Speed = Int
-type Energy = Int
-type Capacity = Energy
-type Durability = Int
 
 data PassRestriction = NoFly | NoWalk | NoUndermine
   deriving (Show, Read, Eq)
@@ -64,6 +61,8 @@ durabilityA      = PAccessor 1 PDurability
 batteryA         = PAccessor 2 PBattery
 ownershipA       = PAccessor 3 POwnership
 passRestrictionA = PAccessor 4 PPassRestriction
+
+passRestrictions = [NoFly, NoWalk, NoUndermine]
 
 durability      = property (key durabilityA)      _durability
 battery         = property (key batteryA)         _battery

@@ -6,8 +6,8 @@ import Test.QuickCheck
 import Test.QuickCheck.All
 import Control.Monad
 
-import Test.Arbitraries
-import Test.Data
+import Test.Utils.Arbitraries
+import Test.Utils.Data
 
 import World.Geometry
 
