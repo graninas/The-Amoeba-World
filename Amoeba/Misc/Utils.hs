@@ -1,4 +1,4 @@
-module World.Utils where
+module Misc.Utils where
 
 import World.World
 

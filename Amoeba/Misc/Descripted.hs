@@ -1,4 +1,4 @@
-module World.Descripted where
+module Misc.Descripted where
 
 class Descripted a where
     description :: a -> String

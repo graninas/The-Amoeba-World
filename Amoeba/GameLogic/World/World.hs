@@ -1,15 +1,15 @@
-module World.World where
+module GameLogic.World.World where
 
 import qualified Control.Lens as L
 import Data.Maybe
 import Data.Monoid
 import System.Random
 
-import qualified World.GenericWorld as GW
-import World.Geometry
-import World.Properties
-import World.Objects
-import World.Player
+import qualified GameLogic.World.GenericWorld as GW
+import GameLogic.World.Geometry
+import GameLogic.World.Properties
+import GameLogic.World.Objects
+import GameLogic.World.Player
 
 type World = GW.CelledWorld Properties
 type PropertiesMap = GW.GenericMap Properties
@@ -26,8 +26,6 @@ worldMap = L.lens GW.worldMap GW.resetWorldMap
 
 bound :: L.Getter World Bound
 bound = L.to GW.worldBound
-
--- Tip: use Control.Lens.At for Map-like structures.
 
 world :: L.Lens' Game World
 world = L.lens _world (\game w -> game { _world = w })

@@ -1,4 +1,4 @@
-module World.Geometry where
+module GameLogic.World.Geometry where
 
 -- Inspired by https://github.com/ocharles/netwire-classics/blob/master/asteroids/Asteroids.hs
 import qualified Linear as L

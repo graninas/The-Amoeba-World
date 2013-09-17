@@ -8,9 +8,9 @@ import qualified Linear as L
 import qualified Data.List as List
 import qualified Data.Sequence as Seq
 
-import World.Geometry
-import World.Player
-import World.Properties as P
+import GameLogic.World.Geometry
+import GameLogic.World.Player
+import GameLogic.World.Properties as P
 
 instance Arbitrary (L.V3 Int) where
     arbitrary = liftM3 point arbitrary arbitrary arbitrary

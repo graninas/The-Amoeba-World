@@ -10,7 +10,7 @@ import Data.Monoid
 
 import GameView.Render
 import GameView.SceneGraph
-import World.Id
+import Misc.Id
 import Test.Dummy
 
 instance Arbitrary SceneGraph where

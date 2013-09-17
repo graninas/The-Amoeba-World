@@ -1,4 +1,4 @@
-module World.GenericWorld where
+module GameLogic.World.GenericWorld where
 
 import qualified Data.Map as Map
 import qualified Data.Set as Set
@@ -6,7 +6,7 @@ import qualified Data.Graph.AStar as AStar
 import Prelude hiding (null)
 import Data.Maybe (fromMaybe, maybe)
 
-import World.Geometry
+import GameLogic.World.Geometry
 
 type GenericMap c = Map.Map Point c
 data GenericWorld mp = GenericWorld { _worldMap :: mp

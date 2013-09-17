@@ -9,7 +9,7 @@ import Control.Monad
 import Test.Utils.Arbitraries
 import Test.Utils.Data
 
-import World.Geometry
+import GameLogic.World.Geometry
 
 prop_inSegmentBounded _ = inSegment (minBound :: Int, maxBound :: Int)
 prop_inSegmentSwap (x1, x2) y = inSegment (x1, x2) y == inSegment (x2, x1) y

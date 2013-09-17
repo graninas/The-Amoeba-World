@@ -1,13 +1,13 @@
-module World.Objects where
+module GameLogic.World.Objects where
 
 import Control.Monad.State
 import Data.Maybe
 import Data.Monoid
 import Control.Lens
 
-import World.Geometry
-import World.Properties
-import World.Player
+import GameLogic.World.Geometry
+import GameLogic.World.Properties
+import GameLogic.World.Player
 
 plasma :: Point -> Player -> State Properties ()
 plasma p pl = do

@@ -2,7 +2,7 @@
 {-# LANGUAGE NoMonomorphismRestriction #-}
 {-# LANGUAGE ExistentialQuantification #-}
 
-module World.Properties where
+module GameLogic.World.Properties where
 
 import Data.Monoid
 import Data.Maybe
@@ -13,9 +13,9 @@ import Control.Applicative
 import qualified Data.Map as Map
 import qualified Data.Sequence as Seq
 
-import World.Types
-import World.Geometry
-import World.Player
+import GameLogic.World.Types
+import GameLogic.World.Geometry
+import GameLogic.World.Player
 
 type Target = Point
 
@@ -71,16 +71,6 @@ dislocation     = property (key dislocationA)     _dislocation
 
 passRestrictions = [NoFly, NoWalk, NoUndermine]
 
-
-{-
-ableToFly = passability . _ableToFly
-ableToWalk = passability . _ableToWalk
-ableToUndermine = passability . _ableToUndermine
-
-flyIndex = 1
-walkIndex = 2
-undermineIndex = 3
--}
 {-
 passRestriction = property $ PAccessor 5 _passRestriction
 noFly = passRestriction . ix flyIndex .~ NoFly

@@ -11,10 +11,10 @@ import Control.Monad.State
 import Test.QuickCheck
 import Test.QuickCheck.All
 
-import World.Player
-import World.Properties
-import World.Objects
-import World.Geometry
+import GameLogic.World.Player
+import GameLogic.World.Properties
+import GameLogic.World.Objects
+import GameLogic.World.Geometry
 
 import Test.Utils.Data
 import Test.Utils.Arbitraries

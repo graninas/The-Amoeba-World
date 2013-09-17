@@ -36,42 +36,21 @@ library
                    Application.Constants,
                    Application.Environment,
                    Application.MainLoop,
-                   World.Player,
-                   World.Geometry,
-                   World.Stochastic,
-                   World.Items.Karyon,
-                   World.Items.Plasma,
-                   World.Constants,
-                   World.Items.Stone,
-                   World.Items.Canyon,
-                   World.Items.Border,
-                   World.Types,
-                   World.Id,
-                   World.Utils,
                    GameView.Render,
                    Middleware.Wire,
                    Application.GameFlow,
-                   World.Descripted,
                    GameView.SceneGraph,
-                   GameLogic.Scene,
                    GameView.View,
                    GameView.Items,
                    GameView.Color,
-                   World.Items.KaryonTest,
-                   World.GameMapUpdater,
-                   World.Properties,
-                   World.WorldOld,
-                   World.GenericWorld,
-                   World.World,
                    Test.SceneGraph,
-                   Test.WorldOld,
                    Test.WorldTest,
-                   World.Objects,
                    Test.PropertiesTest,
                    Test.GeometryTest,
                    Test.Utils.Arbitraries,
                    Test.Utils.Data,
-                   Test.Utils.Dummy
+                   Test.Utils.Dummy,
+                   GameView.Scene
 
 executable Amoeba
   build-depends:   base >= 4
@@ -83,40 +62,41 @@ executable Amoeba
                    Application.Constants,
                    Application.Environment,
                    Application.MainLoop,
-                   World.Player,
-                   World.Geometry,
-                   World.Stochastic,
-                   World.Items.Karyon,
-                   World.Items.Plasma,
-                   World.Constants,
-                   World.Items.Stone,
-                   World.Items.Canyon,
-                   World.Items.Border,
-                   World.Types,
-                   World.Id,
-                   World.Utils,
                    GameView.Render,
                    Middleware.Wire,
                    Application.GameFlow,
-                   World.Descripted,
                    GameView.SceneGraph,
-                   GameLogic.Scene,
                    GameView.View,
                    GameView.Items,
                    GameView.Color,
-                   World.Items.KaryonTest,
-                   World.GameMapUpdater,
-                   World.Properties,
-                   World.WorldOld,
-                   World.GenericWorld,
-                   World.World,
                    Test.SceneGraph,
-                   Test.WorldOld,
                    Test.WorldTest,
-                   World.Objects,
                    Test.PropertiesTest,
                    Test.GeometryTest,
                    Test.Utils.Arbitraries,
                    Test.Utils.Data,
-                   Test.Utils.Dummy
+                   Test.Utils.Dummy,
+                   GameView.Scene
+
+c.World.Descripted
+
+World.GenericWorld
+
+gic.World.Geometry
+
+GameLogic.World.Id
+
+ogic.World.Objects
+
+Logic.World.Player
+
+c.World.Properties
+
+c.World.Stochastic
+
+eLogic.World.Types
+
+eLogic.World.Utils
+
+eLogic.World.World
 

@@ -14,10 +14,10 @@ import Test.QuickCheck.All
 import Test.Utils.Data
 import Test.Utils.Arbitraries
 
-import World.World
-import World.Geometry
-import World.Objects
-import World.Properties
+import GameLogic.World.World
+import GameLogic.World.Geometry
+import GameLogic.World.Objects
+import GameLogic.World.Properties
 
 instance Monoid r => Monoid (Accessor r a) where
   mempty = Accessor mempty
@@ -36,9 +36,8 @@ instance Eq Game where
 
 prop_world1 p pl seed = game /= initialGame seed
     where
-        game = world . worldMap . at point1 ?~ ps $ initialGame seed
+        game = world . worldMap . at p ?~ ps $ initialGame seed
         ps = execState (plasma p pl) emptyProperties
-
 
 runTests :: IO Bool
 runTests = $quickCheckAll

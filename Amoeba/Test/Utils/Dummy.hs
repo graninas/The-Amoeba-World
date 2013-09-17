@@ -1,10 +1,11 @@
 module Test.Utils.Dummy where
 
+import Misc.Descripted
+import Misc.Id
 import GameView.Render
-import World.Id
-import World.Player
-import World.Descripted
-import World.World
+
+import GameLogic.World.Player
+import GameLogic.World.World
 
 import Test.QuickCheck
 import Control.Monad
