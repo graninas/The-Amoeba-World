@@ -16,7 +16,7 @@ type PropertiesMap = GW.GenericMap Properties
 
 data Game = Game { _world :: World
                  , _rndGen :: StdGen }
-                 
+
 instance GW.GenericCell Properties where
     empty = emptyProperties
     merge = mergeProperties
@@ -35,6 +35,5 @@ world = L.lens _world (\game w -> game { _world = w })
 rndGen :: L.Lens' Game StdGen
 rndGen = L.lens _rndGen (\game g -> game { _rndGen = g})
 
-cellTest p = L.at p L.?~ plasma player1
-
+initialGame seed = Game GW.emptyWorld (mkStdGen seed)
 

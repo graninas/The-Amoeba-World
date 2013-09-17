@@ -61,13 +61,15 @@ durabilityA      = PAccessor 1 PDurability
 batteryA         = PAccessor 2 PBattery
 ownershipA       = PAccessor 3 POwnership
 passRestrictionA = PAccessor 4 PPassRestriction
-
-passRestrictions = [NoFly, NoWalk, NoUndermine]
+dislocationA     = PAccessor 5 PDislocation
 
 durability      = property (key durabilityA)      _durability
 battery         = property (key batteryA)         _battery
 ownership       = property (key ownershipA)       _ownership
 passRestriction = property (key passRestrictionA) _passRestriction
+dislocation     = property (key dislocationA)     _dislocation
+
+passRestrictions = [NoFly, NoWalk, NoUndermine]
 
 
 {-

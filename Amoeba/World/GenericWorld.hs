@@ -11,6 +11,7 @@ import World.Geometry
 type GenericMap c = Map.Map Point c
 data GenericWorld mp = GenericWorld { _worldMap :: mp
                                     , _worldBound :: Bound }
+    deriving (Eq)
 
 type CelledWorld c = GenericWorld (GenericMap c)
 
@@ -28,6 +29,8 @@ worldBound = _worldBound
 
 resetWorldMap :: GenericCell c => CelledWorld c -> GenericMap c -> CelledWorld c
 resetWorldMap w wm = w { _worldMap = wm }
+
+emptyWorld = fromList []
 
 class Eq c => GenericCell c where
     empty :: c

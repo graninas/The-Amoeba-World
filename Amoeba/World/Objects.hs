@@ -5,23 +5,19 @@ import Data.Maybe
 import Data.Monoid
 import Control.Lens
 
+import World.Geometry
 import World.Properties
 import World.Player
 
-instance Monoid r => Monoid (Accessor r a) where
-  mempty = Accessor mempty
-  mappend (Accessor a) (Accessor b) = Accessor $ a <> b
-
-plasma :: Player -> State Properties ()
-plasma pl = do
+plasma :: Point -> Player -> State Properties ()
+plasma p pl = do
+    dislocationA |= p
     durabilityA |= (10, 10)
-    --fullPassable
     ownershipA |= pl
 
-karyon :: Player -> State Properties ()
-karyon pl = do
+karyon :: Point -> Player -> State Properties ()
+karyon p pl = do
+    dislocationA |= p
     batteryA |= (50, 30)
-    durabilityA |= (10, 10)
-    --ableToFly .= True
-    --ableToUndermine .= True
+    durabilityA |= (100, 10)
     ownershipA |= pl
