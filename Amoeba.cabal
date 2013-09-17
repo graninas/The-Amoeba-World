@@ -50,7 +50,8 @@ library
                    Test.Utils.Arbitraries,
                    Test.Utils.Data,
                    Test.Utils.Dummy,
-                   GameView.Scene
+                   GameView.Scene,
+                   Test.ObjectsTest
 
 executable Amoeba
   build-depends:   base >= 4
@@ -76,7 +77,8 @@ executable Amoeba
                    Test.Utils.Arbitraries,
                    Test.Utils.Data,
                    Test.Utils.Dummy,
-                   GameView.Scene
+                   GameView.Scene,
+                   Test.ObjectsTest
 
 c.World.Descripted
 

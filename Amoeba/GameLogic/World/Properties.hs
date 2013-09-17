@@ -27,6 +27,7 @@ data Property = PDurability { __durability :: (Durability, Durability) }
               | POwnership { __ownership :: Player }
               | PDislocation { __dislocation :: Point }
               | PPassRestriction { __passRestriction :: Seq.Seq PassRestriction }
+              | PAge { __age :: Age }
   deriving (Show, Read, Eq)
 
 type PropertyKey = Int
