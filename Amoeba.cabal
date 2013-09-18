@@ -51,7 +51,8 @@ library
                    Test.Utils.Data,
                    Test.Utils.Dummy,
                    GameView.Scene,
-                   Test.ObjectsTest
+                   Test.ObjectsTest,
+                   GameLogic.World.Scenario
 
 executable Amoeba
   build-depends:   base >= 4
@@ -78,7 +79,8 @@ executable Amoeba
                    Test.Utils.Data,
                    Test.Utils.Dummy,
                    GameView.Scene,
-                   Test.ObjectsTest
+                   Test.ObjectsTest,
+                   GameLogic.World.Scenario
 
 c.World.Descripted
 

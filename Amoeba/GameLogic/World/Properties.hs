@@ -21,7 +21,7 @@ type Target = Point
 
 data PassRestriction = NoFly | NoWalk | NoUndermine
   deriving (Show, Read, Eq)
-  
+
 data Property = PDurability { __durability :: (Durability, Durability) }
               | PBattery { __battery :: (Capacity, Energy) }
               | POwnership { __ownership :: Player }

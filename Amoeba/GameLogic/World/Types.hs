@@ -7,3 +7,4 @@ type Speed = Int
 type Energy = Int
 type Capacity = Energy
 type Durability = Int
+type Age = Int
