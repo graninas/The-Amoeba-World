@@ -4,6 +4,7 @@
 
 module GameLogic.World.Properties where
 
+import Data.Default
 import Data.Monoid
 import Data.Maybe
 import Control.Lens
@@ -21,6 +22,10 @@ type Target = Point
 
 data PassRestriction = NoFly | NoWalk | NoUndermine
   deriving (Show, Read, Eq)
+  
+data Fabric = Fabric { _energyCost :: Energy
+                     , _production :: Properties }
+  deriving (Show, Read, Eq)
 
 data Property = PDurability { __durability :: (Durability, Durability) }
               | PBattery { __battery :: (Capacity, Energy) }
@@ -28,6 +33,7 @@ data Property = PDurability { __durability :: (Durability, Durability) }
               | PDislocation { __dislocation :: Point }
               | PPassRestriction { __passRestriction :: Seq.Seq PassRestriction }
               | PAge { __age :: Age }
+              | PFabric { __fabric :: Fabric }
   deriving (Show, Read, Eq)
 
 type PropertyKey = Int
@@ -37,7 +43,7 @@ data Properties = Properties { _propertyMap :: PropertyMap }
 
 data PAccessor a = PAccessor { key :: PropertyKey
                              , constr :: a -> Property }
-                             
+
 (|=) accessor v = do
     props <- get
     let oldPropMap = _propertyMap props
@@ -53,6 +59,7 @@ mergeProperties (Properties pm1) (Properties pm2) = Properties $ Map.union pm1 p
 -- Lenses
 makeLenses ''Properties
 makeLenses ''Property
+makeLenses ''Fabric
 
 property k l = propertyMap . at k . traverse . l
 
@@ -63,14 +70,28 @@ batteryA         = PAccessor 2 PBattery
 ownershipA       = PAccessor 3 POwnership
 passRestrictionA = PAccessor 4 PPassRestriction
 dislocationA     = PAccessor 5 PDislocation
+ageA             = PAccessor 6 PAge
+fabricA          = PAccessor 7 PFabric
 
 durability      = property (key durabilityA)      _durability
 battery         = property (key batteryA)         _battery
 ownership       = property (key ownershipA)       _ownership
 passRestriction = property (key passRestrictionA) _passRestriction
 dislocation     = property (key dislocationA)     _dislocation
+age             = property (key ageA)             _age
+fabric          = property (key fabricA)          _fabric
 
 passRestrictions = [NoFly, NoWalk, NoUndermine]
+
+baseFabric :: Fabric
+baseFabric = Fabric 0 def
+
+instance Default Properties where
+    def = emptyProperties
+
+instance Default Fabric where
+    def = baseFabric
+
 
 {-
 passRestriction = property $ PAccessor 5 _passRestriction
@@ -116,4 +137,5 @@ type ProductionAlg = Properties -> Property
 type PlacementAlg = Property -> Properties -> Point -> Bool 
 
 fabric :: ProductionAlg -> PlacementAlg -> Property
+
 -}

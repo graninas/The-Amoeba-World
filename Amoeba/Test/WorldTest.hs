@@ -37,7 +37,7 @@ instance Eq Game where
 prop_world1 p pl seed = game /= initialGame seed
     where
         game = world . worldMap . at p ?~ ps $ initialGame seed
-        ps = execState (plasma p pl) emptyProperties
+        ps = plasma pl p
 
 runTests :: IO Bool
 runTests = $quickCheckAll
