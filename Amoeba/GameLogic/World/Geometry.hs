@@ -3,6 +3,8 @@ module GameLogic.World.Geometry where
 -- Inspired by https://github.com/ocharles/netwire-classics/blob/master/asteroids/Asteroids.hs
 import qualified Linear as L
 import qualified Control.Arrow as Arr
+import Data.Maybe (fromJust)
+import Data.Tuple (swap)
 
 class Bounded i where
     bounds :: i -> Point -> Bound
@@ -30,6 +32,7 @@ data Direction = DirLeft | DirRight | DirUp | DirDown
 type Directions = [Direction]
 type Shift = Point -> Point
 type Shifts = [Shift]
+type TargetPoint = Point
 
 toDoubleV3 :: L.V3 Int -> L.V3 Double
 toDoubleV3 (L.V3 x1 x2 x3) = L.V3 (fromIntegral x1) (fromIntegral x2) (fromIntegral x3)
@@ -95,6 +98,15 @@ right = DirRight
 up    = DirUp
 down  = DirDown
 
+oppositePairs1 = [ (DirLeftUp, DirRightDown)
+                 , (DirLeftDown, DirRightUp)
+                 , (DirLeft, DirRight)
+                 , (DirUp, DirDown) ]
+oppositePairs2 = map swap oppositePairs1
+oppositePairs = oppositePairs1 ++ oppositePairs2
+
+opposite dir = fromJust $ lookup dir oppositePairs
+
 instance ToVector Direction where
     toVector DirLeft = leftP
     toVector DirRight = rightP
@@ -117,9 +129,18 @@ downP  = L.V3 0 1 0 :: L.V3 Int
 pointX (L.V3 x _ _) = x
 pointY (L.V3 _ y _) = y
 pointZ (L.V3 _ _ z) = z
-movePoint :: Point -> Direction -> Point
-movePoint p dir = (L.^+^) p (toVector dir)
 addPoint = (L.^+^) :: Point -> Point -> Point
+movePoint :: Int -> Point -> Direction -> Point
+movePoint 0 p dir = p
+movePoint dist p dir = let
+    oppDir = opposite dir
+    absDist = abs dist
+    in (L.^+^) p (if dist < 0
+                  then toVector oppDir L.^* absDist
+                  else toVector dir L.^* dist)
+
+movePoint1 :: Point -> Direction -> Point
+movePoint1 = movePoint 1
 
 relativeCorners = [leftUpP, leftDownP, rightUpP, rightDownP]
 relativeSides = [leftP, rightP, upP, downP]

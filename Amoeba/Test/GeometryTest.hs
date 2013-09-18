@@ -3,6 +3,7 @@
 module Main where
 
 import Test.QuickCheck
+import Test.QuickCheck.Property
 import Test.QuickCheck.All
 import Control.Monad
 
@@ -32,10 +33,26 @@ prop_occupiedArea2 ps = let
     area = occupiedArea ps
     in all (\p -> inBounds p [area]) ps
 
-runTests :: IO Bool
-runTests = $quickCheckAll
+prop_movePoint1 n p dir = classify isTrivial "trivial" res
+    where moved1 = movePoint n p dir
+          moved2 = movePoint n moved1 (opposite dir)
+          isTrivial = (n == 0) || (p == zeroPoint)
+          res = if isTrivial then (moved1 == p) && (moved2 == p)
+                             else (moved1 /= p) && (moved2 == p)
+                             
+prop_movePoint2 n p dir = classify isTrivial "trivial" res
+    where moved1 = movePoint n p dir
+          moved2 = movePoint (negate n) moved1 dir
+          isTrivial = (n == 0) || (p == zeroPoint)
+          res = if isTrivial then (moved1 == p) && (moved2 == p)
+                             else (moved1 /= p) && (moved2 == p)
 
-main :: IO ()
-main = runTests >>= \passed -> putStrLn $
+tests :: IO Bool
+tests = $quickCheckAll
+
+runTests = tests >>= \passed -> putStrLn $
   if passed then "All tests passed."
             else "Some tests failed."
+
+main :: IO ()
+main = runTests

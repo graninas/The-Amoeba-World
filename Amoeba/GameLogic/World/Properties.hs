@@ -27,13 +27,18 @@ data Fabric = Fabric { _energyCost :: Energy
                      , _production :: Properties }
   deriving (Show, Read, Eq)
 
-data Property = PDurability { __durability :: (Durability, Durability) }
-              | PBattery { __battery :: (Capacity, Energy) }
+data SelfDestructable = SelfDestructOnTarget TargetPoint
+  deriving (Show, Read, Eq)
+
+data Property = PDurability { __durability :: (Durability, Maybe MaxDurability) }
+              | PBattery { __battery :: (Energy, Maybe EnergyCapacity) }
               | POwnership { __ownership :: Player }
               | PDislocation { __dislocation :: Point }
               | PPassRestriction { __passRestriction :: Seq.Seq PassRestriction }
-              | PAge { __age :: Age }
+              | PAge { __age :: (Age, Maybe Age) }
+              | PDirected { __directed :: Direction }
               | PFabric { __fabric :: Fabric }
+              | PSelfDestructable { __selfDestructable :: SelfDestructable }
   deriving (Show, Read, Eq)
 
 type PropertyKey = Int
@@ -42,7 +47,9 @@ data Properties = Properties { _propertyMap :: PropertyMap }
   deriving (Show, Read, Eq)
 
 data PAccessor a = PAccessor { key :: PropertyKey
-                             , constr :: a -> Property }
+                             , constr :: a -> Property
+                             --, validator :: a -> a
+                             }
 
 (|=) accessor v = do
     props <- get
@@ -60,31 +67,42 @@ mergeProperties (Properties pm1) (Properties pm2) = Properties $ Map.union pm1 p
 makeLenses ''Properties
 makeLenses ''Property
 makeLenses ''Fabric
+makeLenses ''SelfDestructable
 
 property k l = propertyMap . at k . traverse . l
 
 -- Properties itself
 
-durabilityA      = PAccessor 1 PDurability
-batteryA         = PAccessor 2 PBattery
-ownershipA       = PAccessor 3 POwnership
-passRestrictionA = PAccessor 4 PPassRestriction
-dislocationA     = PAccessor 5 PDislocation
-ageA             = PAccessor 6 PAge
-fabricA          = PAccessor 7 PFabric
+boundedValidator r@(a, Just b) | a <= b = r
+boundedValidator r@(a, Nothing) = r
+boundedValidator r = error $ "Invalid bounded property: " ++ show r
 
-durability      = property (key durabilityA)      _durability
-battery         = property (key batteryA)         _battery
-ownership       = property (key ownershipA)       _ownership
-passRestriction = property (key passRestrictionA) _passRestriction
-dislocation     = property (key dislocationA)     _dislocation
-age             = property (key ageA)             _age
-fabric          = property (key fabricA)          _fabric
+durabilityA       = PAccessor 1 $ PDurability       .boundedValidator
+batteryA          = PAccessor 2 $ PBattery          .boundedValidator
+ownershipA        = PAccessor 3 $ POwnership        .id
+passRestrictionA  = PAccessor 4 $ PPassRestriction  .id
+dislocationA      = PAccessor 5 $ PDislocation      .id
+ageA              = PAccessor 6 $ PAge              .boundedValidator
+directedA         = PAccessor 7 $ PDirected         .id
+fabricA           = PAccessor 8 $ PFabric           .id
+selfDestructableA = PAccessor 9 $ PSelfDestructable .id
+
+durability       = property (key durabilityA)       _durability
+battery          = property (key batteryA)          _battery
+ownership        = property (key ownershipA)        _ownership
+passRestriction  = property (key passRestrictionA)  _passRestriction
+dislocation      = property (key dislocationA)      _dislocation
+age              = property (key ageA)              _age
+directed         = property (key directedA)         _directed
+fabric           = property (key fabricA)           _fabric
+selfDestructable = property (key selfDestructableA) _selfDestructable
 
 passRestrictions = [NoFly, NoWalk, NoUndermine]
 
 baseFabric :: Fabric
 baseFabric = Fabric 0 def
+
+selfDestructOnTarget = SelfDestructOnTarget
 
 instance Default Properties where
     def = emptyProperties
