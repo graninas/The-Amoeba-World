@@ -16,6 +16,9 @@ type PropertiesMap = GW.GenericMap Properties
 
 data Game = Game { _world :: World
                  , _rndGen :: StdGen }
+                 
+instance Eq Game where
+    (Game w1 g1) == (Game w2 g2) = (w1 == w2) && (show g1 == show g2)
 
 instance GW.GenericCell Properties where
     empty = emptyProperties

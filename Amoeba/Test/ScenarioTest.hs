@@ -21,9 +21,11 @@ import GameLogic.World.Geometry
 import Test.Utils.Data
 import Test.Utils.Arbitraries
 
+blankGame = initialGame 1
 
-testWorld = objects . at point1 ?~ plasma player1 point1 $ initialGame 1
+testGame = world . worldMap . at point1 ?~ plasma player1 point1 $ blankGame
 
+prop_testWorld = testGame /= blankGame
 
 
 

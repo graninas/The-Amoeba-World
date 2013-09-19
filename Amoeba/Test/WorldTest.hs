@@ -31,9 +31,6 @@ r2 = m ^.. foldMap ix k
 r3 = M.fromList [(1,"world")] ^.at 1
 r4 = at 1 ?~ "hello" $ M.empty
 
-instance Eq Game where
-    (Game w1 g1) == (Game w2 g2) = (w1 == w2) && (show g1 == show g2)
-
 prop_world1 p pl seed = game /= initialGame seed
     where
         game = world . worldMap . at p ?~ ps $ initialGame seed

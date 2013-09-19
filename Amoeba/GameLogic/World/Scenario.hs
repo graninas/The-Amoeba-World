@@ -5,10 +5,10 @@ import GameLogic.World.World
 import GameLogic.World.Properties
 import GameLogic.World.Objects
 
-import qualified Control.Lens as L
+import Control.Lens
 
-objects :: L.Traversal' Game Properties
-objects = game.world.worldMap.traversed
+objects :: Traversal' Game Properties
+objects = world.worldMap.traversed
 
 
 
