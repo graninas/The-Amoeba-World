@@ -1,12 +1,19 @@
 #!/bin/bash
 
-echo Building tests...
-
 rm -rf "./.bin/TestBin/*"
 rm -rf "./.bin/Test/*"
 
 cd ./Amoeba/Test/
+
+if [ "$1" != "" ]; then
+TESTS=`echo "$@" | tr " " "|"`
+echo Tests to build: "$@"
+FILES=`ls | egrep -i "$TESTS" | grep Test`
+else
+echo Building all tests...
 FILES=`ls | grep Test`
+fi
+
 cd ..
 
 for f in $FILES

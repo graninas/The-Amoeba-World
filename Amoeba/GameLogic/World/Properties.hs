@@ -48,7 +48,6 @@ data Properties = Properties { _propertyMap :: PropertyMap }
 
 data PAccessor a = PAccessor { key :: PropertyKey
                              , constr :: a -> Property
-                             --, validator :: a -> a
                              }
 
 (|=) accessor v = do

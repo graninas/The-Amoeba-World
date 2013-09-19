@@ -14,26 +14,15 @@ import Test.QuickCheck.All
 import GameLogic.World.Player
 import GameLogic.World.Properties
 import GameLogic.World.Objects
+import GameLogic.World.Scenario
+import GameLogic.World.World
 import GameLogic.World.Geometry
 
 import Test.Utils.Data
 import Test.Utils.Arbitraries
 
-{-
-world1:
-karyon point1 player1 0
 
-step world1 -> world2:
-karyon point1 player1
-plasma (around point1) player1
-
-step world2 -> world3:
-karyon point1 player1
-plasma (around point1) player1
-plasma (around (around point1)) player1
--}
-
-
+testWorld = objects . at point1 ?~ plasma player1 point1 $ initialGame 1
 
 
 

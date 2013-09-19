@@ -37,7 +37,7 @@ soundWave pl dir tp p = object $ do
     directedA |= dir
     selfDestructableA |= selfDestructOnTarget tp
     -- move dir
-    
+
 soundWaveFabric :: Player -> Direction -> Point -> Fabric
 soundWaveFabric pl dir p = object $ do
     let targetP = movePoint 10 p dir

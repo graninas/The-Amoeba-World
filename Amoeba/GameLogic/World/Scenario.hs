@@ -7,7 +7,7 @@ import GameLogic.World.Objects
 
 import qualified Control.Lens as L
 
-objects :: Traversal' Game Properties
+objects :: L.Traversal' Game Properties
 objects = game.world.worldMap.traversed
 
 

@@ -6,15 +6,11 @@
 #rm -rf "./.bin/Test/*"
 
 cd ./Amoeba/Test/
-
-if [ "$#" > 0 ]; then
-TESTS=`echo "$@" | tr " " "|"`
-echo Tests to run: "$TESTS"
-FILES=`ls | egrep -i "$TESTS" | grep Test`
+if [ $# > 0 ]; then
+FILES=`ls | grep $1 | grep Test`
 else
 FILES=`ls | grep Test`
 fi
-
 cd ..
 
 #for f in $FILES

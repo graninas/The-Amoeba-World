@@ -7,10 +7,10 @@ cd ./Amoeba/Test/
 
 if [ "$1" != "" ]; then
 TESTS=`echo "$@" | tr " " "|"`
-echo Tests to build: "$@"
+echo Tests to build and run: "$@"
 FILES=`ls | egrep -i "$TESTS" | grep Test`
 else
-echo Buildding all tests...
+echo Building and running all tests...
 FILES=`ls | grep Test`
 fi
 
@@ -22,4 +22,20 @@ do
 done
 
 chmod u+x ../.bin/Test/*.bin
-cd ..
+
+cd ../.bin/Test/
+
+if [ "$1" != "" ]; then
+TESTS=`echo "$@" | tr " " "|"`
+FILES=`ls | egrep -i "$TESTS" | grep Test`
+else
+FILES=`ls`
+fi
+
+for f in $FILES
+do
+    echo $f
+    ./$f | egrep -wi 'Failed|All tests passed.|==='
+done
+
+cd ../..
