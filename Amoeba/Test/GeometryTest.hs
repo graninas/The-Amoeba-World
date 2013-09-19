@@ -36,14 +36,14 @@ prop_occupiedArea2 ps = let
 prop_movePoint1 n p dir = classify isTrivial "trivial" res
     where moved1 = movePoint n p dir
           moved2 = movePoint n moved1 (opposite dir)
-          isTrivial = (n == 0) || (p == zeroPoint)
+          isTrivial = (n == 0)
           res = if isTrivial then (moved1 == p) && (moved2 == p)
                              else (moved1 /= p) && (moved2 == p)
-                             
+
 prop_movePoint2 n p dir = classify isTrivial "trivial" res
     where moved1 = movePoint n p dir
           moved2 = movePoint (negate n) moved1 dir
-          isTrivial = (n == 0) || (p == zeroPoint)
+          isTrivial = (n == 0)
           res = if isTrivial then (moved1 == p) && (moved2 == p)
                              else (moved1 /= p) && (moved2 == p)
 
