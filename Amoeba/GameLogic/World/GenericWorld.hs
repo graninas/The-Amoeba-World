@@ -15,6 +15,10 @@ data GenericWorld mp = GenericWorld { _worldMap :: mp
 
 type CelledWorld c = GenericWorld (GenericMap c)
 
+instance (Show mp) => Show (GenericWorld mp) where
+    show (GenericWorld wm wb) = "World { worldMap = \n" ++ show wm
+                             ++ ",\nworldBound = " ++ show wb ++ " } "
+
 fromList :: [(Point, c)] -> CelledWorld c
 fromList list = GenericWorld wm b
   where

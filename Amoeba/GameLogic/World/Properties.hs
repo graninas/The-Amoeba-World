@@ -29,8 +29,13 @@ data Fabric = Fabric { _energyCost :: Energy
 
 data SelfDestructable = SelfDestructOnTarget TargetPoint
   deriving (Show, Read, Eq)
-
-data Property = PDurability { __durability :: (Durability, Maybe MaxDurability) }
+  
+data Moving = StraightMoving { _speed :: Speed
+                             , _route :: Direction }
+  deriving (Show, Read, Eq)
+  
+data Property = PNamed { __named :: String }
+              | PDurability { __durability :: (Durability, Maybe MaxDurability) }
               | PBattery { __battery :: (Energy, Maybe EnergyCapacity) }
               | POwnership { __ownership :: Player }
               | PDislocation { __dislocation :: Point }
@@ -39,6 +44,7 @@ data Property = PDurability { __durability :: (Durability, Maybe MaxDurability) 
               | PDirected { __directed :: Direction }
               | PFabric { __fabric :: Fabric }
               | PSelfDestructable { __selfDestructable :: SelfDestructable }
+              | PMoving { __moving :: Moving }
   deriving (Show, Read, Eq)
 
 type PropertyKey = Int
@@ -67,6 +73,7 @@ makeLenses ''Properties
 makeLenses ''Property
 makeLenses ''Fabric
 makeLenses ''SelfDestructable
+makeLenses ''Moving
 
 property k l = propertyMap . at k . traverse . l
 
@@ -76,16 +83,23 @@ boundedValidator r@(a, Just b) | a <= b = r
 boundedValidator r@(a, Nothing) = r
 boundedValidator r = error $ "Invalid bounded property: " ++ show r
 
-durabilityA       = PAccessor 1 $ PDurability       .boundedValidator
-batteryA          = PAccessor 2 $ PBattery          .boundedValidator
-ownershipA        = PAccessor 3 $ POwnership        .id
-passRestrictionA  = PAccessor 4 $ PPassRestriction  .id
-dislocationA      = PAccessor 5 $ PDislocation      .id
-ageA              = PAccessor 6 $ PAge              .boundedValidator
-directedA         = PAccessor 7 $ PDirected         .id
-fabricA           = PAccessor 8 $ PFabric           .id
-selfDestructableA = PAccessor 9 $ PSelfDestructable .id
+notNullValidator s | null s = error "This property can't be null."
+                   | otherwise = s
 
+-- TODO: remove boilerplate with TH
+namedA            = PAccessor 0    $ PNamed            .notNullValidator
+durabilityA       = PAccessor 1    $ PDurability       .boundedValidator
+batteryA          = PAccessor 2    $ PBattery          .boundedValidator
+ownershipA        = PAccessor 3    $ POwnership        .id
+passRestrictionA  = PAccessor 4    $ PPassRestriction  .id
+dislocationA      = PAccessor 5    $ PDislocation      .id
+ageA              = PAccessor 6    $ PAge              .boundedValidator
+directedA         = PAccessor 7    $ PDirected         .id
+fabricA           = PAccessor 8    $ PFabric           .id
+selfDestructableA = PAccessor 9    $ PSelfDestructable .id
+movingA           = PAccessor 10   $ PMoving           .id
+
+named            = property (key namedA)            _named
 durability       = property (key durabilityA)       _durability
 battery          = property (key batteryA)          _battery
 ownership        = property (key ownershipA)        _ownership
@@ -95,6 +109,7 @@ age              = property (key ageA)              _age
 directed         = property (key directedA)         _directed
 fabric           = property (key fabricA)           _fabric
 selfDestructable = property (key selfDestructableA) _selfDestructable
+moving           = property (key movingA)           _moving
 
 passRestrictions = [NoFly, NoWalk, NoUndermine]
 
@@ -102,6 +117,8 @@ baseFabric :: Fabric
 baseFabric = Fabric 0 def
 
 selfDestructOnTarget = SelfDestructOnTarget
+
+straightMoving = StraightMoving
 
 instance Default Properties where
     def = emptyProperties

@@ -15,6 +15,7 @@ import Test.Utils.Data
 import Test.Utils.Arbitraries
 
 import GameLogic.World.World
+import GameLogic.World.Player
 import GameLogic.World.Geometry
 import GameLogic.World.Objects
 import GameLogic.World.Properties
@@ -23,23 +24,37 @@ instance Monoid r => Monoid (Accessor r a) where
   mempty = Accessor mempty
   mappend (Accessor a) (Accessor b) = Accessor $ a <> b
 
-m = M.fromList [('a',1), ('b',2), ('c',3)]
-k = S.fromList "bce"
-r1 = m ^.. foldMap at k
-r2 = m ^.. foldMap ix k
+blankGame = initialGame 1
 
-r3 = M.fromList [(1,"world")] ^.at 1
-r4 = at 1 ?~ "hello" $ M.empty
+objects = world.worldMap
 
+plasma1 = objects . at point1 ?~ plasma player1 point1
+plasma2 = objects . at point2 ?~ plasma player1 point2
+soundWave1 = objects . at point3 ?~ soundWave player1 left (movePoint 10 point3 left) point3
+testGame = blankGame & plasma1 & plasma2 & soundWave1
+
+moveObjects = objects.traversed.moving.speed += 10000
+
+prop_testGame = testGame /= blankGame
 prop_world1 p pl seed = game /= initialGame seed
     where
-        game = world . worldMap . at p ?~ ps $ initialGame seed
+        game = objects . at p ?~ ps $ initialGame seed
         ps = plasma pl p
 
-runTests :: IO Bool
-runTests = $quickCheckAll
+prop_moveObjects = movedObjectsGame /= blankGame
+  where
+    movedObjectsGame = execState moveObjects testGame
 
-main :: IO ()
-main = runTests >>= \passed -> putStrLn $
+tests :: IO Bool
+tests = $quickCheckAll
+
+runTests = tests >>= \passed -> putStrLn $
   if passed then "All tests passed."
             else "Some tests failed."
+
+main :: IO ()
+main = do
+    runTests
+    let movedObjects = execState moveObjects testGame
+    print testGame
+    print movedObjects
