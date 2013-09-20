@@ -1,7 +1,7 @@
 #!/bin/bash
 
-rm -rf "./.bin/TestBin/*"
-rm -rf "./.bin/Test/*"
+rm -rf "./.bin/TestBin/"*
+rm -rf "./.bin/Test/"*
 
 cd ./Amoeba/Test/
 
@@ -19,6 +19,8 @@ cd ..
 for f in $FILES
 do
     ghc -threaded -outputdir ../.bin/TestBin -o ../.bin/Test/${f%%.hs}.bin ./Test/$f | grep -v Loading
+
+echo $?
 done
 
 chmod u+x ../.bin/Test/*.bin

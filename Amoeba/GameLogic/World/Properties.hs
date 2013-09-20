@@ -50,23 +50,37 @@ data Property = PNamed { __named :: String }
 type PropertyKey = Int
 type PropertyMap = Map.Map PropertyKey Property
 data Properties = Properties { _propertyMap :: PropertyMap }
+                | LayeredProperties { _overProperties :: Properties 
+                                    , _underProperties :: Properties }
   deriving (Show, Read, Eq)
 
 data PAccessor a = PAccessor { key :: PropertyKey
                              , constr :: a -> Property
                              }
 
+insertProperty = Map.insert
+
+emptyPropertiesMap = Map.empty
+emptyProperties = Properties emptyPropertiesMap
+isEmptyProperties (Properties m) = Map.null m
+isEmptyProperties (LayeredProperties mp1 mp2) = isEmptyProperties mp1 && isEmptyProperties mp2
+
+propsertiesOver mp1 mp2 | isEmptyProperties mp1 = mp2
+             | isEmptyProperties mp2 = mp1
+propsertiesOver mp1@(Properties _) mp2@(Properties _) = LayeredProperties mp1 mp2
+propsertiesOver mp1@(LayeredProperties imp11 imp12) mp2@(Properties _) = LayeredProperties imp11 (imp12 `propsertiesOver` mp2)
+propsertiesOver mp1@(Properties _) mp2 = LayeredProperties mp1 mp2
+propsertiesOver mp1@(LayeredProperties imp11 imp12) mp2@(LayeredProperties _ _) = LayeredProperties imp11 (imp12 `propsertiesOver` mp2)
+
+
 (|=) accessor v = do
     props <- get
     let oldPropMap = _propertyMap props
-    let newPropMap = Map.insert (key accessor) (constr accessor v) oldPropMap
+    let newPropMap = insertProperty (key accessor) (constr accessor v) oldPropMap
     put $ props { _propertyMap = newPropMap }
 
 setProperty :: PAccessor a -> a -> State Properties ()
 setProperty = (|=)
-
-emptyProperties = Properties Map.empty
-mergeProperties (Properties pm1) (Properties pm2) = Properties $ Map.union pm1 pm2
 
 -- Lenses
 makeLenses ''Properties
@@ -79,9 +93,10 @@ property k l = propertyMap . at k . traverse . l
 
 -- Properties itself
 
-boundedValidator r@(a, Just b) | a <= b = r
-boundedValidator r@(a, Nothing) = r
-boundedValidator r = error $ "Invalid bounded property: " ++ show r
+isBoundedValid (a, Just b) = (a >= 0) && (a <= b)
+isBoundedValid _ = True
+boundedValidator r | isBoundedValid r = r
+                   | otherwise        = error $ "Invalid bounded property: " ++ show r
 
 notNullValidator s | null s = error "This property can't be null."
                    | otherwise = s
@@ -119,6 +134,9 @@ baseFabric = Fabric 0 def
 selfDestructOnTarget = SelfDestructOnTarget
 
 straightMoving = StraightMoving
+move (StraightMoving s r) p = movePoint s p r
+
+
 
 instance Default Properties where
     def = emptyProperties
@@ -126,7 +144,9 @@ instance Default Properties where
 instance Default Fabric where
     def = baseFabric
 
-
+instance Monoid Properties where
+    mempty = emptyProperties
+    mappend = propsertiesOver
 {-
 passRestriction = property $ PAccessor 5 _passRestriction
 noFly = passRestriction . ix flyIndex .~ NoFly

@@ -10,7 +10,7 @@ TESTS=`echo "$@" | tr " " "|"`
 echo Tests to build: "$@"
 FILES=`ls | egrep -i "$TESTS" | grep Test`
 else
-echo Buildding all tests...
+echo Building all tests...
 FILES=`ls | grep Test`
 fi
 

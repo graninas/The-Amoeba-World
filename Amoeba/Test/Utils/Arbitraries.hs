@@ -16,7 +16,7 @@ instance Arbitrary (L.V3 Int) where
     arbitrary = liftM3 point arbitrary arbitrary arbitrary
     
 instance Arbitrary Bound where
-    arbitrary = oneof [ liftM pointBound arbitrary
+    arbitrary = oneof [ liftM  pointBound arbitrary
                       , liftM2 rectBound arbitrary arbitrary
                       , liftM2 circleBound arbitrary arbitrary
                       , return noBound ]
@@ -36,9 +36,29 @@ instance Arbitrary (Seq.Seq PassRestriction) where
         where
             s = List.subsequences passRestrictions
 
+-- TODO: add another properties
+propertiesCount = 11
 instance Arbitrary P.Property where
-    arbitrary = oneof [ liftM PDurability arbitrary
-                      , liftM PBattery arbitrary
+    arbitrary = oneof [ liftM PDurability (arbitrary `suchThat` isBoundedValid)
+                      , liftM PBattery  (arbitrary `suchThat` isBoundedValid)
                       , liftM POwnership arbitrary
                       , liftM PDislocation arbitrary
                       , liftM PPassRestriction arbitrary ]
+
+instance Arbitrary P.PropertyMap where
+    arbitrary = sized pm
+      where
+            pm 0 = return emptyPropertiesMap
+            pm n | n > 0 = let propArbitraries = replicate n arbitrary
+                               em = return emptyPropertiesMap
+                               k = choose (0, propertiesCount)
+                           in foldr (liftM3 insertProperty k) em propArbitraries
+
+instance Arbitrary P.Properties where
+    arbitrary = sized props
+      where
+            props 0 = return emptyProperties
+            props n | n > 0 = oneof [ liftM Properties arbitrary
+                                    , liftM2 LayeredProperties subprops subprops ]
+              where
+                subprops = props (n `div` 2)

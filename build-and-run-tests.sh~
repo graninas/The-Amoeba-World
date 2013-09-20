@@ -7,10 +7,10 @@ cd ./Amoeba/Test/
 
 if [ "$1" != "" ]; then
 TESTS=`echo "$@" | tr " " "|"`
-echo Tests to build: "$@"
+echo Tests to build and run: "$@"
 FILES=`ls | egrep -i "$TESTS" | grep Test`
 else
-echo Building all tests...
+echo Building and running all tests...
 FILES=`ls | grep Test`
 fi
 
@@ -27,10 +27,8 @@ cd ../.bin/Test/
 
 if [ "$1" != "" ]; then
 TESTS=`echo "$@" | tr " " "|"`
-echo Tests to run: "$@"
 FILES=`ls | egrep -i "$TESTS" | grep Test`
 else
-echo Running all tests...
 FILES=`ls`
 fi
 

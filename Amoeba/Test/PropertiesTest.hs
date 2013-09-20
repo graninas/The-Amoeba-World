@@ -19,24 +19,30 @@ import GameLogic.World.Geometry
 import Test.Utils.Data
 import Test.Utils.Arbitraries
 
-prop_durability d = ps == expected
+-- Testing of Monoid laws for Properties
+
+prop_monoidLaw1 ps = mappend mempty ps == ps
     where
-        durKey = key durabilityA
-        expected = Properties $ Map.fromList [(durKey, constr durabilityA d)]
-        st = durabilityA |= d
-        ps = execState st emptyProperties
+        types = ps :: Properties
 
-prop_battery b = ps == expected
+prop_monoidLaw2 ps = mappend ps mempty == ps
     where
-        batKey = key batteryA
-        expected = Properties $ Map.fromList [(batKey, constr batteryA b)]
-        st = batteryA |= b
-        ps = execState st emptyProperties
+        types = ps :: Properties
 
-runTests :: IO Bool
-runTests = $quickCheckAll
+prop_monoidLaw3 ps1 ps2 ps3 = mappend ps1 (mappend ps2 ps3) == mappend (mappend ps1 ps2) ps3
+    where
+        types = [ps1, ps2, ps3] :: [Properties]
 
-main :: IO ()
-main = runTests >>= \passed -> putStrLn $
+prop_monoidLaw4 pss = mconcat pss == foldr mappend mempty pss
+    where
+        types = pss :: [Properties]
+        
+tests :: IO Bool
+tests = $quickCheckAll
+
+runTests = tests >>= \passed -> putStrLn $
   if passed then "All tests passed."
             else "Some tests failed."
+
+main :: IO ()
+main = runTests

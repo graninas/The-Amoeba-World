@@ -12,7 +12,7 @@ import GameLogic.World.Objects
 import GameLogic.World.Player
 
 type World = GW.CelledWorld Properties
-type PropertiesMap = GW.GenericMap Properties
+type WorldMap = GW.GenericMap Properties
 
 data Game = Game { _world :: World
                  , _rndGen :: StdGen }
@@ -25,7 +25,7 @@ instance GW.GenericCell Properties where
     empty = emptyProperties
     merge = mergeProperties
 
-worldMap :: L.Lens' World PropertiesMap
+worldMap :: L.Lens' World WorldMap
 worldMap = L.lens GW.worldMap GW.resetWorldMap
 
 bound :: L.Getter World Bound
@@ -33,6 +33,9 @@ bound = L.to GW.worldBound
 
 world :: L.Lens' Game World
 world = L.lens _world (\game w -> game { _world = w })
+
+objects :: L.Lens' Game WorldMap
+objects = world.worldMap
 
 rndGen :: L.Lens' Game StdGen
 rndGen = L.lens _rndGen (\game g -> game { _rndGen = g})

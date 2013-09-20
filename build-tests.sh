@@ -1,7 +1,7 @@
 #!/bin/bash
 
-rm -rf "./.bin/TestBin/*"
-rm -rf "./.bin/Test/*"
+rm -rf "./.bin/TestBin/"*
+rm -rf "./.bin/Test/"*
 
 cd ./Amoeba/Test/
 
