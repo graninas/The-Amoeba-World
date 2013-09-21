@@ -27,7 +27,7 @@ instance GW.GenericCell Properties where
 
 emptyWorld = GW.emptyWorld
 initialGame seed = Game emptyWorld (mkStdGen seed)
-
+refreshWorldBound = GW.refreshWorldBound
 
 emptyCell = emptyProperties
 alterCell = GW.alterCell

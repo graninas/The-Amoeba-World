@@ -9,15 +9,15 @@ import Data.Maybe (fromMaybe, maybe)
 import GameLogic.World.Geometry
 
 type GenericMap c = Map.Map Point c
-data GenericWorld mp = GenericWorld { _worldMap :: mp
-                                    , _worldBound :: Bound }
+data GenericWorld mp = GenericWorld { worldMap :: mp
+                                    , worldBound :: Bound }
     deriving (Eq)
 
 type CelledWorld c = GenericWorld (GenericMap c)
 
 instance (Show mp) => Show (GenericWorld mp) where
-    show (GenericWorld wm wb) = "World { worldMap = \n" ++ show wm
-                             ++ ",\nworldBound = " ++ show wb ++ " } "
+    show (GenericWorld wm wb) = "World { worldMap = " ++ show wm
+                             ++ ", worldBound = " ++ show wb ++ " } "
 
 fromList :: [(Point, c)] -> CelledWorld c
 fromList list = GenericWorld wm b
@@ -25,14 +25,16 @@ fromList list = GenericWorld wm b
     wm = Map.fromList list
     b = occupiedArea (map fst list)
 
+{-
 worldMap :: GenericCell c => CelledWorld c -> GenericMap c
 worldMap = _worldMap
 
 worldBound :: GenericCell c => CelledWorld c -> Bound
 worldBound = _worldBound
+-}
 
 resetWorldMap :: GenericCell c => CelledWorld c -> GenericMap c -> CelledWorld c
-resetWorldMap w wm = w { _worldMap = wm }
+resetWorldMap w wm = w { worldMap = wm }
 
 emptyWorld = GenericWorld Map.empty noBound
 
@@ -52,6 +54,10 @@ alterCell (GenericWorld m b) (p, c) = GenericWorld newMap b'
     newMap = f m
     b' = if Map.null newMap then NoBound
                             else updateRectBound p b
+
+refreshWorldBound w = let wmKeys = Map.keys . worldMap $ w
+                          newBound = foldr updateRectBound NoBound wmKeys
+                      in w { worldBound = newBound }
 
 -- Graph
 

@@ -32,10 +32,14 @@ instance Monoid Properties where
 
 blankGame = initialGame 1
 
-plasma1 = objects . at point1 ?~ plasma player1 point1
-plasma2 = objects . at point2 ?~ plasma player1 point2
+plasma1    = objects . at point1 ?~ plasma player1 point1
+plasma2    = objects . at point2 ?~ plasma player1 point2
 soundWave1 = objects . at point3 ?~ soundWave player1 left (moveStraight 10 point3 left) point3
-testGame = blankGame & plasma1 & plasma2 & soundWave1
+testGame   = testGame'
+  where
+    g = blankGame & plasma1 & plasma2 & soundWave1
+    w = g ^. world
+    testGame' = over world refreshWorldBound g
 
 -- foldM :: Monad m => (a -> b -> m a) -> a -> [b] -> m a
 {-
@@ -51,12 +55,28 @@ moveObject :: Point -> State Game ()
 moveObject p = do
     props <- use $ objects . ix p
     let f = move p :: Moving -> Point
-    let d = props ^. singular moving :: Moving
+    let mv = props ^. singular moving :: Moving
     when (has moving props) $ do
-        let newPoint = f d
+        let newPoint = f mv
+        let newProps = dislocation .~ newPoint $ props
         deleteObject p
-        insertObject newPoint props
+        insertObject newPoint newProps
     return ()
+
+insertOnly :: Game -> Game
+insertOnly = execState insert'
+  where
+    insert' = insertObject point5 (plasma player1 point5)
+
+insertAndDelete :: Game -> Game
+insertAndDelete = execState insertAndDelete'
+  where
+    insertAndDelete' = do
+            insertObject point5 (plasma player1 point5)
+            deleteObject point5
+
+moveSingleObject :: Game -> Game
+moveSingleObject = execState (moveObject point3)
 
 prop_testGame = testGame /= blankGame
 prop_world1 p pl seed = game /= initialGame seed
@@ -64,13 +84,12 @@ prop_world1 p pl seed = game /= initialGame seed
         game = objects . at p ?~ ps $ initialGame seed
         ps = plasma pl p
 
-insertAndDelete = execState insertAndDelete' blankGame
-  where
-    insertAndDelete' = do
-            insertObject point1 (plasma player1 point1)
-            deleteObject point1
-
-prop_insertAndDelete = insertAndDelete == blankGame
+prop_insertOnly1       = insertOnly blankGame /= blankGame
+prop_insertOnly2       = insertOnly testGame  /= testGame
+prop_insertAndDelete1  = insertAndDelete blankGame == blankGame
+prop_insertAndDelete2  = insertAndDelete testGame == testGame
+prop_moveSingleObject1 = moveSingleObject blankGame == blankGame
+prop_moveSingleObject2 = moveSingleObject testGame `notElem` [testGame, blankGame]
 
 tests :: IO Bool
 tests = $quickCheckAll
@@ -82,5 +101,21 @@ runTests = tests >>= \passed -> putStrLn $
 main :: IO ()
 main = do
     runTests
+    print "Blank game:"
     print blankGame
-    print insertAndDelete
+    putStrLn ""
+    print "Test game:"
+    print testGame
+    putStrLn ""
+    print "InsertAndDelete blankGame:"
+    print $ insertAndDelete blankGame
+    putStrLn ""
+    print "InsertAndDelete testGame:"
+    print $ insertAndDelete testGame
+    putStrLn ""
+    print "MoveSingleObject blankGame:"
+    print $ moveSingleObject blankGame
+    putStrLn ""
+    print "MoveSingleObject testGame:"
+    print $ moveSingleObject testGame
+    putStrLn ""

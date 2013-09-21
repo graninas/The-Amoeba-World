@@ -56,6 +56,7 @@ circleBound :: Point -> Radius -> Bound
 circleBound = Circled
 noBound = NoBound
 
+updateRectBound :: Point -> Bound -> Bound
 updateRectBound p (Rectangled p1 p2) = Rectangled (minMin p1 p) (maxMax p2 p)
 updateRectBound p NoBound = Rectangled p p
 updateRectBound p b = error $ "Rectangled bound expected, but got: " ++ show b ++ " for point " ++ show p
