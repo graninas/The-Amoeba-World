@@ -34,19 +34,13 @@ blankGame = initialGame 1
 
 plasma1    = objects . at point1 ?~ plasma player1 point1
 plasma2    = objects . at point2 ?~ plasma player1 point2
-soundWave1 = objects . at point3 ?~ soundWave player1 left (moveStraight 10 point3 left) point3
+soundWave1 = objects . at point3 ?~ soundWave player1 left 10 point3
+laserBeam1 = objects . at point4 ?~ laserBeam player2 up 200 point4
 testGame   = testGame'
   where
-    g = blankGame & plasma1 & plasma2 & soundWave1
+    g = blankGame & plasma1 & plasma2 & soundWave1 & laserBeam1
     w = g ^. world
     testGame' = over world refreshWorldBound g
-
--- foldM :: Monad m => (a -> b -> m a) -> a -> [b] -> m a
-{-
-dereference :: Point -> State Game Point
-dereference p = do
-    <- 
--}
 
 deleteObject p = world %= deleteCell p
 insertObject p props = world %= insertCell p props
@@ -61,7 +55,8 @@ moveObject p = do
         let newProps = dislocation .~ newPoint $ props
         deleteObject p
         insertObject newPoint newProps
-    return ()
+
+
 
 insertOnly :: Game -> Game
 insertOnly = execState insert'

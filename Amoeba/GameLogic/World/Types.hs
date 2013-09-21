@@ -10,3 +10,4 @@ type Durability = Int
 type MaxDurability = Durability
 type Age = Int
 type MaxAge = Age
+type Power = Int

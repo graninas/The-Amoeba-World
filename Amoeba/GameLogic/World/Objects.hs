@@ -7,6 +7,7 @@ import Control.Lens
 import GameLogic.World.Geometry
 import GameLogic.World.Properties
 import GameLogic.World.Player
+import GameLogic.World.Types
 
 object :: Default a => State a () -> a
 object = flip execState def
@@ -34,21 +35,24 @@ karyon pl p = object $ do
     ownershipA |= pl
     fabricA |= plasmaFabric pl p
 
-soundWave :: Player -> Direction -> TargetPoint -> Point -> Properties
-soundWave pl dir tp p = object $ do
-    namedA |= "SoundWave"
+bullet :: String -> Speed -> Player -> Direction -> Power -> Point -> Properties
+bullet name speed pl dir power p = object $ do
+    let targetP = moveStraight power p dir
+    namedA |= name
     layerA |= sky
     dislocationA |= p
     ownershipA |= pl
     directedA |= dir
-    selfDestructableA |= selfDestructOnTarget tp
-    movingA |= straightMoving 1 dir
+    selfDestructableA |= selfDestructOnTarget targetP
+    movingA |= straightMoving speed dir
+
+soundWave = bullet "SoundWave" 1
+laserBeam = bullet "LaserBeam" 10
 
 soundWaveFabric :: Player -> Direction -> Point -> Fabric
 soundWaveFabric pl dir p = object $ do
-    let targetP = moveStraight 10 p dir
     energyCost .= 1
-    production .= soundWave pl dir targetP p
+    production .= soundWave pl dir 10 p
 
 influencer :: Player -> Direction -> Point -> Properties
 influencer pl dir p = object $ do

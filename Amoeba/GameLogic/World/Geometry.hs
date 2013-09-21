@@ -33,6 +33,7 @@ type Directions = [Direction]
 type Shift = Point -> Point
 type Shifts = [Shift]
 type TargetPoint = Point
+type Distance = Int
 
 toDoubleV3 :: L.V3 Int -> L.V3 Double
 toDoubleV3 (L.V3 x1 x2 x3) = L.V3 (fromIntegral x1) (fromIntegral x2) (fromIntegral x3)
@@ -142,7 +143,7 @@ addPoint = (L.^+^) :: Point -> Point -> Point
 
 -- Moving
 
-moveStraight :: Int -> Point -> Direction -> Point
+moveStraight :: Distance -> Point -> Direction -> Point
 moveStraight 0 p dir = p
 moveStraight dist p dir = let
     oppDir = opposite dir

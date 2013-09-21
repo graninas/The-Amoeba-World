@@ -25,14 +25,6 @@ fromList list = GenericWorld wm b
     wm = Map.fromList list
     b = occupiedArea (map fst list)
 
-{-
-worldMap :: GenericCell c => CelledWorld c -> GenericMap c
-worldMap = _worldMap
-
-worldBound :: GenericCell c => CelledWorld c -> Bound
-worldBound = _worldBound
--}
-
 resetWorldMap :: GenericCell c => CelledWorld c -> GenericMap c -> CelledWorld c
 resetWorldMap w wm = w { worldMap = wm }
 
