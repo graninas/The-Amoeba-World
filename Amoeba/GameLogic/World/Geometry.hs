@@ -57,7 +57,8 @@ circleBound = Circled
 noBound = NoBound
 
 updateRectBound p (Rectangled p1 p2) = Rectangled (minMin p1 p) (maxMax p2 p)
-updateRectBound _ _ = error "This function is only for rectangled bounds"
+updateRectBound p NoBound = Rectangled p p
+updateRectBound p b = error $ "Rectangled bound expected, but got: " ++ show b ++ " for point " ++ show p
 inRect r1 r2 = leftUpIn && rightDownIn
   where
     leftUpIn = uncurry (withCoords (>=)) ((Arr.***) rectedLU rectedLU (r1, r2))

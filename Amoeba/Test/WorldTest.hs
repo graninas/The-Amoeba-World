@@ -64,9 +64,13 @@ prop_world1 p pl seed = game /= initialGame seed
         game = objects . at p ?~ ps $ initialGame seed
         ps = plasma pl p
 
---prop_moveObjects = movedObjectsGame /= blankGame
---  where
---    movedObjectsGame = execState moveObjects testGame
+insertAndDelete = execState insertAndDelete' blankGame
+  where
+    insertAndDelete' = do
+            insertObject point1 (plasma player1 point1)
+            deleteObject point1
+
+prop_insertAndDelete = insertAndDelete == blankGame
 
 tests :: IO Bool
 tests = $quickCheckAll
@@ -78,3 +82,5 @@ runTests = tests >>= \passed -> putStrLn $
 main :: IO ()
 main = do
     runTests
+    print blankGame
+    print insertAndDelete

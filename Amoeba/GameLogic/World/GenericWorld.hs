@@ -34,7 +34,7 @@ worldBound = _worldBound
 resetWorldMap :: GenericCell c => CelledWorld c -> GenericMap c -> CelledWorld c
 resetWorldMap w wm = w { _worldMap = wm }
 
-emptyWorld = fromList []
+emptyWorld = GenericWorld Map.empty noBound
 
 class Eq c => GenericCell c where
     empty :: c
@@ -44,12 +44,14 @@ alterWorld :: GenericCell c => CelledWorld c -> [(Point, c)] -> CelledWorld c
 alterWorld = foldl alterCell
 
 alterCell :: GenericCell c => CelledWorld c -> (Point, c) -> CelledWorld c
-alterCell (GenericWorld m b) (p, c) = GenericWorld (f m) b'
+alterCell (GenericWorld m b) (p, c) = GenericWorld newMap b'
   where
     alteringFunc oldCell | empty == c = Nothing
                          | otherwise = Just . maybe c (merge c) $ oldCell
     f = Map.alter alteringFunc p
-    b' = updateRectBound p b
+    newMap = f m
+    b' = if Map.null newMap then NoBound
+                            else updateRectBound p b
 
 -- Graph
 

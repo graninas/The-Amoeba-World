@@ -25,7 +25,9 @@ instance GW.GenericCell Properties where
     empty = emptyProperties
     merge = mergeProperties
 
-initialGame seed = Game GW.emptyWorld (mkStdGen seed)
+emptyWorld = GW.emptyWorld
+initialGame seed = Game emptyWorld (mkStdGen seed)
+
 
 emptyCell = emptyProperties
 alterCell = GW.alterCell
