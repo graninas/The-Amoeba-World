@@ -128,23 +128,27 @@ rightP = L.V3 1 0 0 :: L.V3 Int
 upP    = L.V3 0 (-1) 0 :: L.V3 Int
 downP  = L.V3 0 1 0 :: L.V3 Int
 
+relativeCorners = [ leftUpP, leftDownP, rightUpP, rightDownP ]
+relativeSides   = [ leftP, rightP, upP, downP ]
+
+neighbours p = map (p L.^+^) $ relativeCorners ++ relativeSides
+
 pointX (L.V3 x _ _) = x
 pointY (L.V3 _ y _) = y
 pointZ (L.V3 _ _ z) = z
 addPoint = (L.^+^) :: Point -> Point -> Point
-movePoint :: Int -> Point -> Direction -> Point
-movePoint 0 p dir = p
-movePoint dist p dir = let
+
+-- Moving
+
+moveStraight :: Int -> Point -> Direction -> Point
+moveStraight 0 p dir = p
+moveStraight dist p dir = let
     oppDir = opposite dir
     absDist = abs dist
     in (L.^+^) p (if dist < 0
                   then toVector oppDir L.^* absDist
                   else toVector dir L.^* dist)
 
-movePoint1 :: Point -> Direction -> Point
-movePoint1 = movePoint 1
+advance :: Point -> Direction -> Point
+advance = moveStraight 1
 
-relativeCorners = [ leftUpP, leftDownP, rightUpP, rightDownP ]
-relativeSides   = [ leftP, rightP, upP, downP ]
-
-neighbours p = map (p L.^+^) $ relativeCorners ++ relativeSides

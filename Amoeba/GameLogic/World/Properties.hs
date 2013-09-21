@@ -132,7 +132,7 @@ baseFabric = Fabric 0 def
 selfDestructOnTarget = SelfDestructOnTarget
 
 straightMoving = StraightMoving
-move (StraightMoving s r) p = movePoint s p r
+move p (StraightMoving s r) = moveStraight s p r
 
 underground = Underground
 ground = Ground

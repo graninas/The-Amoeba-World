@@ -46,7 +46,7 @@ soundWave pl dir tp p = object $ do
 
 soundWaveFabric :: Player -> Direction -> Point -> Fabric
 soundWaveFabric pl dir p = object $ do
-    let targetP = movePoint 10 p dir
+    let targetP = moveStraight 10 p dir
     energyCost .= 1
     production .= soundWave pl dir targetP p
 

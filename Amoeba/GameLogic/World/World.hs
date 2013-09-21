@@ -25,6 +25,13 @@ instance GW.GenericCell Properties where
     empty = emptyProperties
     merge = mergeProperties
 
+initialGame seed = Game GW.emptyWorld (mkStdGen seed)
+
+emptyCell = emptyProperties
+alterCell = GW.alterCell
+deleteCell p w = alterCell w (p, emptyCell)
+insertCell p c w = alterCell w (p, c)
+
 worldMap :: L.Lens' World WorldMap
 worldMap = L.lens GW.worldMap GW.resetWorldMap
 
@@ -40,5 +47,4 @@ objects = world.worldMap
 rndGen :: L.Lens' Game StdGen
 rndGen = L.lens _rndGen (\game g -> game { _rndGen = g})
 
-initialGame seed = Game GW.emptyWorld (mkStdGen seed)
 
