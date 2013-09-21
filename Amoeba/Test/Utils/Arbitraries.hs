@@ -22,8 +22,7 @@ instance Arbitrary Bound where
                       , return noBound ]
                       
 instance Arbitrary Direction where
-    arbitrary = oneof $ map return [ left, right, up, down,
-                                     leftUp, rightDown, leftDown, rightUp ]
+    arbitrary = oneof $ map return directions
                                      
 instance Arbitrary Player where
     arbitrary = liftM Player arbitrary
@@ -36,14 +35,34 @@ instance Arbitrary (Seq.Seq PassRestriction) where
         where
             s = List.subsequences passRestrictions
 
+instance Arbitrary Fabric where
+    arbitrary = liftM2 Fabric arbitrary arbitrary
+
+instance Arbitrary Moving where
+    arbitrary = liftM2 StraightMoving arbitrary arbitrary
+    
+instance Arbitrary SelfDestructable where
+    arbitrary = liftM SelfDestructOnTarget arbitrary
+
+instance Arbitrary Layer where
+    arbitrary = oneof $ map return layers
+
 -- TODO: add another properties
-propertiesCount = 11
+propertiesCount = 12
 instance Arbitrary P.Property where
-    arbitrary = oneof [ liftM PDurability (arbitrary `suchThat` isBoundedValid)
+    arbitrary = oneof [ liftM PNamed (arbitrary `suchThat` (not.null))
+                      , liftM PDurability (arbitrary `suchThat` isBoundedValid)
                       , liftM PBattery  (arbitrary `suchThat` isBoundedValid)
                       , liftM POwnership arbitrary
                       , liftM PDislocation arbitrary
-                      , liftM PPassRestriction arbitrary ]
+                      , liftM PPassRestriction arbitrary
+                      , liftM PAge (arbitrary `suchThat` isBoundedValid)
+                      , liftM PDirected arbitrary
+                      , liftM PFabric arbitrary
+                      , liftM PSelfDestructable arbitrary
+                      , liftM PMoving arbitrary
+                      , liftM PLayer arbitrary
+                      ]
 
 instance Arbitrary P.PropertyMap where
     arbitrary = sized pm
@@ -55,10 +74,4 @@ instance Arbitrary P.PropertyMap where
                            in foldr (liftM3 insertProperty k) em propArbitraries
 
 instance Arbitrary P.Properties where
-    arbitrary = sized props
-      where
-            props 0 = return emptyProperties
-            props n | n > 0 = oneof [ liftM Properties arbitrary
-                                    , liftM2 LayeredProperties subprops subprops ]
-              where
-                subprops = props (n `div` 2)
+    arbitrary = liftM Properties arbitrary

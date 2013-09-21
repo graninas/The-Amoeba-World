@@ -80,9 +80,8 @@ intersecting NoBound _ = True
 intersecting _ NoBound = True
 intersecting b1 b2 = error $ "Intersecting not implemented for " ++ show b1 ++ " and " ++ show b2
 
-
 inBounds :: Point -> Bounds -> Bool
-inBounds p = any (intersecting (Pointed p)) 
+inBounds p = any (intersecting (Pointed p))
 
 point :: Int -> Int -> Int -> L.V3 Int
 point = L.V3
@@ -98,14 +97,17 @@ right = DirRight
 up    = DirUp
 down  = DirDown
 
-oppositePairs1 = [ (DirLeftUp, DirRightDown)
-                 , (DirLeftDown, DirRightUp)
-                 , (DirLeft, DirRight)
-                 , (DirUp, DirDown) ]
-oppositePairs2 = map swap oppositePairs1
-oppositePairs = oppositePairs1 ++ oppositePairs2
+sideDirections = [ left, right, up, down ]
+cornerDirections = [ leftUp, rightDown, leftDown, rightUp ]
+directions = sideDirections ++ cornerDirections
+oppositeDirections1 = [ (leftUp, rightDown)
+                      , (leftDown, rightUp)
+                      , (left, right)
+                      , (up, down) ]
+oppositeDirections2 = map swap oppositeDirections1
+oppositeDirections = oppositeDirections1 ++ oppositeDirections2
 
-opposite dir = fromJust $ lookup dir oppositePairs
+opposite dir = fromJust $ lookup dir oppositeDirections
 
 instance ToVector Direction where
     toVector DirLeft = leftP
@@ -142,7 +144,7 @@ movePoint dist p dir = let
 movePoint1 :: Point -> Direction -> Point
 movePoint1 = movePoint 1
 
-relativeCorners = [leftUpP, leftDownP, rightUpP, rightDownP]
-relativeSides = [leftP, rightP, upP, downP]
+relativeCorners = [ leftUpP, leftDownP, rightUpP, rightDownP ]
+relativeSides   = [ leftP, rightP, upP, downP ]
 
 neighbours p = map (p L.^+^) $ relativeCorners ++ relativeSides

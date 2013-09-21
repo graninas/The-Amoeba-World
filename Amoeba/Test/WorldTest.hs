@@ -25,23 +25,16 @@ instance Monoid r => Monoid (Accessor r a) where
   mempty = Accessor mempty
   mappend (Accessor a) (Accessor b) = Accessor $ a <> b
 
+instance Monoid Properties where
+    mempty  = emptyProperties
+    mappend = mergeProperties
+
 blankGame = initialGame 1
 
 plasma1 = objects . at point1 ?~ plasma player1 point1
 plasma2 = objects . at point2 ?~ plasma player1 point2
 soundWave1 = objects . at point3 ?~ soundWave player1 left (movePoint 10 point3 left) point3
 testGame = blankGame & plasma1 & plasma2 & soundWave1
-
-
-reconnaissance obj mv p = do
-    let nextP = move (obj ^. mv) p
-    obj2 <- use (objects . at nextP)
-    return True
-
-moveObject p = do
-    obj <- use (objects . ix p)
-    reconnaissance obj moving p
-
 
 prop_testGame = testGame /= blankGame
 prop_world1 p pl seed = game /= initialGame seed
@@ -63,9 +56,3 @@ runTests = tests >>= \passed -> putStrLn $
 main :: IO ()
 main = do
     runTests
-    
-    let mv = evalState moveObject testGame
-    
-    let movedObject = execState moveObject testGame
-    print testGame
-    print movedObject

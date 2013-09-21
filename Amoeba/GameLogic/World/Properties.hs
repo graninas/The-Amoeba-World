@@ -7,7 +7,7 @@ module GameLogic.World.Properties where
 import Data.Default
 import Data.Monoid
 import Data.Maybe
-import Control.Lens
+import Control.Lens hiding (over)
 import Control.Monad
 import Control.Monad.State
 import Control.Applicative
@@ -29,11 +29,14 @@ data Fabric = Fabric { _energyCost :: Energy
 
 data SelfDestructable = SelfDestructOnTarget TargetPoint
   deriving (Show, Read, Eq)
-  
+
 data Moving = StraightMoving { _speed :: Speed
                              , _route :: Direction }
   deriving (Show, Read, Eq)
-  
+
+data Layer = Underground | Ground | Sky
+  deriving (Show, Read, Eq)
+
 data Property = PNamed { __named :: String }
               | PDurability { __durability :: (Durability, Maybe MaxDurability) }
               | PBattery { __battery :: (Energy, Maybe EnergyCapacity) }
@@ -45,13 +48,12 @@ data Property = PNamed { __named :: String }
               | PFabric { __fabric :: Fabric }
               | PSelfDestructable { __selfDestructable :: SelfDestructable }
               | PMoving { __moving :: Moving }
+              | PLayer { __layer :: Layer }
   deriving (Show, Read, Eq)
 
 type PropertyKey = Int
 type PropertyMap = Map.Map PropertyKey Property
 data Properties = Properties { _propertyMap :: PropertyMap }
-                | LayeredProperties { _overProperties :: Properties 
-                                    , _underProperties :: Properties }
   deriving (Show, Read, Eq)
 
 data PAccessor a = PAccessor { key :: PropertyKey
@@ -59,20 +61,12 @@ data PAccessor a = PAccessor { key :: PropertyKey
                              }
 
 insertProperty = Map.insert
-
 emptyPropertiesMap = Map.empty
-emptyProperties = Properties emptyPropertiesMap
-isEmptyProperties (Properties m) = Map.null m
-isEmptyProperties (LayeredProperties mp1 mp2) = isEmptyProperties mp1 && isEmptyProperties mp2
+emptyProperties = Properties Map.empty
+mergeProperties (Properties pm1) (Properties pm2) = Properties $ Map.union pm1 pm2
 
-propsertiesOver mp1 mp2 | isEmptyProperties mp1 = mp2
-             | isEmptyProperties mp2 = mp1
-propsertiesOver mp1@(Properties _) mp2@(Properties _) = LayeredProperties mp1 mp2
-propsertiesOver mp1@(LayeredProperties imp11 imp12) mp2@(Properties _) = LayeredProperties imp11 (imp12 `propsertiesOver` mp2)
-propsertiesOver mp1@(Properties _) mp2 = LayeredProperties mp1 mp2
-propsertiesOver mp1@(LayeredProperties imp11 imp12) mp2@(LayeredProperties _ _) = LayeredProperties imp11 (imp12 `propsertiesOver` mp2)
-
-
+-- | Access to base layer. Use it to setup base properties in layer 0.
+baseLayer = 0
 (|=) accessor v = do
     props <- get
     let oldPropMap = _propertyMap props
@@ -88,6 +82,7 @@ makeLenses ''Property
 makeLenses ''Fabric
 makeLenses ''SelfDestructable
 makeLenses ''Moving
+makeLenses ''Layer
 
 property k l = propertyMap . at k . traverse . l
 
@@ -113,6 +108,7 @@ directedA         = PAccessor 7    $ PDirected         .id
 fabricA           = PAccessor 8    $ PFabric           .id
 selfDestructableA = PAccessor 9    $ PSelfDestructable .id
 movingA           = PAccessor 10   $ PMoving           .id
+layerA            = PAccessor 11   $ PLayer            .id
 
 named            = property (key namedA)            _named
 durability       = property (key durabilityA)       _durability
@@ -125,6 +121,8 @@ directed         = property (key directedA)         _directed
 fabric           = property (key fabricA)           _fabric
 selfDestructable = property (key selfDestructableA) _selfDestructable
 moving           = property (key movingA)           _moving
+layer            = property (key layerA)            _layer
+
 
 passRestrictions = [NoFly, NoWalk, NoUndermine]
 
@@ -136,7 +134,10 @@ selfDestructOnTarget = SelfDestructOnTarget
 straightMoving = StraightMoving
 move (StraightMoving s r) p = movePoint s p r
 
-
+underground = Underground
+ground = Ground
+sky = Sky
+layers = [ underground, ground, sky ]
 
 instance Default Properties where
     def = emptyProperties
@@ -144,9 +145,6 @@ instance Default Properties where
 instance Default Fabric where
     def = baseFabric
 
-instance Monoid Properties where
-    mempty = emptyProperties
-    mappend = propsertiesOver
 {-
 passRestriction = property $ PAccessor 5 _passRestriction
 noFly = passRestriction . ix flyIndex .~ NoFly

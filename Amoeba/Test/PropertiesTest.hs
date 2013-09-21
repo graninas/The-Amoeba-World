@@ -19,24 +19,7 @@ import GameLogic.World.Geometry
 import Test.Utils.Data
 import Test.Utils.Arbitraries
 
--- Testing of Monoid laws for Properties
 
-prop_monoidLaw1 ps = mappend mempty ps == ps
-    where
-        types = ps :: Properties
-
-prop_monoidLaw2 ps = mappend ps mempty == ps
-    where
-        types = ps :: Properties
-
-prop_monoidLaw3 ps1 ps2 ps3 = mappend ps1 (mappend ps2 ps3) == mappend (mappend ps1 ps2) ps3
-    where
-        types = [ps1, ps2, ps3] :: [Properties]
-
-prop_monoidLaw4 pss = mconcat pss == foldr mappend mempty pss
-    where
-        types = pss :: [Properties]
-        
 tests :: IO Bool
 tests = $quickCheckAll
 

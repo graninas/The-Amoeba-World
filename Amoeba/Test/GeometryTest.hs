@@ -24,6 +24,10 @@ prop_rectBound1 = rectBound point1 point2 == Rectangled point1 point2
 prop_rectBound2 = rectBound point3 point4 == Rectangled point5 point6
 prop_rectInRect = inRect rect1 rect2
 
+prop_validateDirections = all (==zeroPoint) mappedDirPairs
+    where
+        mappedDirPairs = map (\(a, b) -> addPoint (toVector a) (toVector b)) oppositeDirections
+
 prop_updateRectBound ps = rect1 `inRect` newRect
   where
     newRect = foldr updateRectBound rect1 ps

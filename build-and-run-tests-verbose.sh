@@ -19,8 +19,6 @@ cd ..
 for f in $FILES
 do
     ghc -threaded -outputdir ../.bin/TestBin -o ../.bin/Test/${f%%.hs}.bin ./Test/$f | grep -v Loading
-
-echo $?
 done
 
 chmod u+x ../.bin/Test/*.bin

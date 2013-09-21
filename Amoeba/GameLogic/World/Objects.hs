@@ -14,6 +14,7 @@ object = flip execState def
 plasma :: Player -> Point -> Properties
 plasma pl p = object $ do
     namedA |= "Plasma"
+    layerA |= ground
     dislocationA |= p
     durabilityA |= (30, Just 40)
     ownershipA |= pl
@@ -26,6 +27,7 @@ plasmaFabric pl p = object $ do
 karyon :: Player -> Point -> Properties
 karyon pl p = object $ do
     namedA |= "Karyon"
+    layerA |= ground
     dislocationA |= p
     batteryA |= (300, Just 2000)
     durabilityA |= (100, Just 100)
@@ -35,6 +37,7 @@ karyon pl p = object $ do
 soundWave :: Player -> Direction -> TargetPoint -> Point -> Properties
 soundWave pl dir tp p = object $ do
     namedA |= "SoundWave"
+    layerA |= sky
     dislocationA |= p
     ownershipA |= pl
     directedA |= dir
@@ -50,6 +53,7 @@ soundWaveFabric pl dir p = object $ do
 influencer :: Player -> Direction -> Point -> Properties
 influencer pl dir p = object $ do
     namedA |= "Influencer"
+    layerA |= ground
     dislocationA |= p
     durabilityA |= (30, Just 30)
     ownershipA |= pl
