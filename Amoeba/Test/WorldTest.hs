@@ -42,20 +42,30 @@ testGame   = testGame'
     w = g ^. world
     testGame' = over world refreshWorldBound g
 
-deleteObject p = world %= deleteCell p
+deleteObject p       = world %= deleteCell p
 insertObject p props = world %= insertCell p props
 
-moveObject :: Point -> State Game ()
-moveObject p = do
-    props <- use $ objects . ix p
-    let f = move p :: Moving -> Point
-    let mv = props ^. singular moving :: Moving
-    when (has moving props) $ do
-        let newPoint = f mv
-        let newProps = dislocation .~ newPoint $ props
-        deleteObject p
-        insertObject newPoint newProps
+getP obj p = obj ^. singular p
 
+deleteObject' obj = deleteObject (getP obj dislocation)
+insertObject' obj = insertObject (getP obj dislocation) obj
+
+moveObject' obj = let
+    d = getP obj dislocation
+    mv = getP obj moving
+    newPoint = move d mv
+    in dislocation .~ newPoint $ obj
+
+moveObject :: Object -> State Game ()
+moveObject obj = do
+        let newObj = moveObject' obj
+        deleteObject' obj
+        insertObject' newObj
+
+
+moveObjects = do
+    obj <- use $ objects . ix point3
+    when (has moving obj) (moveObject obj)
 
 
 insertOnly :: Game -> Game
@@ -71,7 +81,7 @@ insertAndDelete = execState insertAndDelete'
             deleteObject point5
 
 moveSingleObject :: Game -> Game
-moveSingleObject = execState (moveObject point3)
+moveSingleObject = execState moveObjects
 
 prop_testGame = testGame /= blankGame
 prop_world1 p pl seed = game /= initialGame seed

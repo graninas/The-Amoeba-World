@@ -11,8 +11,9 @@ import GameLogic.World.Properties
 import GameLogic.World.Objects
 import GameLogic.World.Player
 
-type World = GW.CelledWorld Properties
-type WorldMap = GW.GenericMap Properties
+type Object = Properties
+type World = GW.CelledWorld Object
+type WorldMap = GW.GenericMap Object
 
 data Game = Game { _world :: World
                  , _rndGen :: StdGen }
