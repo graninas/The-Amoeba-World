@@ -68,6 +68,7 @@ moveObjects = do
     when (has moving obj) (moveObject obj)
 
 
+
 insertOnly :: Game -> Game
 insertOnly = execState insert'
   where
