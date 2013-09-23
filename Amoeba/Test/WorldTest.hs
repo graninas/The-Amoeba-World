@@ -57,6 +57,7 @@ moveObject' obj = let
     in dislocation .~ newPoint $ obj
 
 moveObject :: Object -> State Game (Either Game Game)
+moveObject obj | hasn't moving obj = liftM Left get
 moveObject obj = do
         let newObj = moveObject' obj
         deleteObject' obj
@@ -68,17 +69,21 @@ selectScenario accessor | accessor == movingA = Just moveObject
                         | otherwise           = Nothing
 
 evalScenario Nothing _ g = Left g
-evalScenario (Just scenario) cell g = evalState (scenario cell) g
+evalScenario (Just scenario) obj g = evalState (scenario obj) g
 
-tryRun accessor cell g = let scenario = selectScenario accessor
-                         in evalScenario scenario cell g
+tryRun accessor obj g = let scenario = selectScenario accessor
+                        in evalScenario scenario obj g
 
-applyRunResult = undefined
+applyRunResult :: Either Game Game -> Game
+applyRunResult (Right g) = g
+applyRunResult (Left g)  = g
 
-runScenarios k c g = let runResult = tryRun movingA c g
-                     in applyRunResult runResult g
+runScenarios :: Point -> Object -> Game -> Game
+runScenarios k obj g = let runResult = tryRun movingA obj g
+                       in applyRunResult runResult
 
-moveObjects g = M.foldrWithKey runScenarios g (g ^. world.worldMap)
+evalScenarios :: Game -> Game
+evalScenarios g = M.foldrWithKey runScenarios g (g ^. world.worldMap)
 
 insertOnly :: Game -> Game
 insertOnly = execState insert'
@@ -92,9 +97,9 @@ insertAndDelete = execState insertAndDelete'
             insertObject point5 (plasma player1 point5)
             deleteObject point5
 
-moveSingleObject :: Game -> Game
-moveSingleObject g = flip execState g $ do
-    obj <- use $ objects . ix point3
+moveSingleObject :: Point -> Game -> Game
+moveSingleObject p g = flip execState g $ do
+    obj <- use $ objects . ix p
     when (has moving obj) $ do
         res <- moveObject obj
         return ()
@@ -109,8 +114,10 @@ prop_insertOnly1       = insertOnly blankGame /= blankGame
 prop_insertOnly2       = insertOnly testGame  /= testGame
 prop_insertAndDelete1  = insertAndDelete blankGame == blankGame
 prop_insertAndDelete2  = insertAndDelete testGame == testGame
-prop_moveSingleObject1 = moveSingleObject blankGame == blankGame
-prop_moveSingleObject2 = moveSingleObject testGame `notElem` [testGame, blankGame]
+prop_moveSingleObject1 = moveSingleObject point3 blankGame == blankGame
+prop_moveSingleObject2 = moveSingleObject point3 testGame `notElem` [testGame, blankGame]
+
+prop_evalScenarios = evalScenarios testGame == foldr moveSingleObject testGame [point3, point4]
 
 tests :: IO Bool
 tests = $quickCheckAll
@@ -119,9 +126,7 @@ runTests = tests >>= \passed -> putStrLn $
   if passed then "All tests passed."
             else "Some tests failed."
 
-main :: IO ()
-main = do
-    runTests
+printTestData = do
     print "Blank game:"
     print blankGame
     putStrLn ""
@@ -135,8 +140,14 @@ main = do
     print $ insertAndDelete testGame
     putStrLn ""
     print "MoveSingleObject blankGame:"
-    print $ moveSingleObject blankGame
+    print $ moveSingleObject point3 blankGame
     putStrLn ""
     print "MoveSingleObject testGame:"
-    print $ moveSingleObject testGame
-    putStrLn ""
+    print $ moveSingleObject point3 testGame
+
+main :: IO ()
+main = do
+    runTests
+    printTestData
+    putStrLn "\nMoving all movable objects:"
+    print $ evalScenarios testGame

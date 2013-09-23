@@ -90,6 +90,3 @@ runTests = tests >>= \passed -> putStrLn $
 main :: IO ()
 main = do
     runTests
-
-    putStrLn $ "c1: " ++ show (c1 testMap4)
-    putStrLn $ "c2: " ++ show c2
