@@ -145,6 +145,9 @@ instance Default Properties where
 instance Default Fabric where
     def = baseFabric
 
+instance Eq (PAccessor a) where
+    acc1 == acc2 = key acc1 == key acc2
+
 {-
 passRestriction = property $ PAccessor 5 _passRestriction
 noFly = passRestriction . ix flyIndex .~ NoFly

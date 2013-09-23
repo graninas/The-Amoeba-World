@@ -79,13 +79,6 @@ b9  = testMap2 ^.. folded.traverse      -- ["ABC","CDE","acvx","","87s","}}{}{}{
 b10 = testMap2 ^.. traversed.traverse   -- ["ABC","CDE","acvx","","87s","}}{}{}{","||||||","IOU*^^"]
 
 
-g1 m = Map.insert 11 (Val "11" 11)
---g2 s m = s ++ show m
--- (%%~) :: Overloading p q f s t a b -> p a (f b) -> q s (f t)
-
-c1 = (%%~) id g1 testMap3
---c2 = (%%~) name g2 id testMap3
-
 
 tests :: IO Bool
 tests = $quickCheckAll

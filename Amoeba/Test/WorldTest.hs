@@ -56,18 +56,29 @@ moveObject' obj = let
     newPoint = move d mv
     in dislocation .~ newPoint $ obj
 
-moveObject :: Object -> State Game ()
+moveObject :: Object -> State Game (Either Game Game)
 moveObject obj = do
         let newObj = moveObject' obj
         deleteObject' obj
         insertObject' newObj
+        g <- get
+        return $ Right g
 
+selectScenario accessor | accessor == movingA = Just moveObject
+                        | otherwise           = Nothing
 
-moveObjects = do
-    obj <- use $ objects . ix point3
-    when (has moving obj) (moveObject obj)
+evalScenario Nothing _ g = Left g
+evalScenario (Just scenario) cell g = evalState (scenario cell) g
 
+tryRun accessor cell g = let scenario = selectScenario accessor
+                         in evalScenario scenario cell g
 
+applyRunResult = undefined
+
+runScenarios k c g = let runResult = tryRun movingA c g
+                     in applyRunResult runResult g
+
+moveObjects g = M.foldrWithKey runScenarios g (g ^. world.worldMap)
 
 insertOnly :: Game -> Game
 insertOnly = execState insert'
@@ -82,7 +93,11 @@ insertAndDelete = execState insertAndDelete'
             deleteObject point5
 
 moveSingleObject :: Game -> Game
-moveSingleObject = execState moveObjects
+moveSingleObject g = flip execState g $ do
+    obj <- use $ objects . ix point3
+    when (has moving obj) $ do
+        res <- moveObject obj
+        return ()
 
 prop_testGame = testGame /= blankGame
 prop_world1 p pl seed = game /= initialGame seed
