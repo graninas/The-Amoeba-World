@@ -21,6 +21,7 @@ import GameLogic.World.Player
 import GameLogic.World.Geometry
 import GameLogic.World.Objects
 import GameLogic.World.Properties
+import GameLogic.World.Scenario
 
 instance Monoid r => Monoid (Accessor r a) where
   mempty = Accessor mempty
@@ -56,10 +57,25 @@ moveObject' obj = let
     newPoint = move d mv
     in dislocation .~ newPoint $ obj
 
+moveObject'' :: Properties -> Point -> Properties
+moveObject'' obj p = dislocation .~ p $ obj
+
+track :: Points -> (Points -> Points) -> (Properties -> Point -> Properties) -> Properties -> Properties
+track ps strategy act obj = foldl act obj (strategy ps) 
+
+withLast [] = []
+withLast ps = [last ps]
+
+trackMovingPath obj = let
+    startPoint = getP obj dislocation
+    mv = getP obj moving
+    points = path startPoint mv
+    in track points withLast moveObject'' obj
+
 moveObject :: Object -> State Game (Either Game Game)
 moveObject obj | hasn't moving obj = liftM Left get
 moveObject obj = do
-        let newObj = moveObject' obj
+        let newObj = trackMovingPath obj
         deleteObject' obj
         insertObject' newObj
         g <- get
@@ -118,6 +134,7 @@ prop_moveSingleObject1 = moveSingleObject point3 blankGame == blankGame
 prop_moveSingleObject2 = moveSingleObject point3 testGame `notElem` [testGame, blankGame]
 
 prop_evalScenarios = evalScenarios testGame == foldr moveSingleObject testGame [point3, point4]
+
 
 tests :: IO Bool
 tests = $quickCheckAll

@@ -31,7 +31,7 @@ data SelfDestructable = SelfDestructOnTarget TargetPoint
   deriving (Show, Read, Eq)
 
 data Moving = StraightMoving { _speed :: Speed
-                             , _route :: Direction }
+                             , _dir :: Direction }
   deriving (Show, Read, Eq)
 
 data Layer = Underground | Ground | Sky
@@ -132,7 +132,6 @@ baseFabric = Fabric 0 def
 selfDestructOnTarget = SelfDestructOnTarget
 
 straightMoving = StraightMoving
-move p (StraightMoving s r) = moveStraight s p r
 
 underground = Underground
 ground = Ground
