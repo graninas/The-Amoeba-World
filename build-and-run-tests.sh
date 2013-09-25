@@ -1,7 +1,10 @@
 #!/bin/bash
 
-rm -rf "./.bin/TestBin/"*
-rm -rf "./.bin/Test/"*
+rm -rf "./.bin/TestBin"*
+rm -rf "./.bin/Test"*
+
+mkdir "./.bin/TestBin"
+mkdir "./.bin/Test"
 
 cd ./Amoeba/Test/
 

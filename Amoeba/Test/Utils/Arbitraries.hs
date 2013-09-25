@@ -8,22 +8,22 @@ import qualified Linear as L
 import qualified Data.List as List
 import qualified Data.Sequence as Seq
 
-import GameLogic.World.Geometry
-import GameLogic.World.Player
-import GameLogic.World.Properties as P
+import GameLogic.Geometry
+import GameLogic.Player
+import GameLogic.Properties as P
 
 instance Arbitrary (L.V3 Int) where
     arbitrary = liftM3 point arbitrary arbitrary arbitrary
-    
+
 instance Arbitrary Bound where
     arbitrary = oneof [ liftM  pointBound arbitrary
                       , liftM2 rectBound arbitrary arbitrary
                       , liftM2 circleBound arbitrary arbitrary
                       , return noBound ]
-                      
+
 instance Arbitrary Direction where
     arbitrary = oneof $ map return directions
-                                     
+
 instance Arbitrary Player where
     arbitrary = liftM Player arbitrary
 
@@ -40,7 +40,7 @@ instance Arbitrary Fabric where
 
 instance Arbitrary Moving where
     arbitrary = liftM2 StraightMoving arbitrary arbitrary
-    
+
 instance Arbitrary SelfDestructable where
     arbitrary = liftM SelfDestructOnTarget arbitrary
 

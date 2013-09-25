@@ -16,27 +16,27 @@ import Test.QuickCheck.All
 import Test.Utils.Data
 import Test.Utils.Arbitraries
 
-import GameLogic.World.World
-import GameLogic.World.Player
-import GameLogic.World.Geometry
-import GameLogic.World.Objects
-import GameLogic.World.Properties
-import GameLogic.World.Scenario
+import GameLogic.World
+import GameLogic.Player
+import GameLogic.Geometry
+import GameLogic.Objects
+import GameLogic.Properties
+import GameLogic.Scenario
+import GameLogic.Game
 
 instance Monoid r => Monoid (Accessor r a) where
   mempty = Accessor mempty
   mappend (Accessor a) (Accessor b) = Accessor $ a <> b
 
-instance Monoid Properties where
-    mempty  = emptyProperties
-    mappend = mergeProperties
-
 blankGame = initialGame 1
 
-plasma1    = objects . at point1 ?~ plasma player1 point1
-plasma2    = objects . at point2 ?~ plasma player1 point2
-soundWave1 = objects . at point3 ?~ soundWave player1 left 10 point3
-laserBeam1 = objects . at point4 ?~ laserBeam player2 up 200 point4
+putObject p objConstr = objects . at p ?~ objConstr p
+
+plasma1    = putObject point1 $ plasma player1
+plasma2    = putObject point2 $ plasma player1
+soundWave1 = putObject point3 $ soundWave player1 left 10
+laserBeam1 = putObject point4 $ laserBeam player2 up 200
+karyon1    = putObject point5 $ karyon player2
 testGame   = testGame'
   where
     g = blankGame & plasma1 & plasma2 & soundWave1 & laserBeam1
@@ -81,25 +81,28 @@ moveObject obj = do
         g <- get
         return $ Right g
 
+produce :: Object -> State Game (Either Game Game)
+produce obj = liftM Left get
+
 selectScenario accessor | accessor == movingA = Just moveObject
                         | otherwise           = Nothing
 
 evalScenario Nothing _ g = Left g
 evalScenario (Just scenario) obj g = evalState (scenario obj) g
 
-tryRun accessor obj g = let scenario = selectScenario accessor
-                        in evalScenario scenario obj g
+activate prop obj g = let scenario = selectScenario prop
+                      in evalScenario scenario obj g
 
 applyRunResult :: Either Game Game -> Game
 applyRunResult (Right g) = g
 applyRunResult (Left g)  = g
 
 runScenarios :: Point -> Object -> Game -> Game
-runScenarios k obj g = let runResult = tryRun movingA obj g
-                       in applyRunResult runResult
+runScenarios k obj g = let runResult1 = activate movingA obj g
+                       in applyRunResult runResult1
 
-evalScenarios :: Game -> Game
-evalScenarios g = M.foldrWithKey runScenarios g (g ^. world.worldMap)
+step :: Game -> Game
+step g = M.foldrWithKey runScenarios g (g ^. world.worldMap)
 
 insertOnly :: Game -> Game
 insertOnly = execState insert'
@@ -133,7 +136,7 @@ prop_insertAndDelete2  = insertAndDelete testGame == testGame
 prop_moveSingleObject1 = moveSingleObject point3 blankGame == blankGame
 prop_moveSingleObject2 = moveSingleObject point3 testGame `notElem` [testGame, blankGame]
 
-prop_evalScenarios = evalScenarios testGame == foldr moveSingleObject testGame [point3, point4]
+prop_evalScenarios = step testGame == foldr moveSingleObject testGame [point3, point4]
 
 
 tests :: IO Bool
@@ -167,4 +170,4 @@ main = do
     runTests
     printTestData
     putStrLn "\nMoving all movable objects:"
-    print $ evalScenarios testGame
+    print $ step testGame

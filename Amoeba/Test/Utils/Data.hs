@@ -1,6 +1,6 @@
 module Test.Utils.Data where
 
-import GameLogic.World.Geometry
+import GameLogic.Geometry
 
 point1 = point 0 (-10) 0
 point2 = point 3 (-3) 0

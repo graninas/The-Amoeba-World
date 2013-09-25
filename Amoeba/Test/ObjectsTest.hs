@@ -2,19 +2,8 @@
 
 module Main where
 
-import Data.Monoid
-import Data.Default
-import Control.Lens
-import qualified Data.Map as Map
-import qualified Data.Sequence as Seq
-import Control.Monad.State
 import Test.QuickCheck
 import Test.QuickCheck.All
-
-import GameLogic.World.Player
-import GameLogic.World.Properties
-import GameLogic.World.Objects
-import GameLogic.World.Geometry
 
 import Test.Utils.Data
 import Test.Utils.Arbitraries

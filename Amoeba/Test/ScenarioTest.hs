@@ -8,20 +8,9 @@ import Control.Lens
 import qualified Data.Map as Map
 import qualified Data.Sequence as Seq
 import Control.Monad.State
+
 import Test.QuickCheck
 import Test.QuickCheck.All
-
-{-
-import GameLogic.World.Player
-import GameLogic.World.Properties
-import GameLogic.World.Objects
-import GameLogic.World.Scenario
-import GameLogic.World.World
-import GameLogic.World.Geometry
-
-import Test.Utils.Data
-import Test.Utils.Arbitraries
--}
 
 type MyKey = Int
 type MyVal = String
@@ -42,7 +31,7 @@ makeLenses ''MyVal2
 
 f1 :: MyMap -> MyMap
 f1 = Map.insert 5 "5"
-f2 m = Map.lookup 3 m
+f2 = Map.lookup 3
 f3 m = take 1 . drop 3 $ Map.keys m
 
 t1 = testMap ^. folding f1         -- "ABCacvx87s5IOU*^^"
@@ -88,5 +77,4 @@ runTests = tests >>= \passed -> putStrLn $
             else "Some tests failed."
 
 main :: IO ()
-main = do
-    runTests
+main = runTests
