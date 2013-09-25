@@ -10,7 +10,7 @@ import qualified Data.Sequence as Seq
 
 import GameLogic.Geometry
 import GameLogic.Player
-import GameLogic.Properties as P
+import GameLogic.Object as O
 
 instance Arbitrary (L.V3 Int) where
     arbitrary = liftM3 point arbitrary arbitrary arbitrary
@@ -49,7 +49,7 @@ instance Arbitrary Layer where
 
 -- TODO: add another properties
 propertiesCount = 12
-instance Arbitrary P.Property where
+instance Arbitrary O.Property where
     arbitrary = oneof [ liftM PNamed (arbitrary `suchThat` (not.null))
                       , liftM PDurability (arbitrary `suchThat` isBoundedValid)
                       , liftM PBattery  (arbitrary `suchThat` isBoundedValid)
@@ -64,14 +64,14 @@ instance Arbitrary P.Property where
                       , liftM PLayer arbitrary
                       ]
 
-instance Arbitrary P.PropertyMap where
+instance Arbitrary O.PropertyMap where
     arbitrary = sized pm
       where
-            pm 0 = return emptyPropertiesMap
+            pm 0 = return emptyPropertyMap
             pm n | n > 0 = let propArbitraries = replicate n arbitrary
-                               em = return emptyPropertiesMap
+                               em = return emptyPropertyMap
                                k = choose (0, propertiesCount)
                            in foldr (liftM3 insertProperty k) em propArbitraries
 
-instance Arbitrary P.Properties where
-    arbitrary = liftM Properties arbitrary
+instance Arbitrary O.Object where
+    arbitrary = liftM O.Object arbitrary

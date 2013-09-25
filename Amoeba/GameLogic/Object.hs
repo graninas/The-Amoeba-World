@@ -2,12 +2,13 @@
 {-# LANGUAGE NoMonomorphismRestriction #-}
 {-# LANGUAGE ExistentialQuantification #-}
 
-module GameLogic.Properties where
+module GameLogic.Object where
 
 import Data.Default
 import Data.Monoid
 import Control.Lens
 import Control.Monad.State
+import Prelude
 import qualified Data.Map as Map
 import qualified Data.Sequence as Seq
 
@@ -21,7 +22,7 @@ data PassRestriction = NoFly | NoWalk | NoUndermine
   deriving (Show, Read, Eq)
   
 data Fabric = Fabric { _energyCost :: Energy
-                     , _production :: Properties }
+                     , _production :: Object }
   deriving (Show, Read, Eq)
 
 data SelfDestructable = SelfDestructOnTarget TargetPoint
@@ -50,17 +51,18 @@ data Property = PNamed { __named :: String }
 
 type PropertyKey = Int
 type PropertyMap = Map.Map PropertyKey Property
-data Properties = Properties { _propertyMap :: PropertyMap }
+data Object = Object { _propertyMap :: PropertyMap }
   deriving (Show, Read, Eq)
+type Objects = [Object]
 
 data PAccessor a = PAccessor { key :: PropertyKey
                              , constr :: a -> Property
                              }
 
 insertProperty = Map.insert
-emptyPropertiesMap = Map.empty
-emptyProperties = Properties Map.empty
-mergeProperties (Properties pm1) (Properties pm2) = Properties $ Map.union pm1 pm2
+emptyPropertyMap = Map.empty
+empty = Object emptyPropertyMap
+merge (Object pm1) (Object pm2) = Object $ Map.union pm1 pm2
 
 -- | Access to base layer. Use it to setup base properties in layer 0.
 baseLayer = 0
@@ -70,11 +72,11 @@ baseLayer = 0
     let newPropMap = insertProperty (key accessor) (constr accessor v) oldPropMap
     put $ props { _propertyMap = newPropMap }
 
-setProperty :: PAccessor a -> a -> State Properties ()
+setProperty :: PAccessor a -> a -> State Object ()
 setProperty = (|=)
 
 -- Lenses
-makeLenses ''Properties
+makeLenses ''Object
 makeLenses ''Property
 makeLenses ''Fabric
 makeLenses ''SelfDestructable
@@ -136,12 +138,12 @@ sky = Sky
 layers = [ underground, ground, sky ]
 
 -- This should be used carefully.
-instance Monoid Properties where
-    mempty  = emptyProperties
-    mappend = mergeProperties
+instance Monoid Object where
+    mempty  = empty
+    mappend = merge
 
-instance Default Properties where
-    def = emptyProperties
+instance Default Object where
+    def = empty
 
 instance Default Fabric where
     def = baseFabric

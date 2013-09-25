@@ -45,16 +45,16 @@ library
                    GameView.Color,
                    Test.SceneGraph,
                    Test.WorldTest,
-                   Test.PropertiesTest,
                    Test.GeometryTest,
                    Test.Utils.Arbitraries,
                    Test.Utils.Data,
-                   Test.Utils.Dummy,
                    GameView.Scene,
                    Test.ObjectsTest,
                    Test.ScenarioTest,
                    GameLogic.Game,
-                   GameLogic.Scenario
+                   GameLogic.Scenario,
+                   GameLogic.AI,
+                   Test.ObjectTest
 
 executable Amoeba
   build-depends:   base >= 4
@@ -75,16 +75,16 @@ executable Amoeba
                    GameView.Color,
                    Test.SceneGraph,
                    Test.WorldTest,
-                   Test.PropertiesTest,
                    Test.GeometryTest,
                    Test.Utils.Arbitraries,
                    Test.Utils.Data,
-                   Test.Utils.Dummy,
                    GameView.Scene,
                    Test.ObjectsTest,
                    Test.ScenarioTest,
                    GameLogic.Game,
-                   GameLogic.Scenario
+                   GameLogic.Scenario,
+                   GameLogic.AI,
+                   Test.ObjectTest
 
 c.World.Descripted
 

@@ -5,15 +5,15 @@ import Data.Default
 import Control.Lens
 
 import GameLogic.Geometry
-import GameLogic.Properties
+import GameLogic.Object
 import GameLogic.Player
 import GameLogic.Types
 
-object :: Default a => State a () -> a
-object = flip execState def
+makeObject :: Default a => State a () -> a
+makeObject = flip execState def
 
-plasma :: Player -> Point -> Properties
-plasma pl p = object $ do
+plasma :: Player -> Point -> Object
+plasma pl p = makeObject $ do
     namedA |= "Plasma"
     layerA |= ground
     dislocationA |= p
@@ -21,12 +21,12 @@ plasma pl p = object $ do
     ownershipA |= pl
 
 plasmaFabric :: Player -> Point -> Fabric
-plasmaFabric pl p = object $ do
+plasmaFabric pl p = makeObject $ do
     energyCost .= 1
     production .= plasma pl p
 
-karyon :: Player -> Point -> Properties
-karyon pl p = object $ do
+karyon :: Player -> Point -> Object
+karyon pl p = makeObject $ do
     namedA |= "Karyon"
     layerA |= ground
     dislocationA |= p
@@ -35,8 +35,8 @@ karyon pl p = object $ do
     ownershipA |= pl
     fabricA |= plasmaFabric pl p
 
-bullet :: String -> Speed -> Player -> Direction -> Power -> Point -> Properties
-bullet name speed pl dir power p = object $ do
+bullet :: String -> Speed -> Player -> Direction -> Power -> Point -> Object
+bullet name speed pl dir power p = makeObject $ do
     let targetP = moveStraight power p dir
     namedA |= name
     layerA |= sky
@@ -50,12 +50,12 @@ soundWave = bullet "SoundWave" 1
 laserBeam = bullet "LaserBeam" 10
 
 soundWaveFabric :: Player -> Direction -> Point -> Fabric
-soundWaveFabric pl dir p = object $ do
+soundWaveFabric pl dir p = makeObject $ do
     energyCost .= 1
     production .= soundWave pl dir 10 p
 
-influencer :: Player -> Direction -> Point -> Properties
-influencer pl dir p = object $ do
+influencer :: Player -> Direction -> Point -> Object
+influencer pl dir p = makeObject $ do
     namedA |= "Influencer"
     layerA |= ground
     dislocationA |= p

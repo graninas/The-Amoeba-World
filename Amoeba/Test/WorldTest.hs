@@ -20,9 +20,10 @@ import GameLogic.World
 import GameLogic.Player
 import GameLogic.Geometry
 import GameLogic.Objects
-import GameLogic.Properties
+import GameLogic.Object
 import GameLogic.Scenario
 import GameLogic.Game
+import GameLogic.AI
 
 instance Monoid r => Monoid (Accessor r a) where
   mempty = Accessor mempty
@@ -57,10 +58,10 @@ moveObject' obj = let
     newPoint = move d mv
     in dislocation .~ newPoint $ obj
 
-moveObject'' :: Properties -> Point -> Properties
+moveObject'' :: Object -> Point -> Object
 moveObject'' obj p = dislocation .~ p $ obj
 
-track :: Points -> (Points -> Points) -> (Properties -> Point -> Properties) -> Properties -> Properties
+track :: Points -> (Points -> Points) -> (Object -> Point -> Object) -> Object -> Object
 track ps strategy act obj = foldl act obj (strategy ps) 
 
 withLast [] = []
@@ -101,8 +102,19 @@ runScenarios :: Point -> Object -> Game -> Game
 runScenarios k obj g = let runResult1 = activate movingA obj g
                        in applyRunResult runResult1
 
+data Logic = Logic
+
+logic = undefined
+
+apply lr g = lr
+eval l rnd objs = undefined
+
+evaluate :: Logic -> Game -> Game
+evaluate l g = let logicResult = eval l (g ^. rndGen) (g ^. objects)
+               in apply logicResult g
+
 step :: Game -> Game
-step g = M.foldrWithKey runScenarios g (g ^. world.worldMap)
+step g = M.foldrWithKey runScenarios g (g ^. world.worldMap) --evaluate (g ^. logic) g
 
 insertOnly :: Game -> Game
 insertOnly = execState insert'
