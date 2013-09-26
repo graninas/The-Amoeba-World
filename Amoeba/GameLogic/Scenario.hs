@@ -4,6 +4,7 @@ module GameLogic.Scenario where
 
 import Control.Lens
 import Control.Monad.State
+import Prelude hiding (read)
 
 import GameLogic.Evaluation
 import GameLogic.Geometry
@@ -35,13 +36,18 @@ example = do
     trans obj1 energyPosted saveEnergy remove
     trans obj2 selfDestruct remove save
 
-produce = undefined
-mv = undefined
+find = undefined
 
+produce :: Eval ()
+produce = do
+    f <- read fabric
+    pl <- read ownership
+    k <- find
+    return ()
+    
 run :: Eval ScenarioResult
 run = do
     with fabric produce
-    with moving mv
 
     example
 

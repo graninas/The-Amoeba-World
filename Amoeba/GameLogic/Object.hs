@@ -20,7 +20,7 @@ type Target = Point
 
 data PassRestriction = NoFly | NoWalk | NoUndermine
   deriving (Show, Read, Eq)
-  
+
 data Fabric = Fabric { _energyCost :: Energy
                      , _production :: Object }
   deriving (Show, Read, Eq)

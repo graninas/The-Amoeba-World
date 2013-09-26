@@ -48,6 +48,7 @@ testGame   = testGame'
 deleteObject p       = world %= deleteCell p
 insertObject p props = world %= insertCell p props
 
+-- this function can be optimized by saving property information anywhere.
 getP obj p = obj ^. singular p
 
 deleteObject' obj = deleteObject (getP obj dislocation)
