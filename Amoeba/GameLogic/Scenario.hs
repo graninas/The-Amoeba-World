@@ -38,7 +38,7 @@ example = do
 
 find = undefined
 
-produce :: Eval ()
+produce :: ObjectedEval ()
 produce = do
     f <- read fabric
     pl <- read ownership
@@ -48,7 +48,7 @@ produce = do
 run :: Eval ScenarioResult
 run = do
     with fabric produce
-
+    f <- read fabric
     example
 
 

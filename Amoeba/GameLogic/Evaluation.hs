@@ -10,7 +10,9 @@ import Prelude hiding (read)
 import GameLogic.Geometry
 import GameLogic.Object
 
-type Eval a = State EvaluationContext a
+type EvalType a b = State a b
+type Eval a = EvalType EvaluationContext a
+type ObjectedEval a = Eval a
 
 data EvaluationContext = EvaluationContext { _ctxNextRndNum :: Eval Int
                                            , _ctxObjectAt :: Point -> Eval Object
