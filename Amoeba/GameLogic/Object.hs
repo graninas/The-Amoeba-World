@@ -35,6 +35,9 @@ data Moving = StraightMoving { _speed :: Speed
 data Layer = Underground | Ground | Sky
   deriving (Show, Read, Eq)
 
+data Collision = Collision { _collidings :: Objects }
+  deriving (Show, Read, Eq)
+
 data Property = PNamed { __named :: String }
               | PDurability { __durability :: (Durability, Maybe MaxDurability) }
               | PBattery { __battery :: (Energy, Maybe EnergyCapacity) }
@@ -47,6 +50,7 @@ data Property = PNamed { __named :: String }
               | PSelfDestructable { __selfDestructable :: SelfDestructable }
               | PMoving { __moving :: Moving }
               | PLayer { __layer :: Layer }
+              | PCollision { __collision :: Collision }
   deriving (Show, Read, Eq)
 
 type PropertyKey = Int
@@ -82,6 +86,7 @@ makeLenses ''Fabric
 makeLenses ''SelfDestructable
 makeLenses ''Moving
 makeLenses ''Layer
+makeLenses ''Collision
 
 property k l = propertyMap . at k . traverse . l
 
@@ -108,6 +113,7 @@ fabricA           = PAccessor 8    $ PFabric           .id
 selfDestructableA = PAccessor 9    $ PSelfDestructable .id
 movingA           = PAccessor 10   $ PMoving           .id
 layerA            = PAccessor 11   $ PLayer            .id
+collisionA        = PAccessor 12   $ PCollision        .id
 
 named            = property (key namedA)            _named
 durability       = property (key durabilityA)       _durability
@@ -121,6 +127,7 @@ fabric           = property (key fabricA)           _fabric
 selfDestructable = property (key selfDestructableA) _selfDestructable
 moving           = property (key movingA)           _moving
 layer            = property (key layerA)            _layer
+collision        = property (key collisionA)        _collision
 
 
 passRestrictions = [NoFly, NoWalk, NoUndermine]

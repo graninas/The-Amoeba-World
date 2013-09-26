@@ -6,6 +6,7 @@ import qualified Data.Set as S
 import qualified Data.Map as M
 import Data.Foldable (foldMap)
 import Data.Monoid
+import System.Random
 import Control.Lens
 import Control.Monad.State
 import Control.Applicative ((<$>), (<*>))
@@ -102,6 +103,16 @@ runScenarios :: Point -> Object -> Game -> Game
 runScenarios k obj g = let runResult1 = activate movingA obj g
                        in applyRunResult runResult1
 
+step :: Game -> Game
+step g = M.foldrWithKey runScenarios g (g ^. world.worldMap)
+
+
+newRndNum :: State StdGen Int
+newRndNum = do
+    (newNum, newG) <- liftM random get
+    put newG
+    return newNum
+
 data Logic = Logic
 
 logic = undefined
@@ -113,8 +124,10 @@ evaluate :: Logic -> Game -> Game
 evaluate l g = let logicResult = eval l (g ^. rndGen) (g ^. objects)
                in apply logicResult g
 
-step :: Game -> Game
-step g = M.foldrWithKey runScenarios g (g ^. world.worldMap) --evaluate (g ^. logic) g
+step' :: Game -> Game
+step' g = evaluate (g ^. logic) g
+
+
 
 insertOnly :: Game -> Game
 insertOnly = execState insert'

@@ -54,7 +54,8 @@ library
                    GameLogic.Game,
                    GameLogic.Scenario,
                    GameLogic.AI,
-                   Test.ObjectTest
+                   Test.ObjectTest,
+                   Test.StateInjectionTest
 
 executable Amoeba
   build-depends:   base >= 4
@@ -84,7 +85,8 @@ executable Amoeba
                    GameLogic.Game,
                    GameLogic.Scenario,
                    GameLogic.AI,
-                   Test.ObjectTest
+                   Test.ObjectTest,
+                   Test.StateInjectionTest
 
 c.World.Descripted
 
