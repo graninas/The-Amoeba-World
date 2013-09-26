@@ -62,12 +62,6 @@ moveObject' obj = let
 moveObject'' :: Object -> Point -> Object
 moveObject'' obj p = dislocation .~ p $ obj
 
-track :: Points -> (Points -> Points) -> (Object -> Point -> Object) -> Object -> Object
-track ps strategy act obj = foldl act obj (strategy ps) 
-
-withLast [] = []
-withLast ps = [last ps]
-
 trackMovingPath obj = let
     startPoint = getP obj dislocation
     mv = getP obj moving
@@ -76,15 +70,13 @@ trackMovingPath obj = let
 
 moveObject :: Object -> State Game (Either Game Game)
 moveObject obj | hasn't moving obj = liftM Left get
+moveObject obj | hasn't named obj = liftM Left get
 moveObject obj = do
         let newObj = trackMovingPath obj
         deleteObject' obj
         insertObject' newObj
         g <- get
         return $ Right g
-
-produce :: Object -> State Game (Either Game Game)
-produce obj = liftM Left get
 
 selectScenario accessor | accessor == movingA = Just moveObject
                         | otherwise           = Nothing

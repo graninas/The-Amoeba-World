@@ -26,6 +26,7 @@ type Bounds = [Bound]
 type Radius = Double
 type Point = L.V3 Int
 type Points = [Point]
+type Path = Points
 data Direction = DirLeft | DirRight | DirUp | DirDown
                | DirLeftUp | DirRightDown | DirLeftDown | DirRightUp
     deriving (Show, Read, Eq)

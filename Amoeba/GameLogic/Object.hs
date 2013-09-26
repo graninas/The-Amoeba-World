@@ -129,7 +129,6 @@ moving           = property (key movingA)           _moving
 layer            = property (key layerA)            _layer
 collision        = property (key collisionA)        _collision
 
-
 passRestrictions = [NoFly, NoWalk, NoUndermine]
 
 baseFabric :: Fabric
