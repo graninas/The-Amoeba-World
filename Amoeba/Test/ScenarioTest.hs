@@ -4,6 +4,7 @@ module Main where
 
 import Data.Monoid
 import Data.Default
+import Data.Maybe
 import Control.Lens
 import qualified Data.Map as Map
 import qualified Data.Sequence as Seq
@@ -68,6 +69,24 @@ b9  = testMap2 ^.. folded.traverse      -- ["ABC","CDE","acvx","","87s","}}{}{}{
 b10 = testMap2 ^.. traversed.traverse   -- ["ABC","CDE","acvx","","87s","}}{}{}{","||||||","IOU*^^"]
 
 
+d = ["abcdef", "cde", "uvx"]
+
+prop1 :: Fold [String] Char
+prop1 = traverse . ix 4
+prop2 = traverse . ix 100
+
+prop1' :: Traversal' [String] Char
+prop1' = traverse . ix 4
+
+checkAndGet1 = prop1 . to ('a' ==)
+checkAndGet2 = prop2 . to ('a' ==)
+
+q1 = has prop1 d
+q2 = d ^? prop1
+q3 = d ^? checkAndGet1
+q4 = d ^? checkAndGet2
+q5 = (checkAndGet1, checkAndGet2) ^.. both
+
 
 tests :: IO Bool
 tests = $quickCheckAll
@@ -77,4 +96,10 @@ runTests = tests >>= \passed -> putStrLn $
             else "Some tests failed."
 
 main :: IO ()
-main = runTests
+main = do
+    runTests
+    
+    print q1
+    print q2
+    print q3
+    print q4

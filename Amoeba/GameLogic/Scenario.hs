@@ -1,4 +1,5 @@
 {-# LANGUAGE NoMonomorphismRestriction #-}
+{-# LANGUAGE Rank2Types #-}
 
 module GameLogic.Scenario where
 
@@ -36,15 +37,20 @@ example = do
     trans obj1 energyPosted saveEnergy remove
     trans obj2 selfDestruct remove save
 
-find = undefined
+is prop val = filtered (\obj -> has prop obj) :: Traversal' Object Object
+
+suchThat prop pred = undefined
+query :: Traversal' Object Object -> ObjectedEval (Maybe Object)
+query = undefined
 
 produce :: ObjectedEval ()
 produce = do
     f <- read fabric
     pl <- read ownership
-    k <- find
+    k <- query (ownership `is` pl)
+        --battery `suchThat` charged
     return ()
-    
+
 run :: Eval ScenarioResult
 run = do
     with fabric produce

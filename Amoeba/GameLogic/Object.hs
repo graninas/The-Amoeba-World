@@ -60,16 +60,13 @@ data Object = Object { _propertyMap :: PropertyMap }
 type Objects = [Object]
 
 data PAccessor a = PAccessor { key :: PropertyKey
-                             , constr :: a -> Property
-                             }
+                             , constr :: a -> Property }
 
 insertProperty = Map.insert
 emptyPropertyMap = Map.empty
 empty = Object emptyPropertyMap
 merge (Object pm1) (Object pm2) = Object $ Map.union pm1 pm2
 
--- | Access to base layer. Use it to setup base properties in layer 0.
-baseLayer = 0
 (|=) accessor v = do
     props <- get
     let oldPropMap = _propertyMap props
@@ -89,6 +86,9 @@ makeLenses ''Layer
 makeLenses ''Collision
 
 property k l = propertyMap . at k . traverse . l
+
+current = _1
+charged b = b ^. current > 0
 
 -- Properties itself
 

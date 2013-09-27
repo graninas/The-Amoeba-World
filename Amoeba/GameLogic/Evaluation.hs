@@ -27,7 +27,7 @@ nextRndNum = get >>= _ctxNextRndNum
 objectAt :: Point -> Eval Object
 objectAt p = get >>= flip _ctxObjectAt p
 
-objectsWith prop = liftM (filter (has prop)) (get >>= _ctxObjects)
+having prop = liftM (filter (has prop)) (get >>= _ctxObjects)
 
 forObject obj act = do
     ctxActedObject .= Just obj
@@ -35,7 +35,7 @@ forObject obj act = do
     ctxActedObject .= Nothing
 
 with prop act = do
-    objs <- objectsWith prop
+    objs <- having prop
     mapM_ (`forObject` act) objs
 
 read prop = use $ ctxActedObject . to fromJust . singular prop
