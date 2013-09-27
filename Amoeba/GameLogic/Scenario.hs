@@ -37,7 +37,8 @@ example = do
     trans obj1 energyPosted saveEnergy remove
     trans obj2 selfDestruct remove save
 
-is prop val = filtered (\obj -> has prop obj) :: Traversal' Object Object
+is prop val = filtered (\obj -> has prop obj
+                                && obj ^. singular) :: Traversal' Object Object
 
 suchThat prop pred = undefined
 query :: Traversal' Object Object -> ObjectedEval (Maybe Object)

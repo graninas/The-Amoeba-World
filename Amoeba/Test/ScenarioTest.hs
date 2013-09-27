@@ -80,13 +80,14 @@ prop1' = traverse . ix 4
 
 checkAndGet1 = prop1 . to ('a' ==)
 checkAndGet2 = prop2 . to ('a' ==)
+checks = (checkAndGet1, checkAndGet2)
 
-q1 = has prop1 d
-q2 = d ^? prop1
-q3 = d ^? checkAndGet1
-q4 = d ^? checkAndGet2
-q5 = (checkAndGet1, checkAndGet2) ^.. both
-
+q1 = has prop1 d                               -- True
+q2 = d ^? prop1                                -- Just 'e'
+q3 = d ^? checkAndGet1                         -- Just false
+q4 = d ^? checkAndGet2                         -- Nothing
+q5 = allOf both (\f -> isJust $ d ^? f) checks -- False
+q6 = anyOf both (isJust . (d ^?)) checks       -- True
 
 tests :: IO Bool
 tests = $quickCheckAll
@@ -103,3 +104,5 @@ main = do
     print q2
     print q3
     print q4
+    print q5
+    print q6
