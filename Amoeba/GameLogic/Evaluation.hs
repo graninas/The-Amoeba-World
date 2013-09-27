@@ -4,7 +4,7 @@ module GameLogic.Evaluation where
 import Control.Monad.State
 import Control.Monad
 import Control.Lens
-import Data.Maybe (fromJust)
+import Data.Maybe (fromJust, isJust)
 import Prelude hiding (read)
 
 import GameLogic.Geometry
@@ -20,6 +20,8 @@ data EvaluationContext = EvaluationContext { _ctxNextRndNum :: Eval Int
                                            , _ctxActedObject :: Maybe Object }
 
 makeLenses ''EvaluationContext
+
+-- context
 
 nextRndNum :: Eval Int
 nextRndNum = get >>= _ctxNextRndNum
@@ -40,5 +42,15 @@ with prop act = do
 
 read prop = use $ ctxActedObject . to fromJust . singular prop
 
-trans :: Object -> (Collision -> Bool) -> a -> a -> b
-trans = undefined
+-- querying
+
+isJustTrue (Just x) = x
+isJustTrue Nothing = False
+
+check prop val op obj = liftM (op val) (obj ^? prop)
+is prop val = filtered (isJustTrue . check prop val (==)) :: Traversal' Object Object
+
+-- resolving
+
+transact :: Object -> (Collision -> Bool) -> a -> a -> b
+transact = undefined

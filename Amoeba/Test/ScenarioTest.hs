@@ -5,6 +5,7 @@ module Main where
 import Data.Monoid
 import Data.Default
 import Data.Maybe
+import Data.Char
 import Control.Lens
 import qualified Data.Map as Map
 import qualified Data.Sequence as Seq
@@ -13,13 +14,16 @@ import Control.Monad.State
 import Test.QuickCheck
 import Test.QuickCheck.All
 
+instance Monoid r => Monoid (Accessor r a) where
+  mempty = Accessor mempty
+  mappend (Accessor a) (Accessor b) = Accessor $ a <> b
+
 type MyKey = Int
 type MyVal = String
 type MyMap = Map.Map MyKey MyVal
 
 data MyVal2 = Val { _name :: String
-                  , _idt :: Int
-                  }
+                  , _idt :: Int }
   deriving (Show, Read, Eq)
 type MyMap2 = Map.Map MyKey MyVal2
 
@@ -45,9 +49,6 @@ u2 = testMap ^.. id                -- [fromList [(1,"ABC"),(2,"acvx"),(3,"87s"),
 u3 = Map.null $ testMap ^.  id     -- False
 u4 = null     $ testMap ^.. id     -- False
 
--- traversed :: Traversable f => IndexedTraversal Int (f a) (f b) a b
--- folded :: Foldable f => Fold (f a) a
-
 a1 = testMap2 ^.  folded           -- ["ABC","CDE","acvx","","87s","}}{}{}{","||||||","IOU*^^"]
 a2 = testMap2 ^.  traversed        -- ["ABC","CDE","acvx","","87s","}}{}{}{","||||||","IOU*^^"]
 a3 = testMap2 ^.  traversed.folded -- "ABCCDEacvx87s}}{}{}{||||||IOU*^^"
@@ -71,23 +72,42 @@ b10 = testMap2 ^.. traversed.traverse   -- ["ABC","CDE","acvx","","87s","}}{}{}{
 
 d = ["abcdef", "cde", "uvx"]
 
-prop1 :: Fold [String] Char
+prop1, prop2 :: Fold [String] Char
 prop1 = traverse . ix 4
 prop2 = traverse . ix 100
-
+prop3 :: Traversal' [String] String
+prop3 = ix 1
 prop1' :: Traversal' [String] Char
 prop1' = traverse . ix 4
 
-checkAndGet1 = prop1 . to ('a' ==)
-checkAndGet2 = prop2 . to ('a' ==)
-checks = (checkAndGet1, checkAndGet2)
+check1 = prop1 . to ('a' ==)
+check2 = prop2 . to ('a' ==)
+check3 = prop1 . to isDigit
+check4 = prop3 . to (not . null)
+checks1 = (check1, check2)
+checks2 = [check1, check2, check3]
+checks3 = [check3,          check4]
+checks4 = [check3 . to not, check4]
+checks5 = check3 . to not <> check4     -- needs a Nonoid instance for Accessor
+checks6 = check3          <> check4              -- needs a Nonoid instance for Accessor
 
-q1 = has prop1 d                               -- True
-q2 = d ^? prop1                                -- Just 'e'
-q3 = d ^? checkAndGet1                         -- Just false
-q4 = d ^? checkAndGet2                         -- Nothing
-q5 = allOf both (\f -> isJust $ d ^? f) checks -- False
-q6 = anyOf both (isJust . (d ^?)) checks       -- True
+isJustTrue (Just x) = x
+isJustTrue Nothing = False
+
+q1  = has prop1 d                                  -- True
+q2  = d ^? prop1                                   -- Just 'e'
+q3  = d ^? check1                                  -- Just False
+q4  = d ^? check2                                  -- Nothing
+q5  = allOf both (isJust . (d ^?)) checks1         -- False
+q6  = anyOf both (isJust . (d ^?)) checks1         -- True
+q7  = allOf traverse (isJust . (d ^?)) checks2     -- False
+q8  = anyOf traverse (isJust . (d ^?)) checks2     -- True
+q9  = allOf traverse (isJustTrue . (d ^?)) checks3 -- False
+q10 = anyOf traverse (isJustTrue . (d ^?)) checks3 -- True
+q11 = allOf traverse (isJustTrue . (d ^?)) checks4 -- True
+q12 = anyOf traverse (isJustTrue . (d ^?)) checks4 -- True
+q13 = isJustTrue . (d ^?) $ checks5                -- True
+q14 = isJustTrue . (d ^?) $ checks6                -- False
 
 tests :: IO Bool
 tests = $quickCheckAll
@@ -99,10 +119,4 @@ runTests = tests >>= \passed -> putStrLn $
 main :: IO ()
 main = do
     runTests
-    
-    print q1
-    print q2
-    print q3
-    print q4
-    print q5
-    print q6
+    print q14

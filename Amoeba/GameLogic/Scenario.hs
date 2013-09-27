@@ -34,11 +34,8 @@ example = do
     rndNum <- nextRndNum
     obj1 <- objectAt p1
     obj2 <- objectAt p2
-    trans obj1 energyPosted saveEnergy remove
-    trans obj2 selfDestruct remove save
-
-is prop val = filtered (\obj -> has prop obj
-                                && obj ^. singular) :: Traversal' Object Object
+    transact obj1 energyPosted saveEnergy remove
+    transact obj2 selfDestruct remove save
 
 suchThat prop pred = undefined
 query :: Traversal' Object Object -> ObjectedEval (Maybe Object)
@@ -49,7 +46,7 @@ produce = do
     f <- read fabric
     pl <- read ownership
     k <- query (ownership `is` pl)
-        --battery `suchThat` charged
+    --battery `suchThat` charged
     return ()
 
 run :: Eval ScenarioResult
