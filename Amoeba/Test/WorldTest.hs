@@ -23,7 +23,6 @@ import GameLogic.Geometry
 import GameLogic.Objects
 import GameLogic.Object
 import GameLogic.Scenario
-import GameLogic.Evaluation
 import GameLogic.Game
 import GameLogic.AI
 

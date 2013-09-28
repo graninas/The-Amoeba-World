@@ -11,6 +11,7 @@ import qualified Data.Sequence as Seq
 import GameLogic.Geometry
 import GameLogic.Player
 import GameLogic.Object as O
+import GameLogic.Evaluation hiding (suchThat)
 
 instance Arbitrary (L.V3 Int) where
     arbitrary = liftM3 point arbitrary arbitrary arbitrary

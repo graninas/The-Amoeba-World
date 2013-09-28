@@ -23,7 +23,7 @@ import GameLogic.Geometry
 import GameLogic.Objects
 import GameLogic.Object
 import GameLogic.Scenario
-import GameLogic.Evaluation
+import GameLogic.Evaluation hiding (objects)
 import GameLogic.Game
 import GameLogic.AI
 
@@ -73,7 +73,6 @@ prop_objectAt2 seed = (obj1 == obj2) && isJust obj1
     ctx = testContext game
     obj1 = evalState (objectAt point1) ctx
     obj2 = game ^. objects . at point1
-
 
 tests :: IO Bool
 tests = $quickCheckAll

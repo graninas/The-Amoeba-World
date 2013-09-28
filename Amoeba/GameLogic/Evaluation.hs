@@ -4,6 +4,8 @@ module GameLogic.Evaluation where
 import Control.Monad.State
 import Control.Monad
 import Control.Lens
+import Control.Applicative
+import Data.Monoid
 import Data.Maybe (fromJust, isJust)
 import Prelude hiding (read)
 
@@ -31,7 +33,10 @@ nextRndNum = get >>= _ctxNextRndNum
 objectAt :: Point -> Eval (Maybe Object)
 objectAt p = get >>= flip _ctxObjectAt p
 
-having prop = liftM (filter (has prop)) (get >>= _ctxObjects)
+objects :: Eval Objects
+objects = get >>= _ctxObjects
+
+having prop = liftM (filter (has prop)) objects
 
 forObject obj act = do
     ctxActedObject .= Just obj
@@ -46,11 +51,25 @@ read prop = use $ ctxActedObject . to fromJust . singular prop
 
 -- querying
 
+(~&~) p1 p2 = \obj -> f (p1 obj) (p2 obj)
+  where
+    f Nothing _ = Nothing
+    f _ Nothing = Nothing
+    f (Just x) (Just y) = Just (x && y)
+
+infixr 3 ~&~
+
+
 isJustTrue (Just x) = x
 isJustTrue Nothing = False
 
-check prop val op obj = liftM (op val) (obj ^? prop)
-is prop val = filtered (isJustTrue . check prop val (==)) :: Traversal' Object Object
+check prop pred obj = liftM pred (obj ^? prop)
+
+is prop val = check prop (val ==) :: Object -> Maybe Bool
+suchThat prop pred = check prop pred :: Object -> Maybe Bool
+
+-- (.) :: (b -> c) -> (a -> b) -> a -> c
+--(<|>) :: Alternative f => f a -> f a -> f a
 
 -- resolving
 
