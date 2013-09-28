@@ -16,6 +16,10 @@ import GameLogic.Types
 import GameLogic.Geometry
 import GameLogic.Player
 
+instance Monoid r => Monoid (Accessor r a) where
+  mempty = Accessor mempty
+  mappend (Accessor a) (Accessor b) = Accessor $ a <> b
+
 type Target = Point
 
 data PassRestriction = NoFly | NoWalk | NoUndermine

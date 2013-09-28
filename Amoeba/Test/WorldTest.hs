@@ -23,16 +23,11 @@ import GameLogic.Geometry
 import GameLogic.Objects
 import GameLogic.Object
 import GameLogic.Scenario
+import GameLogic.Evaluation
 import GameLogic.Game
 import GameLogic.AI
 
-instance Monoid r => Monoid (Accessor r a) where
-  mempty = Accessor mempty
-  mappend (Accessor a) (Accessor b) = Accessor $ a <> b
-
 blankGame = initialGame 1
-
-putObject p objConstr = objects . at p ?~ objConstr p
 
 plasma1    = putObject point1 $ plasma player1
 plasma2    = putObject point2 $ plasma player1

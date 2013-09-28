@@ -15,7 +15,7 @@ type Eval a = EvalType EvaluationContext a
 type ObjectedEval a = Eval a
 
 data EvaluationContext = EvaluationContext { _ctxNextRndNum :: Eval Int
-                                           , _ctxObjectAt :: Point -> Eval Object
+                                           , _ctxObjectAt :: Point -> Eval (Maybe Object)
                                            , _ctxObjects :: Eval Objects
                                            , _ctxActedObject :: Maybe Object }
 
@@ -23,10 +23,12 @@ makeLenses ''EvaluationContext
 
 -- context
 
+context rndF objectsAtF objectsF = EvaluationContext rndF objectsAtF objectsF Nothing
+
 nextRndNum :: Eval Int
 nextRndNum = get >>= _ctxNextRndNum
 
-objectAt :: Point -> Eval Object
+objectAt :: Point -> Eval (Maybe Object)
 objectAt p = get >>= flip _ctxObjectAt p
 
 having prop = liftM (filter (has prop)) (get >>= _ctxObjects)

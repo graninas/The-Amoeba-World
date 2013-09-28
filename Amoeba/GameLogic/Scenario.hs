@@ -32,8 +32,8 @@ p2 = undefined
 
 example = do
     rndNum <- nextRndNum
-    obj1 <- objectAt p1
-    obj2 <- objectAt p2
+    (Just obj1) <- objectAt p1
+    (Just obj2) <- objectAt p2
     transact obj1 energyPosted saveEnergy remove
     transact obj2 selfDestruct remove save
 
@@ -43,9 +43,9 @@ query = undefined
 
 produce :: ObjectedEval ()
 produce = do
-    f <- read fabric
+    f  <- read fabric
     pl <- read ownership
-    k <- query (ownership `is` pl)
+    k  <- query (ownership `is` pl)
     --battery `suchThat` charged
     return ()
 
