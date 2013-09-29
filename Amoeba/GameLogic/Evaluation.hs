@@ -6,7 +6,7 @@ import Control.Monad
 import Control.Lens
 import Control.Applicative
 import Data.Monoid
-import Data.Maybe (fromJust, isJust)
+import Data.Maybe (fromJust, isJust, listToMaybe)
 import Prelude hiding (read)
 
 import GameLogic.Geometry
@@ -59,7 +59,6 @@ read prop = use $ ctxActedObject . to fromJust . singular prop
 
 infixr 3 ~&~
 
-
 isJustTrue (Just x) = x
 isJustTrue Nothing = False
 
@@ -68,8 +67,9 @@ check prop pred obj = liftM pred (obj ^? prop)
 is prop val = check prop (val ==) :: Object -> Maybe Bool
 suchThat prop pred = check prop pred :: Object -> Maybe Bool
 
--- (.) :: (b -> c) -> (a -> b) -> a -> c
---(<|>) :: Alternative f => f a -> f a -> f a
+query q = liftM (filter (isJustTrue . q)) objects :: Eval Objects
+
+find q = liftM listToMaybe (query q) :: Eval (Maybe Object)
 
 -- resolving
 

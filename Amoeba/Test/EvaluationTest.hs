@@ -45,6 +45,11 @@ testContext game = context rndF objectAtF objectsF
     objectAtF = getObjectAt game
     objectsF = getObjects game
 
+testGameAndContext seed = let
+    game = testGame seed
+    ctx = testContext game
+    in (game, ctx)
+
 nextRnd :: Game -> Eval Int
 nextRnd game = let (r, g) = random (game ^. rndGen)
                    newGame = rndGen .~ g $ game
@@ -62,17 +67,22 @@ getObjects game = return $ (game ^. objects) ^.. folding id
 
 prop_objectAt1 p seed = obj1 == obj2
   where
-    game = testGame seed
-    ctx = testContext game
+    (game, ctx) = testGameAndContext seed
     obj1 = evalState (objectAt p) ctx
     obj2 = game ^. objects . at p
     
 prop_objectAt2 seed = (obj1 == obj2) && isJust obj1
   where
-    game = testGame seed
-    ctx = testContext game
+    (game, ctx) = testGameAndContext seed
     obj1 = evalState (objectAt point1) ctx
     obj2 = game ^. objects . at point1
+        
+prop_query1 seed = queried == expected
+  where
+    (game, ctx) = testGameAndContext seed
+    q = find $ layer `is` sky ~&~ named `is` "SoundWave"
+    queried = evalState q ctx
+    expected = Just $ soundWave player1 left 10 point3
 
 tests :: IO Bool
 tests = $quickCheckAll
@@ -85,6 +95,10 @@ main :: IO ()
 main = do
     runTests
     
-    let game = testGame 1
-    let ctx = testContext game
+    let (game, ctx) = testGameAndContext 1
     print $ evalState nextRndNum ctx
+    
+    putStrLn ""
+    let q = find $ layer `is` sky ~&~ named `is` "SoundWave"
+    let queried = evalState q ctx
+    print queried

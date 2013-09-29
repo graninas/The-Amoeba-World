@@ -37,15 +37,13 @@ example = do
     transact obj1 energyPosted saveEnergy remove
     transact obj2 selfDestruct remove save
 
-query q = undefined
-
 produce :: ObjectedEval ()
 produce = do
     f  <- read fabric
     pl <- read ownership
-    k1 <- query ()
-    k2 <- query $ ownership `is` pl
-    k3 <- query (ownership `is` pl ~&~ battery `suchThat` charged)
+    k1 <- find $ battery `suchThat` charged
+    k2 <- find $ ownership `is` pl
+    k3 <- find (ownership `is` pl ~&~ battery `suchThat` charged)
     return ()
 
 run :: Eval ScenarioResult
