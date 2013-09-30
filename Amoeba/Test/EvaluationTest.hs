@@ -84,10 +84,10 @@ prop_query1 seed = queried == expected
     queried = evalState q ctx
     expected = Just $ soundWave player1 left 10 point3
 
-prop_query2 name l seed = length queried == M.size (game ^. world.worldMap)
+prop_query2 name l seed = (length queried == M.size (game ^. world.worldMap)) && (not . null $ queried)
   where
     (game, ctx) = testGameAndContext seed
-    queried = evalState (query justAny) ctx
+    queried = evalState (query justAll) ctx
 
 tests :: IO Bool
 tests = $quickCheckAll
