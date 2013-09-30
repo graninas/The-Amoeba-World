@@ -84,6 +84,11 @@ prop_query1 seed = queried == expected
     queried = evalState q ctx
     expected = Just $ soundWave player1 left 10 point3
 
+prop_query2 name l seed = length queried == M.size (game ^. world.worldMap)
+  where
+    (game, ctx) = testGameAndContext seed
+    queried = evalState (query justAny) ctx
+
 tests :: IO Bool
 tests = $quickCheckAll
 

@@ -66,6 +66,7 @@ check prop pred obj = liftM pred (obj ^? prop)
 
 is prop val = check prop (val ==) :: Object -> Maybe Bool
 suchThat prop pred = check prop pred :: Object -> Maybe Bool
+justAny _ = Just True
 
 query q = liftM (filter (isJustTrue . q)) objects :: Eval Objects
 
