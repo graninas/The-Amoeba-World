@@ -39,16 +39,20 @@ data Moving = StraightMoving { _speed :: Speed
 data Layer = Underground | Ground | Sky
   deriving (Show, Read, Eq)
 
+data Resource a = Resource { _current :: a
+                           , _capacity :: Maybe a }
+  deriving (Show, Read, Eq)
+
 data Collision = Collision { _collidings :: Objects }
   deriving (Show, Read, Eq)
 
 data Property = PNamed { __named :: String }
-              | PDurability { __durability :: (Durability, Maybe MaxDurability) }
-              | PBattery { __battery :: (Energy, Maybe EnergyCapacity) }
+              | PDurability { __durability :: Resource Durability }
+              | PBattery { __battery :: Resource Energy }
               | POwnership { __ownership :: Player }
               | PDislocation { __dislocation :: Point }
               | PPassRestriction { __passRestriction :: Seq.Seq PassRestriction }
-              | PAge { __age :: (Age, Maybe Age) }
+              | PAge { __age :: Resource Age }
               | PDirected { __directed :: Direction }
               | PFabric { __fabric :: Fabric }
               | PSelfDestructable { __selfDestructable :: SelfDestructable }
@@ -88,30 +92,29 @@ makeLenses ''SelfDestructable
 makeLenses ''Moving
 makeLenses ''Layer
 makeLenses ''Collision
+makeLenses ''Resource
 
 property k l = propertyMap . at k . traverse . l
 
-current = _1
-charged b = b ^. current > 0
-
 -- Properties itself
 
-isBoundedValid (a, Just b) = (a >= 0) && (a <= b)
-isBoundedValid _ = True
-boundedValidator r | isBoundedValid r = r
-                   | otherwise        = error $ "Invalid bounded property: " ++ show r
+isResourceValid (Resource c (Just m)) = (c >= 0) && (c <= m)
+isResourceValid (Resource c Nothing)  = c >= 0
+resourceValidator r | isResourceValid r = r
+                    | otherwise         = error $ "Invalid resource property: " ++ show r
+toResource (c, mbM) = resourceValidator $ Resource c mbM
 
 notNullValidator s | null s = error "This property can't be null."
                    | otherwise = s
 
 -- TODO: remove boilerplate with TH
 namedA            = PAccessor 0    $ PNamed            .notNullValidator
-durabilityA       = PAccessor 1    $ PDurability       .boundedValidator
-batteryA          = PAccessor 2    $ PBattery          .boundedValidator
+durabilityA       = PAccessor 1    $ PDurability       .toResource
+batteryA          = PAccessor 2    $ PBattery          .toResource
 ownershipA        = PAccessor 3    $ POwnership        .id
 passRestrictionA  = PAccessor 4    $ PPassRestriction  .id
 dislocationA      = PAccessor 5    $ PDislocation      .id
-ageA              = PAccessor 6    $ PAge              .boundedValidator
+ageA              = PAccessor 6    $ PAge              .toResource
 directedA         = PAccessor 7    $ PDirected         .id
 fabricA           = PAccessor 8    $ PFabric           .id
 selfDestructableA = PAccessor 9    $ PSelfDestructable .id
@@ -137,6 +140,7 @@ passRestrictions = [NoFly, NoWalk, NoUndermine]
 
 baseFabric :: Fabric
 baseFabric = Fabric 0 def
+fromFabric f = (f ^. energyCost, f ^. production)
 
 selfDestructOnTarget = SelfDestructOnTarget
 
@@ -146,6 +150,15 @@ underground = Underground
 ground = Ground
 sky = Sky
 layers = [ underground, ground, sky ]
+
+charged :: Resource Energy -> Bool
+charged (Resource c _) = c > 0
+
+batteryCharge = battery.current
+
+-- Don't know how to do this using lenses.
+resourced d (la, lb) = (d ^. la, d ^. lb)
+
 
 -- This should be used carefully.
 instance Monoid Object where
@@ -160,50 +173,3 @@ instance Default Fabric where
 
 instance Eq (PAccessor a) where
     acc1 == acc2 = key acc1 == key acc2
-
-{-
-passRestriction = property $ PAccessor 5 _passRestriction
-noFly = passRestriction . ix flyIndex .~ NoFly
-noWalk = passRestriction . ix walkIndex .~ NoWalk
-noUndermine = passRestriction . ix undermineIndex .~ NoUndermine
--}
-{-
-noFly = undefined
-noWalk = undefined
-noUndermine = undefined
-noPass :: State Properties ()
-noPass = do
-    noFly
-    noWalk
-    noUndermine
-
-fullPassable :: State Properties ()
-fullPassable = do
-    ableToFly .= True
-    ableToWalk .= True
-    ableToUndermine .= True
--}
-{-
-pDislocation :: Point -> Property
-moving :: Direction -> Property
-
--- Can we add not Energy but generic resource, and 'energy' - one of resources?
-
-consuming :: Energy -> Property
-producing :: Energy -> Property
-
--- Property == Target?
-transmission :: Property -> Property
-
-permissibility :: Properties -> Property
-interaction :: Property -> Property -> Property
-
--- (Properties -> Bool) == Condition
-pursuit :: (Properties -> Bool) -> Target -> Speed -> Property
-
-type ProductionAlg = Properties -> Property
-type PlacementAlg = Property -> Properties -> Point -> Bool 
-
-fabric :: ProductionAlg -> PlacementAlg -> Property
-
--}

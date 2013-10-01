@@ -12,6 +12,8 @@ import GameLogic.Types
 makeObject :: Default a => State a () -> a
 makeObject = flip execState def
 
+
+
 plasma :: Player -> Point -> Object
 plasma pl p = makeObject $ do
     namedA |= "Plasma"

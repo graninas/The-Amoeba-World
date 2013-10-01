@@ -70,13 +70,13 @@ prop_objectAt1 p seed = obj1 == obj2
     (game, ctx) = testGameAndContext seed
     obj1 = evalState (objectAt p) ctx
     obj2 = game ^. objects . at p
-    
+
 prop_objectAt2 seed = (obj1 == obj2) && isJust obj1
   where
     (game, ctx) = testGameAndContext seed
     obj1 = evalState (objectAt point1) ctx
     obj2 = game ^. objects . at point1
-        
+
 prop_query1 seed = queried == expected
   where
     (game, ctx) = testGameAndContext seed
@@ -99,10 +99,10 @@ runTests = tests >>= \passed -> putStrLn $
 main :: IO ()
 main = do
     runTests
-    
+
     let (game, ctx) = testGameAndContext 1
     print $ evalState nextRndNum ctx
-    
+
     putStrLn ""
     let q = find $ layer `is` sky ~&~ named `is` "SoundWave"
     let queried = evalState q ctx

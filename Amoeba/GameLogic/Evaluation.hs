@@ -47,8 +47,6 @@ with prop act = do
     objs <- having prop
     mapM_ (`forObject` act) objs
 
-read prop = use $ ctxActedObject . to fromJust . singular prop
-
 -- querying
 
 (~&~) p1 p2 = \obj -> f (p1 obj) (p2 obj)
@@ -62,17 +60,39 @@ infixr 3 ~&~
 isJustTrue (Just x) = x
 isJustTrue Nothing = False
 
-check prop pred obj = liftM pred (obj ^? prop)
+maybeStored prop pred obj = let
+    mbVal = obj ^? prop
+    mbRes = liftM pred mbVal
+    in if isJustTrue mbRes
+            then mbVal
+            else Nothing
 
-is prop val = check prop (val ==) :: Object -> Maybe Bool
-suchThat prop pred = check prop pred :: Object -> Maybe Bool
-justAll _ = Just True
+is prop val = isJust . maybeStored prop (val ==)
+suchThat = isJust . maybeStored
+justAll _ = True
 
-query q = liftM (filter (isJustTrue . q)) objects :: Eval Objects
+query q = liftM (filter q) objects :: Eval Objects
+find q  = liftM listToMaybe (query q) :: Eval (Maybe Object)
 
-find q = liftM listToMaybe (query q) :: Eval (Maybe Object)
+read prop = use $ ctxActedObject . to fromJust . singular prop
+readIf prop q = do
+    mbObj <- ctxActedObject
+    let checked = mbObj >>= check prop q
+    if isJustTrue checked
+        then mbObj >>= (^? prop)
+        else Nothing
+
+{-
+data Query p b = Match { _queryProperty :: p
+                       , _queryPredicate :: b }
+               | JustAll
+-}
+--check prop pred obj = Match (obj ^? prop) pred
+--query MatchAll = objects :: Eval Objects
+--query (Match prop pred) = liftM (filter (isJustTrue . p)) objects :: Eval Objects
+--justAll = JustAll
 
 -- resolving
 
-transact :: Object -> (Collision -> Bool) -> a -> a -> b
-transact = undefined
+-- transact :: Object -> (Collision -> Bool) -> a -> a -> b
+-- transact = undefined

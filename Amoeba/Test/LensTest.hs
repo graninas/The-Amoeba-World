@@ -7,9 +7,9 @@ import Data.Default
 import Data.Maybe
 import Data.Char
 import Control.Lens
+import Control.Monad.State
 import qualified Data.Map as Map
 import qualified Data.Sequence as Seq
-import Control.Monad.State
 
 import Test.QuickCheck
 import Test.QuickCheck.All
@@ -18,36 +18,36 @@ instance Monoid r => Monoid (Accessor r a) where
   mempty = Accessor mempty
   mappend (Accessor a) (Accessor b) = Accessor $ a <> b
 
-type MyKey = Int
-type MyVal = String
-type MyMap = Map.Map MyKey MyVal
+type MyMap = Map.Map Int String
 
-data MyVal2 = Val { _name :: String
-                  , _idt :: Int }
+data MyVal = Val { _name :: String
+                 , _idt :: Int }
   deriving (Show, Read, Eq)
-type MyMap2 = Map.Map MyKey MyVal2
+type MyMap2 = Map.Map Int MyVal
 
-testMap = Map.fromList [(1, "ABC"), (2, "acvx"), (3, "87s"), (10, "IOU*^^")]
+testMap1 = Map.fromList [(1, "ABC"), (2, "acvx"), (3, "87s"), (10, "IOU*^^")]
 testMap2 = Map.fromList [(1, ["ABC", "CDE"]), (2, ["acvx", ""]), (3, ["87s", "}}{}{}{", "||||||"]), (10, ["IOU*^^"])]
 testMap3 = Map.fromList [(1, Val "N1" 123123), (2, Val "N2" 1212), (100, Val "" 0), (10, Val "bvvvb" 6)]
 testMap4 = Map.fromList [(50, Val "50" 50), (60, Val "60" 60)]
 
-makeLenses ''MyVal2
+myVal1 = Val "ABC" 123
+
+makeLenses ''MyVal
 
 f1 :: MyMap -> MyMap
 f1 = Map.insert 5 "5"
 f2 = Map.lookup 3
 f3 m = take 1 . drop 3 $ Map.keys m
 
-t1 = testMap ^. folding f1         -- "ABCacvx87s5IOU*^^"
-t2 = testMap ^. folding f2         -- "87s"
-t3 = testMap ^.. folding f1        -- ["ABC","acvx","87s","5","IOU*^^"]
-t4 = testMap ^.. folding f2        -- ["87s"]
+t1 = testMap1 ^. folding f1         -- "ABCacvx87s5IOU*^^"
+t2 = testMap1 ^. folding f2         -- "87s"
+t3 = testMap1 ^.. folding f1        -- ["ABC","acvx","87s","5","IOU*^^"]
+t4 = testMap1 ^.. folding f2        -- ["87s"]
 
-u1 = testMap ^.  id                -- fromList [(1,"ABC"),(2,"acvx"),(3,"87s"),(10,"IOU*^^")]
-u2 = testMap ^.. id                -- [fromList [(1,"ABC"),(2,"acvx"),(3,"87s"),(10,"IOU*^^")]]
-u3 = Map.null $ testMap ^.  id     -- False
-u4 = null     $ testMap ^.. id     -- False
+u1 = testMap1 ^.  id                -- fromList [(1,"ABC"),(2,"acvx"),(3,"87s"),(10,"IOU*^^")]
+u2 = testMap1 ^.. id                -- [fromList [(1,"ABC"),(2,"acvx"),(3,"87s"),(10,"IOU*^^")]]
+u3 = Map.null $ testMap1 ^.  id     -- False
+u4 = null     $ testMap1 ^.. id     -- False
 
 a1 = testMap2 ^.  folded           -- ["ABC","CDE","acvx","","87s","}}{}{}{","||||||","IOU*^^"]
 a2 = testMap2 ^.  traversed        -- ["ABC","CDE","acvx","","87s","}}{}{}{","||||||","IOU*^^"]

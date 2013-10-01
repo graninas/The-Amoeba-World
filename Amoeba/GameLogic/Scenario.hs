@@ -30,6 +30,8 @@ save = undefined
 p1 = undefined
 p2 = undefined
 
+transact = undefined
+
 example = do
     rndNum <- nextRndNum
     (Just obj1) <- objectAt p1
@@ -42,25 +44,27 @@ example = do
     transact obj1 energyPosted saveEnergy remove
     transact obj2 selfDestruct remove save
 
+
+
+withdrawEnergy obj cnt = forObject obj $ do
+    ch <- readIf batteryCharge $ batteryCharge `suchThat` (>= cnt)
+    return ()
+
+constructObject = undefined
+
 produce :: ObjectedEval ()
 produce = do
-    fabricProp <- read fabric
-    playerProp <- read ownership
-    karyonObj  <- find $ ownership `is` playerProp
-    let eCost = fabricProp ^. energyCost
---    transact karyonObj (withdrawEnergy eCost)
---    transact thisObject (constructObject (fabricProp ^. production)
-    return ()
+    fabricVal <- read fabric
+    playerVal <- read ownership
+    karyonObj <- find $ ownership `is` playerVal
+    let (eCost, product) = fromFabric fabricVal
+    transact (withdrawEnergy karyonObj eCost >>
+              constructObject product)
 
 run :: Eval ScenarioResult
 run = do
     with fabric produce
     f <- read fabric
     example
-
-
-
-
-
 
 
