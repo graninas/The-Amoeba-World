@@ -49,11 +49,7 @@ with prop act = do
 
 -- querying
 
-(~&~) p1 p2 = \obj -> f (p1 obj) (p2 obj)
-  where
-    f Nothing _ = Nothing
-    f _ Nothing = Nothing
-    f (Just x) (Just y) = Just (x && y)
+(~&~) p1 p2 obj = p1 obj && p2 obj
 
 infixr 3 ~&~
 
@@ -67,30 +63,23 @@ maybeStored prop pred obj = let
             then mbVal
             else Nothing
 
-is prop val = isJust . maybeStored prop (val ==)
-suchThat = isJust . maybeStored
+is prop val = isJust . maybeStored prop (val ==) :: Object -> Bool
+suchThat prop pred = isJust . maybeStored prop pred :: Object -> Bool
+justAll :: Object -> Bool
 justAll _ = True
 
-query q = liftM (filter q) objects :: Eval Objects
+query :: (Object -> Bool) -> Eval Objects
+query q = liftM (filter q) objects
+
+find :: (Object -> Bool) -> Eval (Maybe Object)
 find q  = liftM listToMaybe (query q) :: Eval (Maybe Object)
 
+-- TODO: make it safe.
 read prop = use $ ctxActedObject . to fromJust . singular prop
-readIf prop q = do
-    mbObj <- ctxActedObject
-    let checked = mbObj >>= check prop q
-    if isJustTrue checked
-        then mbObj >>= (^? prop)
-        else Nothing
 
-{-
-data Query p b = Match { _queryProperty :: p
-                       , _queryPredicate :: b }
-               | JustAll
--}
---check prop pred obj = Match (obj ^? prop) pred
---query MatchAll = objects :: Eval Objects
---query (Match prop pred) = liftM (filter (isJustTrue . p)) objects :: Eval Objects
---justAll = JustAll
+whenIt prop pred = do
+    mbObj <- use ctxActedObject
+    return $ mbObj >>= maybeStored prop pred
 
 -- resolving
 

@@ -47,7 +47,7 @@ example = do
 
 
 withdrawEnergy obj cnt = forObject obj $ do
-    ch <- readIf batteryCharge $ batteryCharge `suchThat` (>= cnt)
+    ch <- batteryCharge `whenIt` (>= cnt)
     return ()
 
 constructObject = undefined
