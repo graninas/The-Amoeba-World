@@ -72,8 +72,7 @@ prop_objectAt1 p seed = obj1 == obj2
     obj1 = evaluate (objectAt p) ctx
     obj2 = Right $ game ^. objects . at p
 
-{-
-prop_objectAt2 seed = (obj1 == obj2) && isJust obj1
+prop_objectAt2 seed = (obj1 == obj2) && isJust (obj1 ^. _Right)
   where
     (game, ctx) = testGameAndContext seed
     obj1 = evaluate (objectAt point1) ctx
@@ -82,15 +81,15 @@ prop_objectAt2 seed = (obj1 == obj2) && isJust obj1
 prop_query1 seed = queried == expected
   where
     (game, ctx) = testGameAndContext seed
-    q = find $ layer `is` sky ~&~ named `is` "SoundWave"
-    queried = evalState q ctx
-    expected = Just $ soundWave player1 left 10 point3
+    q = find $ layer `is` sky ~&~ named `is` toNamed "SoundWave"
+    queried = evaluate q ctx
+    expected = Right . Just $ soundWave player1 left 10 point3
 
 prop_query2 name l seed = (length queried == M.size (game ^. world.worldMap)) && (not . null $ queried)
   where
     (game, ctx) = testGameAndContext seed
-    queried = evalState (query justAll) ctx
--}
+    evaluated = evaluate (query justAll) ctx
+    queried = evaluated ^. _Right
 
 
 tests :: IO Bool
@@ -108,6 +107,6 @@ main = do
     print $ evaluate nextRndNum ctx
 
     putStrLn ""
-    let q = find $ layer `is` sky ~&~ named `is` (toNamed "SoundWave")
+    let q = find $ layer `is` sky ~&~ named `is` toNamed "SoundWave"
     let queried = evaluate q ctx
     print queried
