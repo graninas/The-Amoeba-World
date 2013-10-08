@@ -3,7 +3,7 @@ module GameLogic.Evaluation where
 
 import Control.Monad.State
 import Control.Monad.Trans
-import Control.Monad.Trans.Either
+import Control.Monad.Trans.Either as E
 import Control.Monad
 import Control.Lens
 import Control.Applicative
@@ -17,10 +17,10 @@ import GameLogic.Object
 import qualified GameLogic.GenericWorld as GW
 import Misc.Descriptions
 
---type EvalErrorType = Either String
---type EvalType ctx res = StateT ctx EvalErrorType res
+data EvalError = NoSuchProperty String
+  deriving (Show, Read, Eq)
 
-type EvalType ctx res = EitherT String (State ctx) res
+type EvalType ctx res = EitherT EvalError (State ctx) res
 type Eval res = EvalType EvaluationContext res
 
 data EvaluationContext = EvaluationContext { _ctxNextRndNum :: Eval Int
@@ -77,14 +77,15 @@ single :: (Object -> Bool) -> Eval Object
 single q = liftM fromJust (find q)
 
 read obj prop = case obj ^? prop of
-    Just x -> Right x 
-    Nothing -> Left $ describeNoProperty obj prop
+    Just x -> E.right x 
+    Nothing -> E.left $ NoSuchProperty (nameProperty prop)
 
 {-
 whenIt prop pred = do
     mbObj <- use ctxActedObject
     return $ mbObj >>= maybeStored prop pred
 -}
+
 -- evaluation
 
 withProperty prop act = doWithProperty :: Eval ()
@@ -93,4 +94,5 @@ withProperty prop act = doWithProperty :: Eval ()
         objs <- having prop
         mapM_ act objs
 
--- resolving
+evaluate scn = evalState (runEitherT scn)
+

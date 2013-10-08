@@ -87,6 +87,6 @@ dummyObject = makeObject $ do
     selfDestructableA |= selfDestructOnTarget (point 1 1 1)
     movingA |= straightMoving 0 right
     batteryA |= (0, Nothing)
-    passRestrictionA |= passRestrictions
+    passRestrictionA |= layers
     ageA |= (0, Nothing)
     collisionA |= []

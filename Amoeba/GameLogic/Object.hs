@@ -23,7 +23,7 @@ instance Monoid r => Monoid (Accessor r a) where
 
 type Target = Point
 
-data PassRestriction = NoFly | NoWalk | NoUndermine
+data PassRestriction = PassRestriction { _restrictedLayers :: Set.Set Layer }
   deriving (Show, Read, Eq, Ord)
 
 data PlacementAlg = PlaceToNearestEmptyCell
@@ -44,7 +44,7 @@ data Moving = StraightMoving { _speed :: Speed
   deriving (Show, Read, Eq)
 
 data Layer = Underground | Ground | Sky
-  deriving (Show, Read, Eq)
+  deriving (Show, Read, Eq, Ord)
 
 data Resource a = Resource { _current :: a
                            , _capacity :: Maybe a }
@@ -53,12 +53,19 @@ data Resource a = Resource { _current :: a
 data Collision = Collision { _collidings :: Objects }
   deriving (Show, Read, Eq)
 
-data Property = PNamed { __named :: String }
+data Named = Named String
+  deriving (Show, Read, Eq)
+
+data Dislocation = Dislocation Point
+  deriving (Show, Read, Eq)
+  
+
+data Property = PNamed { __named :: Named }
               | PDurability { __durability :: Resource Durability }
               | PBattery { __battery :: Resource Energy }
               | POwnership { __ownership :: Player }
-              | PDislocation { __dislocation :: Point }
-              | PPassRestriction { __passRestriction :: Set.Set PassRestriction }
+              | PDislocation { __dislocation :: Dislocation }
+              | PPassRestriction { __passRestriction :: PassRestriction }
               | PAge { __age :: Resource Age }
               | PDirected { __directed :: Direction }
               | PFabric { __fabric :: Fabric }
@@ -112,20 +119,21 @@ resourceValidator r | isResourceValid r = r
                     | otherwise         = error $ "Invalid resource property: " ++ show r
 toResource (c, mbM) = resourceValidator $ Resource c mbM
 
-notNullValidator s | null s = error "This property can't be null."
-                   | otherwise = s
-
-toPassRestriction = Set.fromList
+isNamedValid (Named n) = not . null $ n
+namedValidator n | isNamedValid n = n
+                 | otherwise      = error $ "Invalid named property: " ++ show n
+toNamed = namedValidator . Named
+toPassRestriction = PassRestriction . Set.fromList
+toDislocation = Dislocation
 
 toCollision = Collision . L.nub
 
--- TODO: remove boilerplate with TH
-namedA            = PAccessor 0    $ PNamed            .notNullValidator
+namedA            = PAccessor 0    $ PNamed            .toNamed
 durabilityA       = PAccessor 1    $ PDurability       .toResource
 batteryA          = PAccessor 2    $ PBattery          .toResource
 ownershipA        = PAccessor 3    $ POwnership        .id
 passRestrictionA  = PAccessor 4    $ PPassRestriction  .toPassRestriction
-dislocationA      = PAccessor 5    $ PDislocation      .id
+dislocationA      = PAccessor 5    $ PDislocation      .toDislocation
 ageA              = PAccessor 6    $ PAge              .toResource
 directedA         = PAccessor 7    $ PDirected         .id
 fabricA           = PAccessor 8    $ PFabric           .id
@@ -134,6 +142,7 @@ movingA           = PAccessor 10   $ PMoving           .id
 layerA            = PAccessor 11   $ PLayer            .id
 collisionA        = PAccessor 12   $ PCollision        .toCollision
 
+-- TODO: remove boilerplate with TH
 named            = property (key namedA)            _named
 durability       = property (key durabilityA)       _durability
 battery          = property (key batteryA)          _battery
@@ -150,11 +159,6 @@ collision        = property (key collisionA)        _collision
 
 placeToNearestEmptyCell = PlaceToNearestEmptyCell
 placeToPoint = PlaceToPoint
-
-noFly = NoFly
-noWalk = NoWalk
-noUndermine = NoUndermine
-passRestrictions = [noFly, noWalk, noUndermine]
 
 selfDestructOnTarget = SelfDestructOnTarget
 

@@ -6,7 +6,7 @@ import Test.QuickCheck
 import Control.Monad
 import qualified Linear as L
 import qualified Data.List as List
-import qualified Data.Sequence as Seq
+import qualified Data.Set as Set
 
 import GameLogic.Geometry
 import GameLogic.Player
@@ -22,6 +22,9 @@ instance Arbitrary Bound where
                       , liftM2 circleBound arbitrary arbitrary
                       , return noBound ]
 
+instance Arbitrary Layer where
+    arbitrary = oneof $ map return layers
+    
 instance Arbitrary Direction where
     arbitrary = oneof $ map return directions
 
@@ -29,15 +32,22 @@ instance Arbitrary Player where
     arbitrary = liftM Player arbitrary
 
 instance Arbitrary PassRestriction where
-    arbitrary = oneof $ map return passRestrictions
+    arbitrary = liftM PassRestriction arbitrary
 
-instance Arbitrary (Seq.Seq PassRestriction) where
-    arbitrary = oneof $ map (return . Seq.fromList) s
+instance Arbitrary (Set.Set Layer) where
+    arbitrary = oneof $ map (return . Set.fromList) s
         where
-            s = List.subsequences passRestrictions
+            s = List.subsequences layers
+
+instance Arbitrary Named where
+    arbitrary = liftM Named arbitrary
+
+instance Arbitrary PlacementAlg where
+    arbitrary = oneof [ return PlaceToNearestEmptyCell
+                      , liftM PlaceToPoint arbitrary ]
 
 instance Arbitrary Fabric where
-    arbitrary = liftM2 Fabric arbitrary arbitrary
+    arbitrary = liftM4 Fabric arbitrary arbitrary arbitrary arbitrary
 
 instance Arbitrary Moving where
     arbitrary = liftM2 StraightMoving arbitrary arbitrary
@@ -45,24 +55,28 @@ instance Arbitrary Moving where
 instance Arbitrary SelfDestructable where
     arbitrary = liftM SelfDestructOnTarget arbitrary
 
-instance Arbitrary Layer where
-    arbitrary = oneof $ map return layers
+instance Arbitrary (Resource Int) where
+    arbitrary = liftM2 Resource arbitrary arbitrary
 
+instance Arbitrary Dislocation where
+    arbitrary = liftM Dislocation arbitrary
+    
 -- TODO: add another properties
-propertiesCount = 12
+propertiesCount = 13
 instance Arbitrary O.Property where
-    arbitrary = oneof [ liftM PNamed (arbitrary `suchThat` (not.null))
-                      , liftM PDurability (arbitrary `suchThat` isBoundedValid)
-                      , liftM PBattery  (arbitrary `suchThat` isBoundedValid)
+    arbitrary = oneof [ liftM PNamed (arbitrary `suchThat` isNamedValid)
+                      , liftM PDurability (arbitrary `suchThat` isResourceValid)
+                      , liftM PBattery  (arbitrary `suchThat` isResourceValid)
                       , liftM POwnership arbitrary
                       , liftM PDislocation arbitrary
                       , liftM PPassRestriction arbitrary
-                      , liftM PAge (arbitrary `suchThat` isBoundedValid)
+                      , liftM PAge (arbitrary `suchThat` isResourceValid)
                       , liftM PDirected arbitrary
                       , liftM PFabric arbitrary
                       , liftM PSelfDestructable arbitrary
                       , liftM PMoving arbitrary
                       , liftM PLayer arbitrary
+                      --, liftM Collision arbitrary
                       ]
 
 instance Arbitrary O.PropertyMap where
