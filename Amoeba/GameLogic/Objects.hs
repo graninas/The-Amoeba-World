@@ -12,7 +12,20 @@ import GameLogic.Types
 makeObject :: Default a => State a () -> a
 makeObject = flip execState def
 
+plasmaFabric :: Player -> Point -> Fabric
+plasmaFabric pl p = makeObject $ do
+    energyCost .= 1
+    scheme .= plasma pl p
+    producing .= True
+    placementAlg .= placeToNearestEmptyCell
 
+soundWaveFabric :: Player -> Direction -> Point -> Fabric
+soundWaveFabric pl dir p = makeObject $ do
+    let placementPoint = advance p dir
+    energyCost .= 1
+    scheme .= soundWave pl dir 10 placementPoint
+    producing .= True
+    placementAlg .= placeToPoint placementPoint
 
 plasma :: Player -> Point -> Object
 plasma pl p = makeObject $ do
@@ -21,11 +34,6 @@ plasma pl p = makeObject $ do
     dislocationA |= p
     durabilityA |= (30, Just 40)
     ownershipA |= pl
-
-plasmaFabric :: Player -> Point -> Fabric
-plasmaFabric pl p = makeObject $ do
-    energyCost .= 1
-    production .= plasma pl p
 
 karyon :: Player -> Point -> Object
 karyon pl p = makeObject $ do
@@ -51,11 +59,6 @@ bullet name speed pl dir power p = makeObject $ do
 soundWave = bullet "SoundWave" 1
 laserBeam = bullet "LaserBeam" 10
 
-soundWaveFabric :: Player -> Direction -> Point -> Fabric
-soundWaveFabric pl dir p = makeObject $ do
-    energyCost .= 1
-    production .= soundWave pl dir 10 p
-
 influencer :: Player -> Direction -> Point -> Object
 influencer pl dir p = makeObject $ do
     namedA |= "Influencer"
@@ -64,5 +67,26 @@ influencer pl dir p = makeObject $ do
     durabilityA |= (30, Just 30)
     ownershipA |= pl
     fabricA |= soundWaveFabric pl dir p
-    
-    
+
+dummyFabric :: Fabric
+dummyFabric = makeObject $ do
+    energyCost .= 1
+    scheme .= dummyObject
+    producing .= False
+    placementAlg .= placeToPoint zeroPoint
+
+dummyObject :: Object
+dummyObject = makeObject $ do
+    namedA |= "DummyObject"
+    layerA |= ground
+    dislocationA |= zeroPoint
+    durabilityA |= (0, Nothing)
+    ownershipA |= dummyPlayer
+    fabricA |= dummyFabric
+    directedA |= left
+    selfDestructableA |= selfDestructOnTarget (point 1 1 1)
+    movingA |= straightMoving 0 right
+    batteryA |= (0, Nothing)
+    passRestrictionA |= passRestrictions
+    ageA |= (0, Nothing)
+    collisionA |= []

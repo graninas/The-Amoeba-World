@@ -2,30 +2,37 @@
 module GameLogic.Evaluation where
 
 import Control.Monad.State
+import Control.Monad.Trans
+import Control.Monad.Trans.Either
 import Control.Monad
 import Control.Lens
 import Control.Applicative
+import qualified Data.Sequence as Seq
 import Data.Monoid
 import Data.Maybe (fromJust, isJust, listToMaybe)
 import Prelude hiding (read)
 
 import GameLogic.Geometry
 import GameLogic.Object
+import qualified GameLogic.GenericWorld as GW
+import Misc.Descriptions
 
-type EvalType a b = State a b
-type Eval a = EvalType EvaluationContext a
-type ObjectedEval a = Eval a
+--type EvalErrorType = Either String
+--type EvalType ctx res = StateT ctx EvalErrorType res
+
+type EvalType ctx res = EitherT String (State ctx) res
+type Eval res = EvalType EvaluationContext res
 
 data EvaluationContext = EvaluationContext { _ctxNextRndNum :: Eval Int
                                            , _ctxObjectAt :: Point -> Eval (Maybe Object)
                                            , _ctxObjects :: Eval Objects
-                                           , _ctxActedObject :: Maybe Object }
+                                           }
 
 makeLenses ''EvaluationContext
 
 -- context
 
-context rndF objectsAtF objectsF = EvaluationContext rndF objectsAtF objectsF Nothing
+context = EvaluationContext
 
 nextRndNum :: Eval Int
 nextRndNum = get >>= _ctxNextRndNum
@@ -38,21 +45,13 @@ objects = get >>= _ctxObjects
 
 having prop = liftM (filter (has prop)) objects
 
-forObject obj act = do
-    ctxActedObject .= Just obj
-    act
-    ctxActedObject .= Nothing
-
-with prop act = do
-    objs <- having prop
-    mapM_ (`forObject` act) objs
-
 -- querying
 
 (~&~) p1 p2 obj = p1 obj && p2 obj
 
 infixr 3 ~&~
 
+isJustTrue :: Maybe Bool -> Bool
 isJustTrue (Just x) = x
 isJustTrue Nothing = False
 
@@ -74,14 +73,24 @@ query q = liftM (filter q) objects
 find :: (Object -> Bool) -> Eval (Maybe Object)
 find q  = liftM listToMaybe (query q) :: Eval (Maybe Object)
 
--- TODO: make it safe.
-read prop = use $ ctxActedObject . to fromJust . singular prop
+single :: (Object -> Bool) -> Eval Object
+single q = liftM fromJust (find q)
 
+read obj prop = case obj ^? prop of
+    Just x -> Right x 
+    Nothing -> Left $ describeNoProperty obj prop
+
+{-
 whenIt prop pred = do
     mbObj <- use ctxActedObject
     return $ mbObj >>= maybeStored prop pred
+-}
+-- evaluation
+
+withProperty prop act = doWithProperty :: Eval ()
+  where
+    doWithProperty = do
+        objs <- having prop
+        mapM_ act objs
 
 -- resolving
-
--- transact :: Object -> (Collision -> Bool) -> a -> a -> b
--- transact = undefined

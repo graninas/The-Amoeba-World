@@ -58,7 +58,8 @@ library
                    Test.StateInjectionTest,
                    GameLogic.Evaluation,
                    Test.EvaluationTest,
-                   Test.LensTest
+                   Test.LensTest,
+                   Misc.Descriptions
 
 executable Amoeba
   build-depends:   base >= 4
@@ -92,7 +93,8 @@ executable Amoeba
                    Test.StateInjectionTest,
                    GameLogic.Evaluation,
                    Test.EvaluationTest,
-                   Test.LensTest
+                   Test.LensTest,
+                   Misc.Descriptions
 
 c.World.Descripted
 

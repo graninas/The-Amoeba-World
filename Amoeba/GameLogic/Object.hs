@@ -5,12 +5,13 @@
 module GameLogic.Object where
 
 import Data.Default
-import Data.Monoid
+import Data.Monoid 
 import Control.Lens
 import Control.Monad.State
 import Prelude
 import qualified Data.Map as Map
-import qualified Data.Sequence as Seq
+import qualified Data.Set as Set
+import qualified Data.List as L (nub)
 
 import GameLogic.Types
 import GameLogic.Geometry
@@ -23,10 +24,16 @@ instance Monoid r => Monoid (Accessor r a) where
 type Target = Point
 
 data PassRestriction = NoFly | NoWalk | NoUndermine
+  deriving (Show, Read, Eq, Ord)
+
+data PlacementAlg = PlaceToNearestEmptyCell
+                  | PlaceToPoint Point
   deriving (Show, Read, Eq)
 
 data Fabric = Fabric { _energyCost :: Energy
-                     , _production :: Object }
+                     , _scheme :: Object
+                     , _producing :: Bool
+                     , _placementAlg :: PlacementAlg }
   deriving (Show, Read, Eq)
 
 data SelfDestructable = SelfDestructOnTarget TargetPoint
@@ -51,7 +58,7 @@ data Property = PNamed { __named :: String }
               | PBattery { __battery :: Resource Energy }
               | POwnership { __ownership :: Player }
               | PDislocation { __dislocation :: Point }
-              | PPassRestriction { __passRestriction :: Seq.Seq PassRestriction }
+              | PPassRestriction { __passRestriction :: Set.Set PassRestriction }
               | PAge { __age :: Resource Age }
               | PDirected { __directed :: Direction }
               | PFabric { __fabric :: Fabric }
@@ -87,6 +94,7 @@ setProperty = (|=)
 -- Lenses
 makeLenses ''Object
 makeLenses ''Property
+makeLenses ''PlacementAlg
 makeLenses ''Fabric
 makeLenses ''SelfDestructable
 makeLenses ''Moving
@@ -107,12 +115,16 @@ toResource (c, mbM) = resourceValidator $ Resource c mbM
 notNullValidator s | null s = error "This property can't be null."
                    | otherwise = s
 
+toPassRestriction = Set.fromList
+
+toCollision = Collision . L.nub
+
 -- TODO: remove boilerplate with TH
 namedA            = PAccessor 0    $ PNamed            .notNullValidator
 durabilityA       = PAccessor 1    $ PDurability       .toResource
 batteryA          = PAccessor 2    $ PBattery          .toResource
 ownershipA        = PAccessor 3    $ POwnership        .id
-passRestrictionA  = PAccessor 4    $ PPassRestriction  .id
+passRestrictionA  = PAccessor 4    $ PPassRestriction  .toPassRestriction
 dislocationA      = PAccessor 5    $ PDislocation      .id
 ageA              = PAccessor 6    $ PAge              .toResource
 directedA         = PAccessor 7    $ PDirected         .id
@@ -120,7 +132,7 @@ fabricA           = PAccessor 8    $ PFabric           .id
 selfDestructableA = PAccessor 9    $ PSelfDestructable .id
 movingA           = PAccessor 10   $ PMoving           .id
 layerA            = PAccessor 11   $ PLayer            .id
-collisionA        = PAccessor 12   $ PCollision        .id
+collisionA        = PAccessor 12   $ PCollision        .toCollision
 
 named            = property (key namedA)            _named
 durability       = property (key durabilityA)       _durability
@@ -136,11 +148,13 @@ moving           = property (key movingA)           _moving
 layer            = property (key layerA)            _layer
 collision        = property (key collisionA)        _collision
 
-passRestrictions = [NoFly, NoWalk, NoUndermine]
+placeToNearestEmptyCell = PlaceToNearestEmptyCell
+placeToPoint = PlaceToPoint
 
-baseFabric :: Fabric
-baseFabric = Fabric 0 def
-fromFabric f = (f ^. energyCost, f ^. production)
+noFly = NoFly
+noWalk = NoWalk
+noUndermine = NoUndermine
+passRestrictions = [noFly, noWalk, noUndermine]
 
 selfDestructOnTarget = SelfDestructOnTarget
 
@@ -159,6 +173,9 @@ batteryCharge = battery.current
 -- Don't know how to do this using lenses.
 resourced d (la, lb) = (d ^. la, d ^. lb)
 
+
+baseFabric :: Fabric
+baseFabric = Fabric 0 def True placeToNearestEmptyCell
 
 -- This should be used carefully.
 instance Monoid Object where
