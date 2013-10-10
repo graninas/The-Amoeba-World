@@ -29,8 +29,6 @@ save = undefined
 p1 = undefined
 p2 = undefined
 
-transact = undefined
-
 {-
 example = do
     rndNum <- nextRndNum
@@ -58,12 +56,12 @@ constructObject = undefined
 createProduct eCost sch = undefined
 placeProduct prod plAlg = undefined
 
-produce :: Object -> Eval ()
+--produce :: Object -> Eval ()
 produce obj = do
     f <- read obj fabric
     when (f ^. producing) $ do
-        prod <- createProduct (f ^. energyCost) (f ^. scheme)
-        placeProduct prod (f ^. placementAlg)
+        prodObj <- createProduct (f ^. energyCost) (f ^. scheme)
+        placeProduct prodObj (f ^. placementAlg)
 
 mainScenario :: Eval ()
 mainScenario = do

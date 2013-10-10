@@ -8,6 +8,7 @@ import Control.Monad
 import Control.Lens
 import Control.Applicative
 import qualified Data.Sequence as Seq
+import qualified Data.Map as Map
 import Data.Monoid
 import Data.Maybe (fromJust, isJust, listToMaybe)
 import Prelude hiding (read)
@@ -17,13 +18,16 @@ import GameLogic.Object
 import qualified GameLogic.GenericWorld as GW
 import Misc.Descriptions
 
+type TransactionMap = GW.GenericMap Object
+
 data EvalError = NoSuchProperty String
   deriving (Show, Read, Eq)
 
 type EvalType ctx res = EitherT EvalError (State ctx) res
 type Eval res = EvalType EvaluationContext res
 
-data EvaluationContext = EvaluationContext { _ctxNextRndNum :: Eval Int
+data EvaluationContext = EvaluationContext { _ctxTransactionMap :: TransactionMap
+                                           , _ctxNextRndNum :: Eval Int
                                            , _ctxObjectAt :: Point -> Eval (Maybe Object)
                                            , _ctxObjects :: Eval Objects
                                            }
@@ -32,7 +36,7 @@ makeLenses ''EvaluationContext
 
 -- context
 
-context = EvaluationContext
+context = EvaluationContext GW.emptyMap
 
 nextRndNum :: Eval Int
 nextRndNum = get >>= _ctxNextRndNum
@@ -88,11 +92,21 @@ whenIt prop pred = do
 
 -- evaluation
 
+transact act obj = doTransact :: Eval ()
+  where
+    doTransact = do
+        let acted = act obj
+        oldTransMap <- use ctxTransactionMap
+        eitherT (rollback oldTransMap) commit acted
+    rollback m _ = void (ctxTransactionMap .= m) :: Eval ()
+    commit _ = return ()
+    
+    
 withProperty prop act = doWithProperty :: Eval ()
   where
     doWithProperty = do
         objs <- having prop
-        mapM_ act objs
+        mapM_ (transact act) objs
 
 evaluate scn = evalState (runEitherT scn)
 

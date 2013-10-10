@@ -28,7 +28,8 @@ fromList list = GenericWorld wm b
 resetWorldMap :: GenericCell c => CelledWorld c -> GenericMap c -> CelledWorld c
 resetWorldMap w wm = w { worldMap = wm }
 
-emptyWorld = GenericWorld Map.empty noBound
+emptyMap = Map.empty
+emptyWorld = GenericWorld emptyMap noBound
 
 class Eq c => GenericCell c where
     empty :: c

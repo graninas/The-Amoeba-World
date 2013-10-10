@@ -9,6 +9,9 @@ import Data.Monoid
 import System.Random
 import Control.Lens
 import Control.Monad.State
+import Control.Monad.Trans
+import Control.Monad.Trans.Either as E
+import Control.Monad
 import Control.Applicative ((<$>), (<*>))
 import Control.Monad (when)
 import Test.QuickCheck

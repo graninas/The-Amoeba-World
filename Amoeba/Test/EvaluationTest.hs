@@ -91,7 +91,6 @@ prop_query2 name l seed = (length queried == M.size (game ^. world.worldMap)) &&
     evaluated = evaluate (query justAll) ctx
     queried = evaluated ^. _Right
 
-
 tests :: IO Bool
 tests = $quickCheckAll
 
