@@ -56,7 +56,7 @@ data Collision = Collision { _collidings :: Objects }
 data Named = Named String
   deriving (Show, Read, Eq)
 
-data Dislocation = Dislocation Point
+data Dislocation = Dislocation { _dislocationPoint :: Point }
   deriving (Show, Read, Eq)
   
 
@@ -108,6 +108,7 @@ makeLenses ''Moving
 makeLenses ''Layer
 makeLenses ''Collision
 makeLenses ''Resource
+makeLenses ''Dislocation
 
 property k l = propertyMap . at k . traverse . l
 
@@ -156,6 +157,8 @@ selfDestructable = property (key selfDestructableA) _selfDestructable
 moving           = property (key movingA)           _moving
 layer            = property (key layerA)            _layer
 collision        = property (key collisionA)        _collision
+
+objectDislocation = dislocation.dislocationPoint
 
 placeToNearestEmptyCell = PlaceToNearestEmptyCell
 placeToPoint = PlaceToPoint

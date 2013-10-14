@@ -11,7 +11,6 @@ import Control.Lens
 import Control.Monad.State
 import Control.Monad.Trans
 import Control.Monad.Trans.Either as E
-import Control.Monad
 import Control.Applicative ((<$>), (<*>))
 import Control.Monad (when)
 import Test.QuickCheck
@@ -22,7 +21,7 @@ import Test.Utils.Arbitraries
 
 import GameLogic.World
 import GameLogic.Player
-import GameLogic.Geometry
+import GameLogic.Geometry as G
 import GameLogic.Objects
 import GameLogic.Object
 import GameLogic.Scenario
@@ -33,7 +32,7 @@ blankGame = initialGame 1
 
 plasma1    = putObject point1 $ plasma player1
 plasma2    = putObject point2 $ plasma player1
-soundWave1 = putObject point3 $ soundWave player1 left 10
+soundWave1 = putObject point3 $ soundWave player1 G.left 10
 laserBeam1 = putObject point4 $ laserBeam player2 up 200
 karyon1    = putObject point5 $ karyon player2
 testGame   = testGame'
@@ -48,20 +47,20 @@ insertObject p props = world %= insertCell p props
 -- this function can be optimized by saving property information anywhere.
 getP obj p = obj ^. singular p
 
-deleteObject' obj = deleteObject (getP obj dislocation)
-insertObject' obj = insertObject (getP obj dislocation) obj
+deleteObject' obj = deleteObject (getP obj objectDislocation)
+insertObject' obj = insertObject (getP obj objectDislocation) obj
 
 moveObject' obj = let
-    d = getP obj dislocation
+    d = getP obj objectDislocation
     mv = getP obj moving
     newPoint = move d mv
-    in dislocation .~ newPoint $ obj
+    in objectDislocation .~ newPoint $ obj
 
 moveObject'' :: Object -> Point -> Object
-moveObject'' obj p = dislocation .~ p $ obj
+moveObject'' obj p = objectDislocation .~ p $ obj
 
 trackMovingPath obj = let
-    startPoint = getP obj dislocation
+    startPoint = getP obj objectDislocation
     mv = getP obj moving
     points = path startPoint mv
     in track points withLast moveObject'' obj

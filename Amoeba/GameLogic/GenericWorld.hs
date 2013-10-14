@@ -26,7 +26,8 @@ fromList list = GenericWorld wm b
     b = occupiedArea (map fst list)
 
 resetWorldMap :: GenericCell c => CelledWorld c -> GenericMap c -> CelledWorld c
-resetWorldMap w wm = w { worldMap = wm }
+resetWorldMap w wm = w { worldMap = wm
+                       , worldBound = worldMapBound wm }
 
 emptyMap = Map.empty
 emptyWorld = GenericWorld emptyMap noBound
@@ -35,22 +36,26 @@ class Eq c => GenericCell c where
     empty :: c
     merge :: c -> c -> c
 
-alterWorld :: GenericCell c => CelledWorld c -> [(Point, c)] -> CelledWorld c
-alterWorld = foldl alterCell
-
-alterCell :: GenericCell c => CelledWorld c -> (Point, c) -> CelledWorld c
-alterCell (GenericWorld m b) (p, c) = GenericWorld newMap b'
+alterMapCell :: GenericCell c => GenericMap c -> (Point, c) -> GenericMap c
+alterMapCell m (p, c) = f m
   where
+    f = Map.alter alteringFunc p
     alteringFunc oldCell | empty == c = Nothing
                          | otherwise = Just . maybe c (merge c) $ oldCell
-    f = Map.alter alteringFunc p
-    newMap = f m
+                         
+alterCell :: GenericCell c => CelledWorld c -> (Point, c) -> CelledWorld c
+alterCell (GenericWorld m b) objDef@(p, c) = GenericWorld newMap b'
+  where
+    newMap = alterMapCell m objDef
     b' = if Map.null newMap then NoBound
                             else updateRectBound p b
 
-refreshWorldBound w = let wmKeys = Map.keys . worldMap $ w
-                          newBound = foldr updateRectBound NoBound wmKeys
-                      in w { worldBound = newBound }
+alterWorld :: GenericCell c => CelledWorld c -> [(Point, c)] -> CelledWorld c
+alterWorld = foldl alterCell
+
+worldMapBound wm = foldr updateRectBound NoBound (Map.keys wm)
+
+refreshWorldBound w = w { worldBound = worldMapBound $ worldMap w }
 
 -- Graph
 

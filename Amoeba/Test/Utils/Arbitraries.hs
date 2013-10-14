@@ -4,13 +4,20 @@ module Test.Utils.Arbitraries where
 
 import Test.QuickCheck
 import Control.Monad
+import System.Random
 import qualified Linear as L
 import qualified Data.List as List
 import qualified Data.Set as Set
+import Data.Maybe (fromJust)
+import Data.Foldable (foldlM)
+import Control.Lens ((^?))
 
 import GameLogic.Geometry
 import GameLogic.Player
+import GameLogic.Game
+import GameLogic.World
 import GameLogic.Object as O
+import qualified GameLogic.GenericWorld as GW
 import GameLogic.Evaluation hiding (suchThat)
 
 instance Arbitrary (L.V3 Int) where
@@ -62,13 +69,13 @@ instance Arbitrary Dislocation where
     arbitrary = liftM Dislocation arbitrary
     
 -- TODO: add another properties
-propertiesCount = 13
+propertiesCount = 11
 instance Arbitrary O.Property where
     arbitrary = oneof [ liftM PNamed (arbitrary `suchThat` isNamedValid)
                       , liftM PDurability (arbitrary `suchThat` isResourceValid)
                       , liftM PBattery  (arbitrary `suchThat` isResourceValid)
                       , liftM POwnership arbitrary
-                      , liftM PDislocation arbitrary
+                      --, liftM PDislocation arbitrary
                       , liftM PPassRestriction arbitrary
                       , liftM PAge (arbitrary `suchThat` isResourceValid)
                       , liftM PDirected arbitrary
@@ -82,11 +89,39 @@ instance Arbitrary O.Property where
 instance Arbitrary O.PropertyMap where
     arbitrary = sized pm
       where
-            pm 0 = return emptyPropertyMap
-            pm n | n > 0 = let propArbitraries = replicate n arbitrary
-                               em = return emptyPropertyMap
-                               k = choose (0, propertiesCount)
-                           in foldr (liftM3 insertProperty k) em propArbitraries
+            pm n | n <= 0 = return emptyPropertyMap
+            pm n | n > 0  = let propArbitraries = replicate n arbitrary
+                                dislocated = liftM PDislocation arbitrary : propArbitraries
+                                em = return emptyPropertyMap
+                                k = choose (0, propertiesCount)
+                            in foldr (liftM3 insertProperty k) em dislocated
 
 instance Arbitrary O.Object where
     arbitrary = liftM O.Object arbitrary
+
+instance Arbitrary (GW.GenericMap Object) where
+    arbitrary = sized gm
+      where
+        gm n | n <= 0 = return GW.emptyMap
+        gm n = foldl (liftM2 GW.alterMapCell) (return GW.emptyMap) (objList n)
+
+        objList :: Int -> [Gen (Point, Object)]
+        objList 0 = []
+        objList n = i : objList (n - 1)
+        i = do obj <- arbitrary :: Gen Object
+               let p = fromJust $ obj ^? dislocation . dislocationPoint
+               return (p, obj)
+
+            
+
+instance Arbitrary World where
+    arbitrary = liftM2 GW.GenericWorld wmGen b
+      where
+        wmGen = arbitrary :: Gen (GW.GenericMap O.Object)
+        b = do wm <- wmGen
+               return $ GW.worldMapBound wm
+    
+instance Arbitrary Game where
+    arbitrary = sized g
+      where
+        g s = liftM2 Game arbitrary (return $ mkStdGen s)
