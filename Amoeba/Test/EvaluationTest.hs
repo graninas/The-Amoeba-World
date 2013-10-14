@@ -92,7 +92,9 @@ prop_query2 name l seed = (length queriedObjects == wmSize) && (not . null $ que
     evaluatedObjects = evaluate (query justAll) ctx
     queriedObjects = evaluatedObjects ^. _Right
 
-prop_single game =  classify (isGameEmpty game) "trivial" test
+prop_single game = ( classify isNothingFound  "nothing found"
+                   . classify isSingleFound   "single found"
+                   . classify isMultipleFound "multiple found") test
   where
     q = has objectDislocation
     ctx = testContext game
