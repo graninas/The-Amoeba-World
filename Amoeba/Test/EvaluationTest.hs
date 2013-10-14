@@ -78,18 +78,21 @@ prop_objectAt2 seed = (obj1 == obj2) && isJust (obj1 ^. _Right)
     obj1 = evaluate (objectAt point1) ctx
     obj2 = Right $ game ^. objects . at point1
 
-prop_query1 seed = queried == expected
+prop_query1 seed = evaluatedObject == expectedSoundWave
   where
     (game, ctx) = testGameAndContext seed
     q = find $ layer `is` sky ~&~ named `is` toNamed "SoundWave"
-    queried = evaluate q ctx
-    expected = Right . Just $ soundWave player1 left 10 point3
+    evaluatedObject = evaluate q ctx
+    expectedSoundWave = Right . Just $ soundWave player1 left 10 point3
 
-prop_query2 name l seed = (length queried == M.size (game ^. world.worldMap)) && (not . null $ queried)
+prop_query2 name l seed = (length queriedObjects == wmSize) && (not . null $ queriedObjects)
   where
     (game, ctx) = testGameAndContext seed
-    evaluated = evaluate (query justAll) ctx
-    queried = evaluated ^. _Right
+    wmSize = M.size (game ^. world.worldMap)
+    evaluatedObjects = evaluate (query justAll) ctx
+    queriedObjects = evaluatedObjects ^. _Right
+
+
 
 tests :: IO Bool
 tests = $quickCheckAll

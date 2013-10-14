@@ -42,23 +42,24 @@ example = do
     transact obj1 energyPosted saveEnergy remove
     transact obj2 selfDestruct remove save
 -}
-{-
-withdrawEnergy obj cnt = forObject obj $ do
-    mbCh <- batteryCharge `whenIt` (>= cnt)
-    case mbCh of
-        Nothing -> return Nothing
-        Just ch -> return . Just 
--}
 
-withdrawEnergy = undefined
+withdrawEnergy pl cnt = do
+    mbK <- lift $ find $ ownership `is` pl ~&~ batteryCharge `suchThat` (>= cnt)
+    
+    return mbK 
+
+
 constructObject = undefined
 
-createProduct eCost sch = undefined
+createProduct eCost sch = do
+    pl <- read ownership
+    withdrawEnergy pl eCost
+    return ()
+    
 placeProduct prod plAlg = undefined
 
---produce :: Object -> Eval ()
-produce obj = do
-    f <- read obj fabric
+produce = do
+    f <- read fabric
     when (f ^. producing) $ do
         prodObj <- createProduct (f ^. energyCost) (f ^. scheme)
         placeProduct prodObj (f ^. placementAlg)

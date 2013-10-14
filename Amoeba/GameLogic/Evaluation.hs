@@ -21,12 +21,16 @@ import Misc.Descriptions
 type TransactionMap = GW.GenericMap Object
 
 data EvalError = NoSuchProperty String
+               | NoActedObjectSet
+               | NotFound
+               | OverlappedObjects Objects
   deriving (Show, Read, Eq)
 
 type EvalType ctx res = EitherT EvalError (State ctx) res
 type Eval res = EvalType EvaluationContext res
 
 data EvaluationContext = EvaluationContext { _ctxTransactionMap :: TransactionMap
+                                           , _ctxActedObject :: Maybe Object
                                            , _ctxNextRndNum :: Eval Int
                                            , _ctxObjectAt :: Point -> Eval (Maybe Object)
                                            , _ctxObjects :: Eval Objects
@@ -34,9 +38,15 @@ data EvaluationContext = EvaluationContext { _ctxTransactionMap :: TransactionMa
 
 makeLenses ''EvaluationContext
 
--- context
+noSuchProperty = NoSuchProperty
+noActedObjectSet = NoActedObjectSet
+notFound = NotFound
+overlappedObjects = OverlappedObjects
 
-context = EvaluationContext GW.emptyMap
+-- context
+noActedObject = Nothing
+
+context = EvaluationContext GW.emptyMap noActedObject
 
 nextRndNum :: Eval Int
 nextRndNum = get >>= _ctxNextRndNum
@@ -72,17 +82,29 @@ justAll :: Object -> Bool
 justAll _ = True
 
 query :: (Object -> Bool) -> Eval Objects
-query q = liftM (filter q) objects
+query q = do
+    objs <- liftM (filter q) objects
+    case objs of
+        [] -> E.left notFound
+        xs -> E.right xs
 
 find :: (Object -> Bool) -> Eval (Maybe Object)
 find q  = liftM listToMaybe (query q) :: Eval (Maybe Object)
 
 single :: (Object -> Bool) -> Eval Object
-single q = liftM fromJust (find q)
+single q = do
+    found <- query q
+    case found of
+        [] -> E.left notFound
+        (x:[]) -> E.right x
+        xs -> E.left $ overlappedObjects xs
 
-read obj prop = case obj ^? prop of
-    Just x -> E.right x 
-    Nothing -> E.left $ NoSuchProperty (nameProperty prop)
+read prop = use ctxActedObject >>= checkPropertyExist
+  where
+    checkPropertyExist Nothing = E.left NoActedObjectSet
+    checkPropertyExist mbObj = case mbObj ^? _Just . prop of -- TODO: there is a conversion func Maybe -> Either.
+            Just x -> E.right x 
+            Nothing -> E.left $ NoSuchProperty (nameProperty prop)
 
 {-
 whenIt prop pred = do
@@ -92,12 +114,16 @@ whenIt prop pred = do
 
 -- evaluation
 
+setupActedObject obj = ctxActedObject .= Just obj
+dropActedObject = ctxActedObject .= Nothing
+
 transact act obj = doTransact :: Eval ()
   where
     doTransact = do
-        let acted = act obj
+        setupActedObject obj
         oldTransMap <- use ctxTransactionMap
-        eitherT (rollback oldTransMap) commit acted
+        eitherT (rollback oldTransMap) commit act
+        dropActedObject
     rollback m _ = void (ctxTransactionMap .= m) :: Eval ()
     commit _ = return ()
     
@@ -109,4 +135,5 @@ withProperty prop act = doWithProperty :: Eval ()
         mapM_ (transact act) objs
 
 evaluate scn = evalState (runEitherT scn)
+execute scn = execState (runEitherT scn)
 
