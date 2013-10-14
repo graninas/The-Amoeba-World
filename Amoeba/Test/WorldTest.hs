@@ -75,48 +75,11 @@ moveObject obj = do
         g <- get
         return $ Right g
 
-selectScenario accessor | accessor == movingA = Just moveObject
-                        | otherwise           = Nothing
-
-evalScenario Nothing _ g = Left g
-evalScenario (Just scenario) obj g = evalState (scenario obj) g
-
-activate prop obj g = let scenario = selectScenario prop
-                      in evalScenario scenario obj g
-
-applyRunResult :: Either Game Game -> Game
-applyRunResult (Right g) = g
-applyRunResult (Left g)  = g
-
-runScenarios :: Point -> Object -> Game -> Game
-runScenarios k obj g = let runResult1 = activate movingA obj g
-                       in applyRunResult runResult1
-
-step :: Game -> Game
-step g = M.foldrWithKey runScenarios g (g ^. world.worldMap)
-
-
 newRndNum :: State StdGen Int
 newRndNum = do
     (newNum, newG) <- liftM random get
     put newG
     return newNum
-
-data Logic = Logic
-
-logic = undefined
-
-apply lr g = lr
-eval l rnd objs = undefined
-
-evaluate :: Logic -> Game -> Game
-evaluate l g = let logicResult = eval l (g ^. rndGen) (g ^. objects)
-               in apply logicResult g
-
-step' :: Game -> Game
-step' g = evaluate (g ^. logic) g
-
-
 
 insertOnly :: Game -> Game
 insertOnly = execState insert'
@@ -150,8 +113,17 @@ prop_insertAndDelete2  = insertAndDelete testGame == testGame
 prop_moveSingleObject1 = moveSingleObject point3 blankGame == blankGame
 prop_moveSingleObject2 = moveSingleObject point3 testGame `notElem` [testGame, blankGame]
 
-prop_evalScenarios = step testGame == foldr moveSingleObject testGame [point3, point4]
+--------
 
+hasDislObj = Object {_propertyMap = M.fromList [(5,PDislocation {__dislocation = Dislocation {_dislocationPoint = G.point (-1) (-1) 1}}),(4,PAge {__age = Resource {_current = 2, _capacity = Nothing}})]}
+prop_hasDislocationTest = has dislocation hasDislObj
+
+prop_hasDislocation game seed = all hasDislocation objs
+  where
+    objs = M.toList $ game ^. objects
+    hasDislocation (_, obj) = has dislocation obj
+    types1 = game :: Game
+    types2 = seed :: Int
 
 tests :: IO Bool
 tests = $quickCheckAll
@@ -180,8 +152,4 @@ printTestData = do
     print $ moveSingleObject point3 testGame
 
 main :: IO ()
-main = do
-    runTests
-    printTestData
-    putStrLn "\nMoving all movable objects:"
-    print $ step testGame
+main = runTests

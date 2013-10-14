@@ -92,11 +92,6 @@ prop_query2 name l seed = (length queriedObjects == wmSize) && (not . null $ que
     evaluatedObjects = evaluate (query justAll) ctx
     queriedObjects = evaluatedObjects ^. _Right
 
-prop_query3 game seed = True
-  where
-    types1 = game :: Game
-    types2 = seed :: Int
-
 
 tests :: IO Bool
 tests = $quickCheckAll

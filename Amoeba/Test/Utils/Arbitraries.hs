@@ -10,7 +10,7 @@ import qualified Data.List as List
 import qualified Data.Set as Set
 import Data.Maybe (fromJust)
 import Data.Foldable (foldlM)
-import Control.Lens ((^?))
+import Control.Lens ((^?), (^.))
 
 import GameLogic.Geometry
 import GameLogic.Player
@@ -69,14 +69,12 @@ instance Arbitrary Dislocation where
     arbitrary = liftM Dislocation arbitrary
     
 -- TODO: add another properties
-propertiesCount = 11
-instance Arbitrary O.Property where
-    arbitrary = oneof [ liftM PNamed (arbitrary `suchThat` isNamedValid)
+propertyArbitraries = [ liftM PNamed (arbitrary `suchThat` isNamedValid)
                       , liftM PDurability (arbitrary `suchThat` isResourceValid)
                       , liftM PBattery  (arbitrary `suchThat` isResourceValid)
                       , liftM POwnership arbitrary
-                      --, liftM PDislocation arbitrary
                       , liftM PPassRestriction arbitrary
+                      , liftM PDislocation arbitrary
                       , liftM PAge (arbitrary `suchThat` isResourceValid)
                       , liftM PDirected arbitrary
                       , liftM PFabric arbitrary
@@ -86,15 +84,27 @@ instance Arbitrary O.Property where
                       --, liftM Collision arbitrary
                       ]
 
+instance Arbitrary O.Property where
+    arbitrary = oneof propertyArbitraries
+
+data ValidProperty = ValidProperty O.PropertyKey O.Property
+
+instance Arbitrary ValidProperty where
+    arbitrary = sized vp
+      where
+            propIdx k = k `mod` length propertyArbitraries
+            propArb k = propertyArbitraries !! propIdx k
+            vp n = liftM2 ValidProperty (return $ propIdx n) (propArb n)
+
 instance Arbitrary O.PropertyMap where
     arbitrary = sized pm
       where
-            pm n | n <= 0 = return emptyPropertyMap
-            pm n | n > 0  = let propArbitraries = replicate n arbitrary
-                                dislocated = liftM PDislocation arbitrary : propArbitraries
-                                em = return emptyPropertyMap
-                                k = choose (0, propertiesCount)
-                            in foldr (liftM3 insertProperty k) em dislocated
+            pm n = let validProps = replicate n arbitrary :: [Gen ValidProperty]
+                       insertProperty' gVP mM = do
+                            (ValidProperty k p) <- gVP
+                            m <- mM
+                            return $ insertProperty k p m
+                   in foldr insertProperty' (return emptyPropertyMap) validProps
 
 instance Arbitrary O.Object where
     arbitrary = liftM O.Object arbitrary
@@ -104,15 +114,18 @@ instance Arbitrary (GW.GenericMap Object) where
       where
         gm n | n <= 0 = return GW.emptyMap
         gm n = foldl (liftM2 GW.alterMapCell) (return GW.emptyMap) (objList n)
-
         objList :: Int -> [Gen (Point, Object)]
         objList 0 = []
         objList n = i : objList (n - 1)
         i = do obj <- arbitrary :: Gen Object
-               let p = fromJust $ obj ^? dislocation . dislocationPoint
-               return (p, obj)
-
-            
+               rndP <- arbitrary :: Gen Point
+               let rndDislK = key dislocationA
+               let dislProp = PDislocation $ Dislocation rndP
+               let dislocatedPropMap = insertProperty rndDislK dislProp (obj ^. propertyMap)
+               let (p, obj') = case obj ^? dislocation . dislocationPoint of
+                        Just dp -> (dp, obj)
+                        Nothing -> (rndP, Object dislocatedPropMap)
+               return (p, obj')
 
 instance Arbitrary World where
     arbitrary = liftM2 GW.GenericWorld wmGen b
