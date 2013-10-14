@@ -92,6 +92,17 @@ prop_query2 name l seed = (length queriedObjects == wmSize) && (not . null $ que
     evaluatedObjects = evaluate (query justAll) ctx
     queriedObjects = evaluatedObjects ^. _Right
 
+prop_single game =  classify (isGameEmpty game) "trivial" test
+  where
+    q = has objectDislocation
+    ctx = testContext game
+    evaluatedObject = evaluate (single q) ctx
+    manyObjects = evaluate (query q) ctx
+    isSingleFound = has _Right evaluatedObject && (not . isGameEmpty $ game)
+    isMultipleFound = has _Left evaluatedObject && (length (manyObjects ^. _Right) > 1)
+    isNothingFound = has _Left evaluatedObject && isGameEmpty game
+    test = isNothingFound || isSingleFound || isMultipleFound
+    types = game :: Game
 
 tests :: IO Bool
 tests = $quickCheckAll
@@ -101,13 +112,4 @@ runTests = tests >>= \passed -> putStrLn $
             else "Some tests failed."
 
 main :: IO ()
-main = do
-    runTests
-
-    let (game, ctx) = testGameAndContext 1
-    print $ evaluate nextRndNum ctx
-
-    putStrLn ""
-    let q = find $ layer `is` sky ~&~ named `is` toNamed "SoundWave"
-    let queried = evaluate q ctx
-    print queried
+main = runTests

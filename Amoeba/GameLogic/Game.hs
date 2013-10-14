@@ -18,6 +18,8 @@ makeLenses ''Game
 
 initialGame seed = Game emptyWorld (mkStdGen seed)
 
+isGameEmpty game = game ^. world == emptyWorld
+
 objects :: Lens' Game WorldMap
 objects = world.worldMap
 

@@ -109,6 +109,7 @@ instance Arbitrary O.PropertyMap where
 instance Arbitrary O.Object where
     arbitrary = liftM O.Object arbitrary
 
+-- | All objects will have dislocation property.
 instance Arbitrary (GW.GenericMap Object) where
     arbitrary = sized gm
       where
@@ -122,7 +123,7 @@ instance Arbitrary (GW.GenericMap Object) where
                let rndDislK = key dislocationA
                let dislProp = PDislocation $ Dislocation rndP
                let dislocatedPropMap = insertProperty rndDislK dislProp (obj ^. propertyMap)
-               let (p, obj') = case obj ^? dislocation . dislocationPoint of
+               let (p, obj') = case obj ^? objectDislocation of
                         Just dp -> (dp, obj)
                         Nothing -> (rndP, Object dislocatedPropMap)
                return (p, obj')
