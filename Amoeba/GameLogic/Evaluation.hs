@@ -28,6 +28,7 @@ data EvalError = NoSuchProperty String
 
 type EvalType ctx res = EitherT EvalError (State ctx) res
 type Eval res = EvalType EvaluationContext res
+type EvalState res = State EvaluationContext res
 
 data EvaluationContext = EvaluationContext { _ctxTransactionMap :: TransactionMap
                                            , _ctxActedObject :: Maybe Object
@@ -95,45 +96,70 @@ single :: (Object -> Bool) -> Eval Object
 single q = do
     found <- query q
     case found of
-        [] -> E.left notFound
+        []     -> E.left notFound
         (x:[]) -> E.right x
-        xs -> E.left $ overlappedObjects xs
+        xs     -> E.left $ overlappedObjects xs
 
 read prop = use ctxActedObject >>= checkPropertyExist
   where
-    checkPropertyExist Nothing = E.left NoActedObjectSet
+    checkPropertyExist Nothing = E.left noActedObjectSet
     checkPropertyExist mbObj = case mbObj ^? _Just . prop of -- TODO: there is a conversion func Maybe -> Either.
             Just x -> E.right x 
-            Nothing -> E.left $ NoSuchProperty (nameProperty prop)
+            Nothing -> E.left $ noSuchProperty (nameProperty prop)
 
-{-
-whenIt prop pred = do
-    mbObj <- use ctxActedObject
-    return $ mbObj >>= maybeStored prop pred
--}
+save :: Object -> Eval ()
+save obj = do
+    let d = obj ^. singular objectDislocation
+    ctxTransactionMap . at d .= Just obj
 
 -- evaluation
 
+setupActedObject :: Object -> EvalState ()
 setupActedObject obj = ctxActedObject .= Just obj
+dropActedObject :: EvalState ()
 dropActedObject = ctxActedObject .= Nothing
 
-transact act obj = doTransact :: Eval ()
-  where
-    doTransact = do
+rollback :: TransactionMap -> EvalError -> EvalState String
+rollback m err = do
+    ctxTransactionMap .= m
+    return $ "Transaction error: " ++ show err
+commit :: String -> EvalState String
+commit = return
+
+transact :: Eval String -> Object -> EvalState String
+transact act obj = do
         setupActedObject obj
         oldTransMap <- use ctxTransactionMap
-        eitherT (rollback oldTransMap) commit act
+        actRes <- eitherT (rollback oldTransMap) commit act
         dropActedObject
-    rollback m _ = void (ctxTransactionMap .= m) :: Eval ()
-    commit _ = return ()
-    
-    
+        return actRes
+
 withProperty prop act = doWithProperty :: Eval ()
   where
     doWithProperty = do
         objs <- having prop
-        mapM_ (transact act) objs
+        evalTransact act objs
 
-evaluate scn = evalState (runEitherT scn)
-execute scn = execState (runEitherT scn)
+evalTransact :: Eval String -> Objects -> Eval ()
+evalTransact act [] = return ()
+evalTransact act (o:os) = do
+    ctx <- get
+    let (_, newCtx) = runState (transact act o) ctx
+    put newCtx
+    evalTransact act os
 
+evaluate scenario = evalState (runEitherT scenario)
+execute scenario = execState (runEitherT scenario)
+
+--         ctx <- get
+--        let evalAct = eitherT (rollback oldTransMap) commit act
+--        let resStr = evalState evalAct ctx
+        
+-- eitherT :: Monad m => (a -> m c) -> (b -> m c) -> EitherT a m b -> m c
+-- act :: EitherT a m b
+-- produce :: EitherT EvalError (State EvaluationContext) String
+-- a :: EvalError
+-- b :: String
+-- m :: State EvaluationContext
+-- rollback :: TransactionMap -> EvalError -> State EvaluationContext String
+-- commit :: String -> State EvaluationContext String

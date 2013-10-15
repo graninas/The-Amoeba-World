@@ -99,10 +99,10 @@ prop_single game = ( classify isNothingFound  "nothing found"
     q = has objectDislocation
     ctx = testContext game
     evaluatedObject = evaluate (single q) ctx
-    manyObjects = evaluate (query q) ctx
-    isSingleFound = has _Right evaluatedObject && (not . isGameEmpty $ game)
-    isMultipleFound = has _Left evaluatedObject && (length (manyObjects ^. _Right) > 1)
-    isNothingFound = has _Left evaluatedObject && isGameEmpty game
+    manyObjects     = evaluate (query  q) ctx
+    isSingleFound   = has _Right evaluatedObject && (not . isGameEmpty $ game)
+    isMultipleFound = has _Left  evaluatedObject && (length (manyObjects ^. _Right) > 1)
+    isNothingFound  = has _Left  evaluatedObject && isGameEmpty game
     test = isNothingFound || isSingleFound || isMultipleFound
     types = game :: Game
 
