@@ -24,6 +24,7 @@ import GameLogic.Objects
 import GameLogic.Object
 import GameLogic.Scenario
 import GameLogic.Evaluation hiding (objects)
+import qualified GameLogic.GenericWorld as GW
 import GameLogic.Game
 import GameLogic.AI
 import Misc.Descriptions
@@ -92,9 +93,9 @@ prop_query2 name l seed = (length queriedObjects == wmSize) && (not . null $ que
     evaluatedObjects = evaluate (query justAll) ctx
     queriedObjects = evaluatedObjects ^. _Right
 
-prop_single game = ( classify isNothingFound  "nothing found"
-                   . classify isSingleFound   "single found"
-                   . classify isMultipleFound "multiple found") test
+prop_mandatoryDislocation game = ( classify isNothingFound  "nothing found"
+                                 . classify isSingleFound   "single found"
+                                 . classify isMultipleFound "multiple found") test
   where
     q = has objectDislocation
     ctx = testContext game
@@ -104,7 +105,35 @@ prop_single game = ( classify isNothingFound  "nothing found"
     isMultipleFound = has _Left  evaluatedObject && (length (manyObjects ^. _Right) > 1)
     isNothingFound  = has _Left  evaluatedObject && isGameEmpty game
     test = isNothingFound || isSingleFound || isMultipleFound
-    types = game :: Game
+    
+testSingleProperty game prop = ( classify isSingleFound "single found"
+                               . classify isQueryError1 "ENotFound error"
+                               . classify isQueryError2 "EOverlappedObjects error") test
+  where
+    q = has prop
+    ctx = testContext game
+    evaluatedObject = evaluate (single q) ctx
+    singularError   = evaluatedObject ^. singular _Left
+    hasLeft         = has _Left  evaluatedObject
+    hasRight        = has _Right evaluatedObject
+    isSingleFound   = hasRight
+    isQueryError1   = hasLeft && isENotFound singularError
+    isQueryError2   = hasLeft && isEOverlappedObjects singularError
+    test = isSingleFound || isQueryError1 || isQueryError2
+
+prop_singleNamed       game = testSingleProperty game named
+prop_singleDurability  game = testSingleProperty game durability
+prop_singleBattery     game = testSingleProperty game battery
+prop_singleOwnership   game = testSingleProperty game ownership
+prop_singleDislocation game = testSingleProperty game dislocation
+prop_singlePassRestr   game = testSingleProperty game passRestriction
+prop_singleAge         game = testSingleProperty game age
+prop_singleDirected    game = testSingleProperty game directed
+prop_singleFabric      game = testSingleProperty game fabric
+prop_singleSelfDestr   game = testSingleProperty game selfDestructable
+prop_singleMoving      game = testSingleProperty game moving
+prop_singleLayer       game = testSingleProperty game layer
+prop_singleCollision   game = testSingleProperty game collision
 
 tests :: IO Bool
 tests = $quickCheckAll
@@ -115,3 +144,4 @@ runTests = tests >>= \passed -> putStrLn $
 
 main :: IO ()
 main = runTests
+    

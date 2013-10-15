@@ -20,10 +20,10 @@ import Misc.Descriptions
 
 type TransactionMap = GW.GenericMap Object
 
-data EvalError = NoSuchProperty String
-               | NoActedObjectSet
-               | NotFound
-               | OverlappedObjects Objects
+data EvalError = ENoSuchProperty String
+               | ENoActedObjectSet
+               | ENotFound
+               | EOverlappedObjects Objects
   deriving (Show, Read, Eq)
 
 type EvalType ctx res = EitherT EvalError (State ctx) res
@@ -39,10 +39,14 @@ data EvaluationContext = EvaluationContext { _ctxTransactionMap :: TransactionMa
 
 makeLenses ''EvaluationContext
 
-noSuchProperty = NoSuchProperty
-noActedObjectSet = NoActedObjectSet
-notFound = NotFound
-overlappedObjects = OverlappedObjects
+eNoSuchProperty = ENoSuchProperty
+eNoActedObjectSet = ENoActedObjectSet
+eNotFound = ENotFound
+eOverlappedObjects = EOverlappedObjects
+isEOverlappedObjects (EOverlappedObjects _) = True
+isEOverlappedObjects _ = False
+isENotFound ENotFound = True
+isENotFound _ = False
 
 -- context
 noActedObject = Nothing
@@ -86,7 +90,7 @@ query :: (Object -> Bool) -> Eval Objects
 query q = do
     objs <- liftM (filter q) objects
     case objs of
-        [] -> E.left notFound
+        [] -> E.left eNotFound
         xs -> E.right xs
 
 find :: (Object -> Bool) -> Eval (Maybe Object)
@@ -96,16 +100,16 @@ single :: (Object -> Bool) -> Eval Object
 single q = do
     found <- query q
     case found of
-        []     -> E.left notFound
+        []     -> E.left eNotFound
         (x:[]) -> E.right x
-        xs     -> E.left $ overlappedObjects xs
+        xs     -> E.left $ eOverlappedObjects xs
 
 read prop = use ctxActedObject >>= checkPropertyExist
   where
-    checkPropertyExist Nothing = E.left noActedObjectSet
+    checkPropertyExist Nothing = E.left eNoActedObjectSet
     checkPropertyExist mbObj = case mbObj ^? _Just . prop of -- TODO: there is a conversion func Maybe -> Either.
             Just x -> E.right x 
-            Nothing -> E.left $ noSuchProperty (nameProperty prop)
+            Nothing -> E.left $ eNoSuchProperty (nameProperty prop)
 
 save :: Object -> Eval ()
 save obj = do
@@ -151,15 +155,3 @@ evalTransact act (o:os) = do
 evaluate scenario = evalState (runEitherT scenario)
 execute scenario = execState (runEitherT scenario)
 
---         ctx <- get
---        let evalAct = eitherT (rollback oldTransMap) commit act
---        let resStr = evalState evalAct ctx
-        
--- eitherT :: Monad m => (a -> m c) -> (b -> m c) -> EitherT a m b -> m c
--- act :: EitherT a m b
--- produce :: EitherT EvalError (State EvaluationContext) String
--- a :: EvalError
--- b :: String
--- m :: State EvaluationContext
--- rollback :: TransactionMap -> EvalError -> State EvaluationContext String
--- commit :: String -> State EvaluationContext String
