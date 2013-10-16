@@ -180,9 +180,14 @@ batteryCharge = battery.current
 -- Don't know how to do this using lenses.
 resourced d (la, lb) = (d ^. la, d ^. lb)
 
-
 baseFabric :: Fabric
 baseFabric = Fabric 0 def True placeToNearestEmptyCell
+
+passable obj1 obj2 = areNeighbours p1 p2 && noObstacles
+  where
+    p1 = obj1 ^. singular objectDislocation
+    p2 = obj2 ^. singular objectDislocation
+    noObstacles = True -- TODO
 
 -- This should be used carefully.
 instance Monoid Object where

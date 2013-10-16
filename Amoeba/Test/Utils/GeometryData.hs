@@ -1,4 +1,4 @@
-module Test.Utils.Data where
+module Test.Utils.GeometryData where
 
 import GameLogic.Geometry
 

@@ -7,8 +7,8 @@ import Test.QuickCheck.Property
 import Test.QuickCheck.All
 import Control.Monad
 
-import Test.Utils.Arbitraries
-import Test.Utils.Data
+import Test.Utils.GeometryArbitraries
+import Test.Utils.GeometryData
 
 import GameLogic.Geometry
 
@@ -50,6 +50,26 @@ prop_movePoint2 n p dir = classify isTrivial "trivial" res
           isTrivial = n == 0
           res = if isTrivial then (moved1 == p) && (moved2 == p)
                              else (moved1 /= p) && (moved2 == p)
+
+prop_neighbours1 p1 dir = testNeighbours dir && testNeighbours (opposite dir)
+  where
+    testNeighbours d = advance p1 d `elem` neighbours p1
+
+prop_neighbours2 p1 dir (NonZero dist) = ( classify far "not neighbours"
+                                         . classify near  "neighbours") (far || near)
+  where
+    far = (abs dist > 1) && not test
+    near = (abs dist <= 1) && test
+    test = testNeighbours dir && testNeighbours (opposite dir)
+    testNeighbours d = moveStraight (abs dist) p1 d `elem` neighbours p1
+
+prop_areNeighbours p1 p2 = ( classify (not ns) "not neighbours"
+                           . classify ns "neighbours"
+                           . classify same "same point") (not ns || ns || same)
+  where
+    same = p1 == p2
+    ns = areNeighbours p1 p2
+    
 
 tests :: IO Bool
 tests = $quickCheckAll

@@ -42,6 +42,9 @@ toDoubleV3 (L.V3 x1 x2 x3) = L.V3 (fromIntegral x1) (fromIntegral x2) (fromInteg
 normIntV3 :: Point -> Double
 normIntV3  = L.norm . toDoubleV3
 
+distanceIntV3 :: Point -> Point -> Double
+distanceIntV3 p1 p2 = L.distance (toDoubleV3 p1) (toDoubleV3 p2)
+
 inSegment :: (Int, Int) -> Int -> Bool
 inSegment (x, y) z = (z <= max x y) && (z >= min x y)
 
@@ -136,6 +139,7 @@ relativeCorners = [ leftUpP, leftDownP, rightUpP, rightDownP ]
 relativeSides   = [ leftP, rightP, upP, downP ]
 
 neighbours p = map (p L.^+^) $ relativeCorners ++ relativeSides
+areNeighbours p1 p2 = p1 `elem` neighbours p2
 
 pointX (L.V3 x _ _) = x
 pointY (L.V3 _ y _) = y
@@ -155,4 +159,3 @@ moveStraight dist p dir = let
 
 advance :: Point -> Direction -> Point
 advance = moveStraight 1
-

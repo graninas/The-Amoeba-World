@@ -30,14 +30,6 @@ createProduct eCost sch = do
     let p1 = ownership .~ pl $ sch
     let p2 = dislocation .~ d $ p1
     return p2
-    
-evaluatePlacementAlg PlaceToNearestEmptyCell p = do
-    return p
-  where
-    res = case AI.nearestEmpty p of
-        Just n -> return p
-    
-
 
 placeProduct prod plAlg = do
     dp <- read objectDislocation

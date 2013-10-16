@@ -47,7 +47,6 @@ library
                    Test.WorldTest,
                    Test.GeometryTest,
                    Test.Utils.Arbitraries,
-                   Test.Utils.Data,
                    GameView.Scene,
                    Test.ObjectsTest,
                    Test.ScenarioTest,
@@ -60,7 +59,10 @@ library
                    Test.EvaluationTest,
                    Test.LensTest,
                    Misc.Descriptions,
-                   Test.Utils.TestGameData
+                   Test.Utils.TestGameData,
+                   GameLogic.GenericAI,
+                   Test.Utils.GeometryArbitraries,
+                   Test.Utils.GeometryData
 
 executable Amoeba
   build-depends:   base >= 4
@@ -83,7 +85,6 @@ executable Amoeba
                    Test.WorldTest,
                    Test.GeometryTest,
                    Test.Utils.Arbitraries,
-                   Test.Utils.Data,
                    GameView.Scene,
                    Test.ObjectsTest,
                    Test.ScenarioTest,
@@ -96,7 +97,10 @@ executable Amoeba
                    Test.EvaluationTest,
                    Test.LensTest,
                    Misc.Descriptions,
-                   Test.Utils.TestGameData
+                   Test.Utils.TestGameData,
+                   GameLogic.GenericAI,
+                   Test.Utils.GeometryArbitraries,
+                   Test.Utils.GeometryData
 
 c.World.Descripted
 

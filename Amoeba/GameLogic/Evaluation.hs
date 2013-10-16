@@ -18,7 +18,6 @@ import GameLogic.AI as AI
 import qualified GameLogic.GenericWorld as GW
 import Misc.Descriptions
 
-type ObjectGraph = AI.Graph Object
 type TransactionMap = GW.GenericMap Object
 
 data EvalError = ENoSuchProperty String
@@ -71,8 +70,17 @@ getObjects = get >>= (_dataObjects . _ctxData)
 getObjectGraph :: Eval ObjectGraph
 getObjectGraph = get >>= (_dataObjectGraph . _ctxData)
 
-filterObjects f = liftM (filter f) getObjects
--- having prop = liftM (filter (has prop)) getObjects
+ctxObjects     = ctxData . dataObjects
+ctxObjectGraph = ctxData . dataObjectGraph
+ctxObjectAt    = ctxData . dataObjectAt
+
+-- misc
+
+evaluatePlacementAlg PlaceToNearestEmptyCell p = do
+    objGraph <- use ctxObjectGraph
+    return p -- TODO
+    
+
 
 -- querying
 
@@ -95,6 +103,8 @@ is prop val = isJust . maybeStored prop (val ==) :: Object -> Bool
 suchThat prop pred = isJust . maybeStored prop pred :: Object -> Bool
 justAll :: Object -> Bool
 justAll _ = True
+
+filterObjects f = liftM (filter f) getObjects
 
 query :: (Object -> Bool) -> Eval Objects
 query q = do

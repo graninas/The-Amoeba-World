@@ -5,7 +5,6 @@ module Test.Utils.Arbitraries where
 import Test.QuickCheck
 import Control.Monad
 import System.Random
-import qualified Linear as L
 import qualified Data.List as List
 import qualified Data.Set as Set
 import Data.Maybe (fromJust)
@@ -20,20 +19,10 @@ import GameLogic.Object as O
 import qualified GameLogic.GenericWorld as GW
 import GameLogic.Evaluation hiding (suchThat)
 
-instance Arbitrary (L.V3 Int) where
-    arbitrary = liftM3 point arbitrary arbitrary arbitrary
-
-instance Arbitrary Bound where
-    arbitrary = oneof [ liftM  pointBound arbitrary
-                      , liftM2 rectBound arbitrary arbitrary
-                      , liftM2 circleBound arbitrary arbitrary
-                      , return noBound ]
+import Test.Utils.GeometryArbitraries
 
 instance Arbitrary Layer where
     arbitrary = oneof $ map return layers
-    
-instance Arbitrary Direction where
-    arbitrary = oneof $ map return directions
 
 instance Arbitrary Player where
     arbitrary = liftM Player arbitrary
