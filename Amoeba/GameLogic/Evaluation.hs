@@ -1,4 +1,5 @@
 {-# LANGUAGE TemplateHaskell #-}
+{-# LANGUAGE BangPatterns #-}
 module GameLogic.Evaluation where
 
 import Control.Monad.State
@@ -138,20 +139,21 @@ transact act obj = do
         dropActedObject
         return actRes
 
-withProperty prop act = doWithProperty :: Eval ()
+withProperty prop act = doWithProperty :: Eval [String]
   where
     doWithProperty = do
         objs <- having prop
         evalTransact act objs
 
-evalTransact :: Eval String -> Objects -> Eval ()
-evalTransact act [] = return ()
+evalTransact :: Eval String -> Objects -> Eval [String]
+evalTransact act [] = return []
 evalTransact act (o:os) = do
     ctx <- get
-    let (_, newCtx) = runState (transact act o) ctx
+    let (res, newCtx) = runState (transact act o) ctx
     put newCtx
-    evalTransact act os
+    ress <- evalTransact act os
+    return (res : ress)
 
 evaluate scenario = evalState (runEitherT scenario)
 execute scenario = execState (runEitherT scenario)
-
+run scenario = runState (runEitherT scenario)

@@ -15,6 +15,7 @@ import Test.QuickCheck
 import Test.QuickCheck.All
 
 import Test.Utils.Data
+import Test.Utils.TestGameData
 import Test.Utils.Arbitraries
 
 import GameLogic.World
@@ -28,17 +29,6 @@ import qualified GameLogic.GenericWorld as GW
 import GameLogic.Game
 import GameLogic.AI
 import Misc.Descriptions
-
-plasma1       = putObject point1 $ plasma player1
-plasma2       = putObject point2 $ plasma player1
-soundWave1    = putObject point3 $ soundWave player1 left 10
-laserBeam1    = putObject point4 $ laserBeam player2 up 200
-karyon1       = putObject point5 $ karyon player2
-testGame seed = testGame'
-  where
-    g = initialGame seed & karyon1 & plasma1 & plasma2 & soundWave1 & laserBeam1
-    w = g ^. world
-    testGame' = over world refreshWorldBound g
 
 testContext :: Game -> EvaluationContext
 testContext game = context rndF objectAtF objectsF
@@ -64,8 +54,9 @@ getObjectAt :: Game -> Point -> Eval (Maybe Object)
 getObjectAt game p = return $ game ^? objects . ix p
 
 getObjects :: Game -> Eval Objects
-getObjects game = return $ (game ^. objects) ^.. folding id
+getObjects game = return $ getObjectsFromMap (game ^. objects)
 
+getObjectsFromMap m = m ^.. folding id
 
 prop_objectAt1 p seed = obj1 == obj2
   where
@@ -93,6 +84,7 @@ prop_query2 name l seed = (length queriedObjects == wmSize) && (not . null $ que
     evaluatedObjects = evaluate (query justAll) ctx
     queriedObjects = evaluatedObjects ^. _Right
 
+{-
 prop_mandatoryDislocation game = ( classify isNothingFound  "nothing found"
                                  . classify isSingleFound   "single found"
                                  . classify isMultipleFound "multiple found") test
@@ -134,6 +126,16 @@ prop_singleSelfDestr   game = testSingleProperty game selfDestructable
 prop_singleMoving      game = testSingleProperty game moving
 prop_singleLayer       game = testSingleProperty game layer
 prop_singleCollision   game = testSingleProperty game collision
+-}
+
+prop_withProperty game = test
+  where
+    ctx = testContext game
+    evaluatedState = execute (withProperty fabric produce) ctx
+    evaluatedObjects = getObjectsFromMap $ evaluatedState ^. ctxTransactionMap
+    sourceObjects = getObjectsFromMap $ game ^. world.worldMap
+    test = evaluatedObjects == sourceObjects
+
 
 tests :: IO Bool
 tests = $quickCheckAll
@@ -143,5 +145,16 @@ runTests = tests >>= \passed -> putStrLn $
             else "Some tests failed."
 
 main :: IO ()
-main = runTests
+main = do
+    runTests
+    
+    print sourceObjects
+    print evaluatedObjects
+    print res
+  where
+    ctx = testContext testGame1
+    (res, evaluatedState) = run (withProperty fabric produce) ctx
+    evaluatedObjects = getObjectsFromMap $ evaluatedState ^. ctxTransactionMap
+    sourceObjects = getObjectsFromMap $ testGame1 ^. world.worldMap
+    test = evaluatedObjects == sourceObjects
     
