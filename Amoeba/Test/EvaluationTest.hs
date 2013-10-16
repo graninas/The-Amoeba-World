@@ -24,50 +24,55 @@ import GameLogic.Geometry
 import GameLogic.Objects
 import GameLogic.Object
 import GameLogic.Scenario
-import GameLogic.Evaluation hiding (objects)
+import GameLogic.Evaluation
 import qualified GameLogic.GenericWorld as GW
 import GameLogic.Game
-import GameLogic.AI
+import GameLogic.AI as AI
 import Misc.Descriptions
 
+nextRnd' :: Game -> Eval Int
+nextRnd' game = let (r, g) = random (game ^. rndGen)
+                    newGame = rndGen .~ g $ game
+               in do
+                   ctx <- get
+                   put $ ctx { _ctxNextRndNum = nextRnd' newGame }
+                   return r
+
+getObjectAt' :: Game -> Point -> Eval (Maybe Object)
+getObjectAt' game p = return $ game ^? objects . ix p
+
+getObjects' :: Game -> Eval Objects
+getObjects' game = return $ getObjectsFromMap (game ^. objects)
+
+getObjectGraph' :: Game -> Eval ObjectGraph
+getObjectGraph' game = return $ AI.graph (game ^. world)
+
+getObjectsFromMap m = m ^.. folding id
+
 testContext :: Game -> EvaluationContext
-testContext game = context rndF objectAtF objectsF
+testContext game = context dataCtx rndF
   where
-    rndF = nextRnd game
-    objectAtF = getObjectAt game
-    objectsF = getObjects game
+    rndF = nextRnd' game
+    dataCtx = dataContext objectsF objectGraphF objectAtF
+    objectGraphF = getObjectGraph' game
+    objectAtF = getObjectAt' game
+    objectsF = getObjects' game
 
 testGameAndContext seed = let
     game = testGame seed
     ctx = testContext game
     in (game, ctx)
 
-nextRnd :: Game -> Eval Int
-nextRnd game = let (r, g) = random (game ^. rndGen)
-                   newGame = rndGen .~ g $ game
-               in do
-                   ctx <- get
-                   put $ ctx { _ctxNextRndNum = nextRnd newGame }
-                   return r
-
-getObjectAt :: Game -> Point -> Eval (Maybe Object)
-getObjectAt game p = return $ game ^? objects . ix p
-
-getObjects :: Game -> Eval Objects
-getObjects game = return $ getObjectsFromMap (game ^. objects)
-
-getObjectsFromMap m = m ^.. folding id
-
 prop_objectAt1 p seed = obj1 == obj2
   where
     (game, ctx) = testGameAndContext seed
-    obj1 = evaluate (objectAt p) ctx
+    obj1 = evaluate (getObjectAt p) ctx
     obj2 = Right $ game ^. objects . at p
 
 prop_objectAt2 seed = (obj1 == obj2) && isJust (obj1 ^. _Right)
   where
     (game, ctx) = testGameAndContext seed
-    obj1 = evaluate (objectAt point1) ctx
+    obj1 = evaluate (getObjectAt point1) ctx
     obj2 = Right $ game ^. objects . at point1
 
 prop_query1 seed = evaluatedObject == expectedSoundWave

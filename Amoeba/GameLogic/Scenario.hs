@@ -13,7 +13,7 @@ import GameLogic.Geometry
 import GameLogic.Object
 import GameLogic.Types
 import GameLogic.Player
-import GameLogic.AI
+import GameLogic.AI as AI
 
 withdrawEnergy :: Player -> Energy -> Eval ()
 withdrawEnergy pl cnt = do
@@ -21,9 +21,6 @@ withdrawEnergy pl cnt = do
     let ch = k ^. singular batteryCharge
     let newK = batteryCharge .~ (ch - cnt) $ k
     save newK
-
-
-constructObject = undefined
 
 createProduct :: Energy -> Object -> Eval Object
 createProduct eCost sch = do
@@ -34,14 +31,19 @@ createProduct eCost sch = do
     let p2 = dislocation .~ d $ p1
     return p2
     
-evaluatePlacementAlg = undefined
+evaluatePlacementAlg PlaceToNearestEmptyCell p = do
+    return p
+  where
+    res = case AI.nearestEmpty p of
+        Just n -> return p
+    
 
 
 placeProduct prod plAlg = do
     dp <- read objectDislocation
     targetP <- evaluatePlacementAlg plAlg dp
     let p1 = objectDislocation .~ targetP $ prod
-    save prod
+    save p1
 
 produce :: Eval String
 produce = do

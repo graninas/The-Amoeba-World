@@ -7,18 +7,18 @@ import Control.Monad.Trans
 import Control.Monad.Trans.Either as E
 import Control.Monad
 import Control.Lens
-import Control.Applicative
 import qualified Data.Sequence as Seq
 import qualified Data.Map as Map
-import Data.Monoid
 import Data.Maybe (fromJust, isJust, listToMaybe)
 import Prelude hiding (read)
 
 import GameLogic.Geometry
 import GameLogic.Object
+import GameLogic.AI as AI
 import qualified GameLogic.GenericWorld as GW
 import Misc.Descriptions
 
+type ObjectGraph = AI.Graph Object
 type TransactionMap = GW.GenericMap Object
 
 data EvalError = ENoSuchProperty String
@@ -31,13 +31,16 @@ type EvalType ctx res = EitherT EvalError (State ctx) res
 type Eval res = EvalType EvaluationContext res
 type EvalState res = State EvaluationContext res
 
-data EvaluationContext = EvaluationContext { _ctxTransactionMap :: TransactionMap
-                                           , _ctxActedObject :: Maybe Object
-                                           , _ctxNextRndNum :: Eval Int
-                                           , _ctxObjectAt :: Point -> Eval (Maybe Object)
-                                           , _ctxObjects :: Eval Objects
-                                           }
+data DataContext = DataContext { _dataObjects :: Eval Objects
+                               , _dataObjectGraph :: Eval ObjectGraph
+                               , _dataObjectAt :: Point -> Eval (Maybe Object) }
 
+data EvaluationContext = EvaluationContext { _ctxData :: DataContext
+                                           , _ctxTransactionMap :: TransactionMap
+                                           , _ctxActedObject :: Maybe Object
+                                           , _ctxNextRndNum :: Eval Int }
+
+makeLenses ''DataContext
 makeLenses ''EvaluationContext
 
 eNoSuchProperty = ENoSuchProperty
@@ -52,18 +55,24 @@ isENotFound _ = False
 -- context
 noActedObject = Nothing
 
-context = EvaluationContext GW.emptyMap noActedObject
+dataContext = DataContext
+context dtCtx = EvaluationContext dtCtx GW.emptyMap noActedObject
 
 nextRndNum :: Eval Int
 nextRndNum = get >>= _ctxNextRndNum
 
-objectAt :: Point -> Eval (Maybe Object)
-objectAt p = get >>= flip _ctxObjectAt p
+-- TODO: replace by Graph
+getObjectAt :: Point -> Eval (Maybe Object)
+getObjectAt p = get >>= flip (_dataObjectAt . _ctxData) p
 
-objects :: Eval Objects
-objects = get >>= _ctxObjects
+getObjects :: Eval Objects
+getObjects = get >>= (_dataObjects . _ctxData)
 
-having prop = liftM (filter (has prop)) objects
+getObjectGraph :: Eval ObjectGraph
+getObjectGraph = get >>= (_dataObjectGraph . _ctxData)
+
+filterObjects f = liftM (filter f) getObjects
+-- having prop = liftM (filter (has prop)) getObjects
 
 -- querying
 
@@ -89,7 +98,7 @@ justAll _ = True
 
 query :: (Object -> Bool) -> Eval Objects
 query q = do
-    objs <- liftM (filter q) objects
+    objs <- filterObjects q --liftM (filter q) getObjects
     case objs of
         [] -> E.left eNotFound
         xs -> E.right xs
@@ -142,7 +151,7 @@ transact act obj = do
 withProperty prop act = doWithProperty :: Eval [String]
   where
     doWithProperty = do
-        objs <- having prop
+        objs <- filterObjects (has prop) --having prop
         evalTransact act objs
 
 evalTransact :: Eval String -> Objects -> Eval [String]
