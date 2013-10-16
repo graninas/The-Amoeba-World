@@ -13,7 +13,7 @@ import GameLogic.Object
 import qualified GameLogic.GenericWorld as GW
 import GameLogic.Game
 
-import Test.Utils.Data
+import Test.Utils.GeometryData
 
 customKaryon p pl = putObject p $ karyon pl
 

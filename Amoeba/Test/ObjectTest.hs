@@ -5,8 +5,9 @@ module Main where
 import Test.QuickCheck
 import Test.QuickCheck.All
 
-import Test.Utils.Data
+import Test.Utils.GeometryData
 import Test.Utils.Arbitraries
+import Test.Utils.GeometryArbitraries
 
 tests :: IO Bool
 tests = $quickCheckAll

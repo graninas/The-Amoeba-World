@@ -14,9 +14,10 @@ import Control.Monad
 import Test.QuickCheck
 import Test.QuickCheck.All
 
-import Test.Utils.Data
+import Test.Utils.GeometryData
 import Test.Utils.TestGameData
 import Test.Utils.Arbitraries
+import Test.Utils.GeometryArbitraries
 
 import GameLogic.World
 import GameLogic.Player
@@ -25,10 +26,11 @@ import GameLogic.Objects
 import GameLogic.Object
 import GameLogic.Scenario
 import GameLogic.Evaluation
-import qualified GameLogic.GenericWorld as GW
 import GameLogic.Game
 import GameLogic.AI as AI
 import Misc.Descriptions
+import qualified GameLogic.GenericWorld as GW
+import qualified GameLogic.GenericAI as GAI
 
 nextRnd' :: Game -> Eval Int
 nextRnd' game = let (r, g) = random (game ^. rndGen)
@@ -45,7 +47,7 @@ getObjects' :: Game -> Eval Objects
 getObjects' game = return $ getObjectsFromMap (game ^. objects)
 
 getObjectGraph' :: Game -> Eval ObjectGraph
-getObjectGraph' game = return $ AI.graph (game ^. world)
+getObjectGraph' game = return $ GAI.graph (game ^. world)
 
 getObjectsFromMap m = m ^.. folding id
 
