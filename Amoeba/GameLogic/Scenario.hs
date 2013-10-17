@@ -13,7 +13,6 @@ import GameLogic.Geometry
 import GameLogic.Object
 import GameLogic.Types
 import GameLogic.Player
-import GameLogic.AI as AI
 
 withdrawEnergy :: Player -> Energy -> Eval ()
 withdrawEnergy pl cnt = do

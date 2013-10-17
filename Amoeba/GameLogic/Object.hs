@@ -109,6 +109,7 @@ makeLenses ''Layer
 makeLenses ''Collision
 makeLenses ''Resource
 makeLenses ''Dislocation
+makeLenses ''PassRestriction
 
 property k l = propertyMap . at k . traverse . l
 
@@ -183,11 +184,20 @@ resourced d (la, lb) = (d ^. la, d ^. lb)
 baseFabric :: Fabric
 baseFabric = Fabric 0 def True placeToNearestEmptyCell
 
-passable obj1 obj2 = areNeighbours p1 p2 && noObstacles
+isPassable obj l = not restricted
   where
+    setToList s = s ^.. folding id
+    restrictionsList o = setToList $ o ^. passRestriction.restrictedLayers
+    restricted = l `elem` restrictionsList obj
+
+isPathExist obj1 obj2 l =  areNeighbours p1 p2
+                        && isPassable obj1 l
+                        && isPassable obj2 l
+  where
+    layer1 = obj1 ^. singular layer
+    layer2 = obj2 ^. singular layer
     p1 = obj1 ^. singular objectDislocation
     p2 = obj2 ^. singular objectDislocation
-    noObstacles = True -- TODO
 
 -- This should be used carefully.
 instance Monoid Object where

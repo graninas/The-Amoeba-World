@@ -33,11 +33,11 @@ type ObjectNodeSet = GAI.NodeSet Object
 passableNodesDist = 1
 notPassableNodesDist = 1000
 nodesDist n1@(Node p1 o1) n2@(Node p2 o2) =
-    if passable o1 o2
+    if isPathExist o1 o2 ground -- TODO: layer
     then passableNodesDist
     else notPassableNodesDist
 
-nearestEmpty p g = GAI.aStar g 
+nearestEmpty l p g = GAI.aStar g 
 
 {-
 -- From here: http://hackage.haskell.org/packages/archive/astar/0.1/doc/html/src/Data-Graph-AStar.html#aStar

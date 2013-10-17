@@ -17,8 +17,9 @@ import Test.QuickCheck
 import Test.QuickCheck.All
 
 import Test.Utils.GeometryData
-import Test.Utils.Arbitraries
 import Test.Utils.GeometryArbitraries
+import Test.Utils.ObjectArbitraries
+import Test.Utils.GameArbitraries
 
 import GameLogic.World
 import GameLogic.Player

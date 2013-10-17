@@ -15,6 +15,7 @@ import Prelude hiding (read)
 import GameLogic.Geometry
 import GameLogic.Object
 import GameLogic.AI as AI
+import GameLogic.GenericAI as GAI
 import qualified GameLogic.GenericWorld as GW
 import Misc.Descriptions
 
