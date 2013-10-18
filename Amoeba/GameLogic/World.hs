@@ -4,19 +4,17 @@ import qualified Control.Lens as L
 
 import qualified GameLogic.GenericWorld as GW
 import GameLogic.Object as O
+import GameLogic.ObjectCell
 import GameLogic.Geometry
 
 type World = GW.CelledWorld Object
 type WorldMap = GW.GenericMap Object
 
-instance GW.GenericCell Object where
-    empty = O.empty
-    merge = O.merge
 
 emptyCell = O.empty
 alterCell = GW.alterCell
-deleteCell p w = alterCell w (p, emptyCell)
-insertCell p c w = alterCell w (p, c)
+deleteCell p w = alterCell w p emptyCell
+insertCell p c w = alterCell w p c
 
 emptyWorld = GW.emptyWorld
 refreshWorldBound = GW.refreshWorldBound

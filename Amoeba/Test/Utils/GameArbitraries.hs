@@ -27,7 +27,8 @@ instance Arbitrary (GW.GenericMap Object) where
     arbitrary = sized gm
       where
         gm n | n <= 0 = return GW.emptyMap
-        gm n = foldl (liftM2 GW.alterMapCell) (return GW.emptyMap) (objList n)
+        gm n = foldl (liftM2 alterMapCell') (return GW.emptyMap) (objList n)
+        alterMapCell' w (p, c) = GW.alterMapCell w p c
         objList :: Int -> [Gen (Point, Object)]
         objList 0 = []
         objList n = i : objList (n - 1)

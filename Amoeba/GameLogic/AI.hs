@@ -1,8 +1,12 @@
 module GameLogic.AI where
 
+import Control.Lens ((^.), singular)
+
 import GameLogic.Geometry
-import GameLogic.Object
+import GameLogic.Object as O
+import GameLogic.ObjectCell
 import GameLogic.GenericAI as GAI
+import GameLogic.GenericWorld as GW
 
 data PathStrategy = WithLast
 type TrackAction = Object -> Point -> Object
@@ -32,21 +36,17 @@ type ObjectNodeSet = GAI.NodeSet Object
 
 passableNodesDist = 1
 notPassableNodesDist = 1000
-nodesDist n1@(Node p1 o1) n2@(Node p2 o2) =
-    if isPathExist o1 o2 ground -- TODO: layer
+nodesDist l n1@(Node p1 o1) n2@(Node p2 o2) =
+    if isPathExist o1 o2 l
     then passableNodesDist
     else notPassableNodesDist
 
-nearestEmpty l p g = GAI.aStar g 
+-- TODO: heuristic distance
+heurDist _ = 2
 
-{-
--- From here: http://hackage.haskell.org/packages/archive/astar/0.1/doc/html/src/Data-Graph-AStar.html#aStar
-aStar
-:: (Ord a, Ord c, Num c)     
-=> (a -> Set a)    The graph we are searching through, given as a function from vertices to their neighbours.
--> (a -> a -> c)   Distance function between neighbouring vertices of the graph. This will never be applied to vertices that are not neighbours, so may be undefined on pairs that are not neighbours in the graph.
--> (a -> c)        Heuristic distance to the (nearest) goal. This should never overestimate the distance, or else the path found may not be minimal.
--> (a -> Bool)     The goal, specified as a boolean predicate on vertices.
--> a               The vertex to start searching from.
--> Maybe [a]       An optimal path, if any path exists. This excludes the starting vertex. 
--}
+nearestEmpty :: Layer -> Object -> ObjectGraph -> Maybe [ObjectNode]
+nearestEmpty l obj gr = GAI.aStar gr (nodesDist l) heurDist GAI.isNodeEmpty startNode
+  where
+    startNode = node (obj ^. singular objectDislocation) obj
+    
+    

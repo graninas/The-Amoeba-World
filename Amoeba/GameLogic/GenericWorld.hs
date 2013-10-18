@@ -31,27 +31,31 @@ lookup = M.lookup
 emptyMap = M.empty
 emptyWorld = GenericWorld emptyMap noBound
 
+isCellEmpty :: GenericCell c => c -> Bool
+isCellEmpty c = empty == c
 
 class Eq c => GenericCell c where
     empty :: c
     merge :: c -> c -> c
 
-alterMapCell :: GenericCell c => GenericMap c -> (Point, c) -> GenericMap c
-alterMapCell m (p, c) = f m
+alterMapCell :: GenericCell c => GenericMap c -> Point -> c -> GenericMap c
+alterMapCell m p c = f m
   where
     f = M.alter alteringFunc p
     alteringFunc oldCell | empty == c = Nothing
                          | otherwise = Just . maybe c (merge c) $ oldCell
                          
-alterCell :: GenericCell c => CelledWorld c -> (Point, c) -> CelledWorld c
-alterCell (GenericWorld m b) objDef@(p, c) = GenericWorld newMap b'
+alterCell :: GenericCell c => CelledWorld c -> Point -> c -> CelledWorld c
+alterCell (GenericWorld m b) p c = GenericWorld newMap b'
   where
-    newMap = alterMapCell m objDef
+    newMap = alterMapCell m p c
     b' = if M.null newMap then NoBound
                             else updateRectBound p b
 
 alterWorld :: GenericCell c => CelledWorld c -> [(Point, c)] -> CelledWorld c
-alterWorld = foldl alterCell
+alterWorld = foldl alterCell'
+  where
+    alterCell' w (p, c) = alterCell w p c
 
 worldMapBound wm = foldr updateRectBound NoBound (M.keys wm)
 
