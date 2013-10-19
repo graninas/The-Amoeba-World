@@ -22,6 +22,8 @@ instance Eq (Node c) where
 isNodeEmpty (Node _ c) = GW.isCellEmpty c
 node = Node
 
+fromNode (Node p c) = (p, c)
+
 lookupNode :: GenericCell c => Point -> CelledWorld c -> Node c
 lookupNode p (GenericWorld wm _) = Node p (fromMaybe GW.empty $ GW.lookup p wm)
 

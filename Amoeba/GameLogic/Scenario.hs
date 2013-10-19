@@ -31,8 +31,9 @@ createProduct eCost sch = do
     return p2
 
 placeProduct prod plAlg = do
+    l <- getProperty layer ground prod
     obj <- getActedObject
-    targetP <- evaluatePlacementAlg plAlg obj
+    targetP <- evaluatePlacementAlg plAlg l obj
     let p1 = objectDislocation .~ targetP $ prod
     save p1
 

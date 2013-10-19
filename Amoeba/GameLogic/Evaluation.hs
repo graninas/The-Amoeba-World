@@ -117,6 +117,8 @@ single q = do
         (x:[]) -> E.right x
         xs     -> E.left $ eOverlappedObjects xs
 
+getProperty prop defVal obj = maybe (E.right defVal) E.right (obj ^? prop)
+
 -- evaluation
 
 setupActedObject :: Object -> EvalState ()
@@ -159,13 +161,14 @@ withProperty prop act = doWithProperty :: Eval [String]
         objs <- filterObjects (has prop)
         evalTransact act objs
 
-evaluatePlacementAlg PlaceToNearestEmptyCell obj = do
+evaluatePlacementAlg PlaceToNearestEmptyCell l obj = do
     let p = obj ^. singular objectDislocation
-    objGraph <- use ctxObjectGraph
-    
-    
-    
-    return p -- TODO
+    objGraph <- getObjectGraph
+    let mbRes = nearestEmpty l obj objGraph
+    maybe (E.left eNotFound) extractPoint mbRes
+  where
+        extractPoint [] = E.left eNotFound
+        extractPoint ps = E.right $ nodePoint $ last ps
 
 evalTransact :: Eval String -> Objects -> Eval [String]
 evalTransact act [] = return []

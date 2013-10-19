@@ -32,6 +32,8 @@ type ObjectGraph = GAI.Graph Object
 type ObjectNode = GAI.Node Object
 type ObjectNodeSet = GAI.NodeSet Object
 
+nodePoint = fst . GAI.fromNode
+
 -- Path finding & search
 
 passableNodesDist = 1
