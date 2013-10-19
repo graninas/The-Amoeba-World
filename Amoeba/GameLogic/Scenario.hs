@@ -31,8 +31,8 @@ createProduct eCost sch = do
     return p2
 
 placeProduct prod plAlg = do
-    dp <- read objectDislocation
-    targetP <- evaluatePlacementAlg plAlg dp
+    obj <- getActedObject
+    targetP <- evaluatePlacementAlg plAlg obj
     let p1 = objectDislocation .~ targetP $ prod
     save p1
 

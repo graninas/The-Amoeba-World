@@ -75,14 +75,6 @@ ctxObjects     = ctxData . dataObjects
 ctxObjectGraph = ctxData . dataObjectGraph
 ctxObjectAt    = ctxData . dataObjectAt
 
--- misc
-
-evaluatePlacementAlg PlaceToNearestEmptyCell p = do
-    objGraph <- use ctxObjectGraph
-    return p -- TODO
-    
-
-
 -- querying
 
 (~&~) p1 p2 obj = p1 obj && p2 obj
@@ -109,7 +101,7 @@ filterObjects f = liftM (filter f) getObjects
 
 query :: (Object -> Bool) -> Eval Objects
 query q = do
-    objs <- filterObjects q --liftM (filter q) getObjects
+    objs <- filterObjects q
     case objs of
         [] -> E.left eNotFound
         xs -> E.right xs
@@ -125,24 +117,26 @@ single q = do
         (x:[]) -> E.right x
         xs     -> E.left $ eOverlappedObjects xs
 
-read prop = use ctxActedObject >>= checkPropertyExist
-  where
-    checkPropertyExist Nothing = E.left eNoActedObjectSet
-    checkPropertyExist mbObj = case mbObj ^? _Just . prop of -- TODO: there is a conversion func Maybe -> Either.
-            Just x -> E.right x 
-            Nothing -> E.left $ eNoSuchProperty (nameProperty prop)
-
-save :: Object -> Eval ()
-save obj = do
-    let d = obj ^. singular objectDislocation
-    ctxTransactionMap . at d .= Just obj
-
 -- evaluation
 
 setupActedObject :: Object -> EvalState ()
 setupActedObject obj = ctxActedObject .= Just obj
 dropActedObject :: EvalState ()
 dropActedObject = ctxActedObject .= Nothing
+getActedObject :: Eval Object
+getActedObject = do
+    mbActedObject <- use ctxActedObject
+    maybe (E.left eNoActedObjectSet) E.right mbActedObject
+
+read prop = do
+    obj <- getActedObject
+    let er = E.left $ eNoSuchProperty $ nameProperty prop
+    maybe er E.right (obj ^? prop)
+
+save :: Object -> Eval ()
+save obj = do
+    let p = obj ^. singular objectDislocation
+    ctxTransactionMap . at p .= Just obj
 
 rollback :: TransactionMap -> EvalError -> EvalState String
 rollback m err = do
@@ -162,8 +156,16 @@ transact act obj = do
 withProperty prop act = doWithProperty :: Eval [String]
   where
     doWithProperty = do
-        objs <- filterObjects (has prop) --having prop
+        objs <- filterObjects (has prop)
         evalTransact act objs
+
+evaluatePlacementAlg PlaceToNearestEmptyCell obj = do
+    let p = obj ^. singular objectDislocation
+    objGraph <- use ctxObjectGraph
+    
+    
+    
+    return p -- TODO
 
 evalTransact :: Eval String -> Objects -> Eval [String]
 evalTransact act [] = return []
