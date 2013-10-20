@@ -52,6 +52,7 @@ instance Arbitrary (Resource Int) where
 instance Arbitrary Dislocation where
     arbitrary = liftM Dislocation arbitrary
 
+-- Enumeration of properties. Order should be corresponded with property keys.
 -- TODO: add another properties
 propertyArbitraries = [ liftM PNamed (arbitrary `suchThat` isNamedValid)
                       , liftM PDurability (arbitrary `suchThat` isResourceValid)
@@ -73,6 +74,7 @@ instance Arbitrary O.Property where
 
 data ValidProperty = ValidProperty O.PropertyKey O.Property
 
+-- Validated property key.
 instance Arbitrary ValidProperty where
     arbitrary = sized vp
       where
@@ -92,3 +94,4 @@ instance Arbitrary O.PropertyMap where
 
 instance Arbitrary O.Object where
     arbitrary = liftM O.Object arbitrary
+

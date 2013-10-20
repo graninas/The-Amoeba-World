@@ -52,7 +52,7 @@ isEOverlappedObjects _ = False
 isENotFound ENotFound = True
 isENotFound _ = False
 
-noSuchProperty prop = E.left $ eNoSuchProperty $ nameProperty prop
+noSuchProperty prop obj = E.left $ eNoSuchProperty $ describeNoProperty prop obj
 notFound = E.left eNotFound
 noActedObjectSet = E.left eNoActedObjectSet
 
@@ -101,8 +101,8 @@ maybeStored prop pred obj = let
             then mbVal
             else Nothing
 
-is prop val = isJust . maybeStored prop (val ==) :: Object -> Bool
-suchThat prop pred = isJust . maybeStored prop pred :: Object -> Bool
+is prop val        = isJust . maybeStored prop (val ==) :: Object -> Bool
+suchThat prop pred = isJust . maybeStored prop pred     :: Object -> Bool
 justAll :: Object -> Bool
 justAll _ = True
 
@@ -127,10 +127,10 @@ single q = do
         xs     -> E.left $ eOverlappedObjects xs
 
 withDefault defVal (EitherT m) = m >>= \z -> case z of
-    Left  x -> E.right defVal
+    Left  _ -> E.right defVal
     Right r -> E.right r
 
-getProperty prop obj = maybe (noSuchProperty prop) E.right (obj ^? prop)
+getProperty prop obj = maybe (noSuchProperty prop obj) E.right (obj ^? prop)
 
 -- evaluation
 
@@ -147,7 +147,7 @@ read prop = getActedObject >>= getProperty prop
 
 save :: Object -> Eval ()
 save obj = do
-    let p = obj ^. singular objectDislocation
+    p <- getProperty objectDislocation obj
     ctxTransactionMap . at p .= Just obj
 
 rollback :: TransactionMap -> EvalError -> EvalState String
@@ -165,17 +165,17 @@ transact act obj = do
         dropActedObject
         return actRes
 
-forProperty prop act = doWithProperty :: Eval [String]
+forProperty prop act = doForProperty :: Eval [String]
   where
-    doWithProperty = do
+    doForProperty = do
         objs <- filterObjects (has prop)
         evalTransact act objs
 
 evaluatePlacementAlg PlaceToNearestEmptyCell l obj = do
-    let p = obj ^. singular objectDislocation
+    p        <- getProperty objectDislocation obj
     objGraph <- getObjectGraph
     let mbRes = nearestEmpty l obj objGraph
-    maybe (E.left eNotFound) extractPoint mbRes
+    maybe notFound extractPoint mbRes
   where
         extractPoint [] = notFound
         extractPoint ps = E.right $ nodePoint $ last ps

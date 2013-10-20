@@ -9,8 +9,8 @@ import Data.Monoid
 import Control.Lens
 import Control.Monad.State
 import Prelude
-import qualified Data.Map as Map
-import qualified Data.Set as Set
+import qualified Data.Map as M
+import qualified Data.Set as S
 import qualified Data.List as L (nub)
 
 import GameLogic.Types
@@ -23,7 +23,7 @@ instance Monoid r => Monoid (Accessor r a) where
 
 type Target = Point
 
-data PassRestriction = PassRestriction { _restrictedLayers :: Set.Set Layer }
+data PassRestriction = PassRestriction { _restrictedLayers :: S.Set Layer }
   deriving (Show, Read, Eq, Ord)
 
 data PlacementAlg = PlaceToNearestEmptyCell
@@ -76,7 +76,7 @@ data Property = PNamed { __named :: Named }
   deriving (Show, Read, Eq)
 
 type PropertyKey = Int
-type PropertyMap = Map.Map PropertyKey Property
+type PropertyMap = M.Map PropertyKey Property
 data Object = Object { _propertyMap :: PropertyMap }
   deriving (Show, Read, Eq)
 type Objects = [Object]
@@ -84,10 +84,10 @@ type Objects = [Object]
 data PAccessor a = PAccessor { key :: PropertyKey
                              , constr :: a -> Property }
 
-insertProperty = Map.insert
-emptyPropertyMap = Map.empty
+insertProperty = M.insert
+emptyPropertyMap = M.empty
 empty = Object emptyPropertyMap
-merge (Object pm1) (Object pm2) = Object $ Map.union pm1 pm2
+merge (Object pm1) (Object pm2) = Object $ M.union pm1 pm2
 
 (|=) accessor v = do
     props <- get
@@ -125,7 +125,7 @@ isNamedValid (Named n) = not . null $ n
 namedValidator n | isNamedValid n = n
                  | otherwise      = error $ "Invalid named property: " ++ show n
 toNamed = namedValidator . Named
-toPassRestriction = PassRestriction . Set.fromList
+toPassRestriction = PassRestriction . S.fromList
 toDislocation = Dislocation
 
 toCollision = Collision . L.nub
@@ -184,20 +184,19 @@ resourced d (la, lb) = (d ^. la, d ^. lb)
 baseFabric :: Fabric
 baseFabric = Fabric 0 def True placeToNearestEmptyCell
 
-isPassable obj l = not restricted
-  where
-    setToList s = s ^.. folding id
-    restrictionsList o = setToList $ o ^. passRestriction.restrictedLayers
-    restricted = l `elem` restrictionsList obj
+isPassable obj l = case obj ^? passRestriction.restrictedLayers of
+    Just lsSet -> not $ l `S.member` lsSet
+    Nothing    -> True
 
-isPathExist obj1 obj2 l =  areNeighbours p1 p2
+-- TODO: make it safe
+isPathExist obj1 obj2 l =  areNeighbours' mbP1 mbP2
                         && isPassable obj1 l
                         && isPassable obj2 l
   where
-    layer1 = obj1 ^. singular layer
-    layer2 = obj2 ^. singular layer
-    p1 = obj1 ^. singular objectDislocation
-    p2 = obj2 ^. singular objectDislocation
+    areNeighbours' (Just p1) (Just p2) = areNeighbours p1 p2
+    areNeighbours' _ _ = False
+    mbP1 = obj1 ^? objectDislocation
+    mbP2 = obj2 ^? objectDislocation
 
 -- This should be used carefully.
 instance Monoid Object where

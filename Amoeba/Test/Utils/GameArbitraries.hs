@@ -23,6 +23,7 @@ import Test.Utils.GeometryArbitraries
 import Test.Utils.ObjectArbitraries
 
 -- | All objects will have dislocation property.
+-- | All objects will have layer property.
 instance Arbitrary (GW.GenericMap Object) where
     arbitrary = sized gm
       where

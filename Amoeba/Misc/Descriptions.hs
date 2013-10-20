@@ -8,7 +8,7 @@ import GameLogic.Objects
 
 nameProperty prop = show . fromJust $ dummyObject ^? prop
 
-describeNoProperty obj prop = "No property " ++ showedProp ++ " in object " ++ showedObj
+describeNoProperty prop obj = "No property " ++ showedProp ++ " in object " ++ showedObj
   where
     showedProp = nameProperty prop
     showedObj = show obj

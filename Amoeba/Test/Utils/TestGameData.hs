@@ -10,8 +10,8 @@ import GameLogic.Player
 import GameLogic.Geometry
 import GameLogic.Objects
 import GameLogic.Object
-import qualified GameLogic.GenericWorld as GW
 import GameLogic.Game
+import qualified GameLogic.GenericWorld as GW
 
 import Test.Utils.GeometryData
 
