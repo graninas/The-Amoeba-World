@@ -136,12 +136,12 @@ prop_singleLayer       game = testSingleProperty game layer
 prop_singleCollision   game = testSingleProperty game collision
 -}
 
-prop_withProperty game = test
+prop_forProperty game = test
   where
-    ctx = testContext game
-    evaluatedState = execute (withProperty fabric produce) ctx
+    ctx = testContext testGame1
+    evaluatedState = execute (forProperty fabric produce) ctx
     evaluatedObjects = getObjectsFromMap $ evaluatedState ^. ctxTransactionMap
-    sourceObjects = getObjectsFromMap $ game ^. world.worldMap
+    sourceObjects = getObjectsFromMap $ testGame1 ^. world.worldMap
     test = evaluatedObjects == sourceObjects
 
 
@@ -161,7 +161,7 @@ main = do
     print res
   where
     ctx = testContext testGame1
-    (res, evaluatedState) = run (withProperty fabric produce) ctx
+    (res, evaluatedState) = run (forProperty fabric produce) ctx
     evaluatedObjects = getObjectsFromMap $ evaluatedState ^. ctxTransactionMap
     sourceObjects = getObjectsFromMap $ testGame1 ^. world.worldMap
     test = evaluatedObjects == sourceObjects

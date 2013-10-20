@@ -52,6 +52,10 @@ isEOverlappedObjects _ = False
 isENotFound ENotFound = True
 isENotFound _ = False
 
+noSuchProperty prop = E.left $ eNoSuchProperty $ nameProperty prop
+notFound = E.left eNotFound
+noActedObjectSet = E.left eNoActedObjectSet
+
 -- context
 noActedObject = Nothing
 
@@ -60,6 +64,11 @@ context dtCtx = EvaluationContext dtCtx GW.emptyMap noActedObject
 
 nextRndNum :: Eval Int
 nextRndNum = get >>= _ctxNextRndNum
+
+-- Naming convention:
+-- getXyz :: Eval Xyz
+-- findXyz :: Eval (Maybe Xyz)
+-- queryXyz :: Eval Xyzs
 
 -- TODO: replace by Graph
 getObjectAt :: Point -> Eval (Maybe Object)
@@ -117,7 +126,11 @@ single q = do
         (x:[]) -> E.right x
         xs     -> E.left $ eOverlappedObjects xs
 
-getProperty prop defVal obj = maybe (E.right defVal) E.right (obj ^? prop)
+withDefault defVal (EitherT m) = m >>= \z -> case z of
+    Left  x -> E.right defVal
+    Right r -> E.right r
+
+getProperty prop obj = maybe (noSuchProperty prop) E.right (obj ^? prop)
 
 -- evaluation
 
@@ -128,12 +141,9 @@ dropActedObject = ctxActedObject .= Nothing
 getActedObject :: Eval Object
 getActedObject = do
     mbActedObject <- use ctxActedObject
-    maybe (E.left eNoActedObjectSet) E.right mbActedObject
+    maybe noActedObjectSet E.right mbActedObject
 
-read prop = do
-    obj <- getActedObject
-    let er = E.left $ eNoSuchProperty $ nameProperty prop
-    maybe er E.right (obj ^? prop)
+read prop = getActedObject >>= getProperty prop
 
 save :: Object -> Eval ()
 save obj = do
@@ -155,7 +165,7 @@ transact act obj = do
         dropActedObject
         return actRes
 
-withProperty prop act = doWithProperty :: Eval [String]
+forProperty prop act = doWithProperty :: Eval [String]
   where
     doWithProperty = do
         objs <- filterObjects (has prop)
@@ -167,7 +177,7 @@ evaluatePlacementAlg PlaceToNearestEmptyCell l obj = do
     let mbRes = nearestEmpty l obj objGraph
     maybe (E.left eNotFound) extractPoint mbRes
   where
-        extractPoint [] = E.left eNotFound
+        extractPoint [] = notFound
         extractPoint ps = E.right $ nodePoint $ last ps
 
 evalTransact :: Eval String -> Objects -> Eval [String]

@@ -17,7 +17,7 @@ import GameLogic.Player
 withdrawEnergy :: Player -> Energy -> Eval ()
 withdrawEnergy pl cnt = do
     k <- single $ ownership `is` pl ~&~ batteryCharge `suchThat` (>= cnt)
-    let ch = k ^. singular batteryCharge
+    ch <- getProperty batteryCharge k
     let newK = batteryCharge .~ (ch - cnt) $ k
     save newK
 
@@ -31,11 +31,10 @@ createProduct eCost sch = do
     return p2
 
 placeProduct prod plAlg = do
-    l <- getProperty layer ground prod
+    l <- withDefault ground $ getProperty layer prod
     obj <- getActedObject
     targetP <- evaluatePlacementAlg plAlg l obj
-    let p1 = objectDislocation .~ targetP $ prod
-    save p1
+    save $ objectDislocation .~ targetP $ prod
 
 produce :: Eval String
 produce = do
@@ -47,6 +46,6 @@ produce = do
 
 mainScenario :: Eval ()
 mainScenario = do
-    withProperty fabric produce
+    forProperty fabric produce
     return ()
 
