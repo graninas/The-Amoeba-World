@@ -122,7 +122,7 @@ testSingleProperty game prop = ( classify isSingleFound "single found"
     test = isSingleFound || isQueryError1 || isQueryError2
 
 prop_singleNamed       game = testSingleProperty game named
-prop_singleDurability  game = testSingleProperty game durability
+prop_singleDurability  game = testSingleProperty game durability    
 prop_singleBattery     game = testSingleProperty game battery
 prop_singleOwnership   game = testSingleProperty game ownership
 prop_singleDislocation game = testSingleProperty game dislocation
@@ -138,11 +138,11 @@ prop_singleCollision   game = testSingleProperty game collision
 
 prop_forProperty game = test
   where
-    ctx = testContext testGame1
+    ctx = testContext game
     evaluatedState = execute (forProperty fabric produce) ctx
     evaluatedObjects = getObjectsFromMap $ evaluatedState ^. ctxTransactionMap
-    sourceObjects = getObjectsFromMap $ testGame1 ^. world.worldMap
-    test = evaluatedObjects == sourceObjects
+    sourceObjects = getObjectsFromMap $ game ^. world.worldMap
+    test = evaluatedObjects /= sourceObjects
 
 
 tests :: IO Bool

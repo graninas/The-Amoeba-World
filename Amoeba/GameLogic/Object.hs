@@ -161,6 +161,8 @@ collision        = property (key collisionA)        _collision
 
 objectDislocation = dislocation.dislocationPoint
 
+adjust = foldr ($)
+
 placeToNearestEmptyCell = PlaceToNearestEmptyCell
 placeToPoint = PlaceToPoint
 

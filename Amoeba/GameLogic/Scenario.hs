@@ -16,33 +16,31 @@ import GameLogic.Player
 
 withdrawEnergy :: Player -> Energy -> Eval ()
 withdrawEnergy pl cnt = do
-    k <- single $ ownership `is` pl ~&~ batteryCharge `suchThat` (>= cnt)
+    k  <- single $ ownership `is` pl ~&~ batteryCharge `suchThat` (>= cnt)
     ch <- getProperty batteryCharge k
-    let newK = batteryCharge .~ (ch - cnt) $ k
-    save newK
+    save $ batteryCharge .~ (ch - cnt) $ k
 
 createProduct :: Energy -> Object -> Eval Object
 createProduct eCost sch = do
     pl <- read ownership
-    d <- read dislocation
+    d  <- read dislocation
     withdrawEnergy pl eCost
-    let p1 = ownership .~ pl $ sch
-    let p2 = dislocation .~ d $ p1
-    return p2
+    return $ adjust sch [ownership .~ pl, dislocation .~ d]
 
 placeProduct prod plAlg = do
-    l <- withDefault ground $ getProperty layer prod
+    l   <- withDefault ground $ getProperty layer prod
     obj <- getActedObject
-    targetP <- evaluatePlacementAlg plAlg l obj
-    save $ objectDislocation .~ targetP $ prod
+    p   <- evaluatePlacementAlg plAlg l obj
+    save $ objectDislocation .~ p $ prod
 
 produce :: Eval String
 produce = do
     f <- read fabric
-    when (f ^. producing) $ do
-        prodObj <- createProduct (f ^. energyCost) (f ^. scheme)
-        placeProduct prodObj (f ^. placementAlg)
-    return "Successfully produced."
+    if f ^. producing then do
+      prodObj <- createProduct (f ^. energyCost) (f ^. scheme)
+      placeProduct prodObj (f ^. placementAlg)
+      return "Successfully produced."
+    else return "Producing paused."
 
 mainScenario :: Eval ()
 mainScenario = do
