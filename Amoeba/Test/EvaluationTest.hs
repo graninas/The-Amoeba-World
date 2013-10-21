@@ -50,8 +50,6 @@ getObjects' game = return $ getObjectsFromMap (game ^. objects)
 getObjectGraph' :: Game -> Eval ObjectGraph
 getObjectGraph' game = return $ GAI.graph (game ^. world)
 
-getObjectsFromMap m = m ^.. folding id
-
 testContext :: Game -> EvaluationContext
 testContext game = context dataCtx rndF
   where

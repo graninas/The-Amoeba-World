@@ -80,6 +80,11 @@ getObjects = get >>= (_dataObjects . _ctxData)
 getObjectGraph :: Eval ObjectGraph
 getObjectGraph = get >>= (_dataObjectGraph . _ctxData)
 
+getObjectsFromMap m = m ^.. folding id
+
+getTransactionObjects :: Eval Objects
+getTransactionObjects = liftM (getObjectsFromMap . _ctxTransactionMap) get
+
 ctxObjects     = ctxData . dataObjects
 ctxObjectGraph = ctxData . dataObjectGraph
 ctxObjectAt    = ctxData . dataObjectAt
@@ -106,13 +111,16 @@ suchThat prop pred = isJust . maybeStored prop pred     :: Object -> Bool
 justAll :: Object -> Bool
 justAll _ = True
 
-filterObjects f = liftM (filter f) getObjects
+filterObjects f  = liftM (filter f) 
 
 query :: (Object -> Bool) -> Eval Objects
 query q = do
-    objs <- filterObjects q
-    case objs of
-        [] -> E.left eNotFound
+    objs1 <- filterObjects q getTransactionObjects
+    objs2 <- filterObjects q getObjects
+    case objs1 of
+        [] -> case objs2 of
+            [] -> E.left eNotFound
+            xs -> E.right xs
         xs -> E.right xs
 
 find :: (Object -> Bool) -> Eval (Maybe Object)
@@ -168,7 +176,7 @@ transact act obj = do
 forProperty prop act = doForProperty :: Eval [String]
   where
     doForProperty = do
-        objs <- filterObjects (has prop)
+        objs <- filterObjects (has prop) getObjects
         evalTransact act objs
 
 evaluatePlacementAlg PlaceToNearestEmptyCell l obj = do
