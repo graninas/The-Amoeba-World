@@ -33,17 +33,20 @@ placeProduct prod plAlg = do
     p   <- evaluatePlacementAlg plAlg l obj
     save $ objectDislocation .~ p $ prod
 
-produce :: Eval String
-produce = do
+produce f = do
+    prodObj <- createProduct (f ^. energyCost) (f ^. scheme)
+    placeProduct prodObj (f ^. placementAlg)
+    return "Successfully produced."
+
+producingScenario :: Eval String
+producingScenario = do
     f <- read fabric
-    if f ^. producing then do
-      prodObj <- createProduct (f ^. energyCost) (f ^. scheme)
-      placeProduct prodObj (f ^. placementAlg)
-      return "Successfully produced."
-    else return "Producing paused."
+    if f ^. producing
+        then produce f
+        else return "Producing paused."
 
 mainScenario :: Eval ()
 mainScenario = do
-    forProperty fabric produce
+    forProperty fabric producingScenario
     return ()
 
