@@ -191,6 +191,7 @@ isPassable obj l = case obj ^? passRestriction.restrictedLayers of
     Nothing    -> True
 
 -- TODO: make it safe
+-- TODO: consider ownership
 isPathExist obj1 obj2 l =  areNeighbours' mbP1 mbP2
                         && isPassable obj1 l
                         && isPassable obj2 l

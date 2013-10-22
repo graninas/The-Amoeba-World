@@ -90,7 +90,7 @@ prop_query2 name l seed = (length queriedObjects == wmSize) && (not . null $ que
     evaluatedObjects = evaluate (query justAll) ctx
     queriedObjects = evaluatedObjects ^. _Right
 
-{-
+
 prop_mandatoryDislocation game = ( classify isNothingFound  "nothing found"
                                  . classify isSingleFound   "single found"
                                  . classify isMultipleFound "multiple found") test
@@ -132,8 +132,9 @@ prop_singleSelfDestr   game = testSingleProperty game selfDestructable
 prop_singleMoving      game = testSingleProperty game moving
 prop_singleLayer       game = testSingleProperty game layer
 prop_singleCollision   game = testSingleProperty game collision
--}
 
+{-
+Under constraction
 prop_forProperty game = test
   where
     ctx = testContext game
@@ -141,7 +142,7 @@ prop_forProperty game = test
     evaluatedObjects = getObjectsFromMap $ evaluatedState ^. ctxTransactionMap
     sourceObjects = getObjectsFromMap $ game ^. world.worldMap
     test = evaluatedObjects /= sourceObjects
-
+-}
 
 tests :: IO Bool
 tests = $quickCheckAll

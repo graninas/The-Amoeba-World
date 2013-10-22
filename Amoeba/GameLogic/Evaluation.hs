@@ -55,6 +55,7 @@ isENotFound _ = False
 noSuchProperty prop obj = E.left $ eNoSuchProperty $ describeNoProperty prop obj
 notFound = E.left eNotFound
 noActedObjectSet = E.left eNoActedObjectSet
+overlappedObjects objs = E.left $ eOverlappedObjects objs
 
 -- context
 noActedObject = Nothing
@@ -64,6 +65,12 @@ context dtCtx = EvaluationContext dtCtx GW.emptyMap noActedObject
 
 nextRndNum :: Eval Int
 nextRndNum = get >>= _ctxNextRndNum
+
+ctxObjects     = ctxData . dataObjects
+ctxObjectGraph = ctxData . dataObjectGraph
+ctxObjectAt    = ctxData . dataObjectAt
+
+-- helpers
 
 -- Naming convention:
 -- getXyz :: Eval Xyz
@@ -85,16 +92,6 @@ getObjectsFromMap m = m ^.. folding id
 getTransactionObjects :: Eval Objects
 getTransactionObjects = liftM (getObjectsFromMap . _ctxTransactionMap) get
 
-ctxObjects     = ctxData . dataObjects
-ctxObjectGraph = ctxData . dataObjectGraph
-ctxObjectAt    = ctxData . dataObjectAt
-
--- querying
-
-(~&~) p1 p2 obj = p1 obj && p2 obj
-
-infixr 3 ~&~
-
 isJustTrue :: Maybe Bool -> Bool
 isJustTrue (Just x) = x
 isJustTrue Nothing = False
@@ -106,39 +103,56 @@ maybeStored prop pred obj = let
             then mbVal
             else Nothing
 
+filterObjects f  = liftM (filter f) 
+
+querySpec q objectsGetter = do
+    objs <- filterObjects q objectsGetter
+    case objs of
+        [] -> notFound
+        xs -> E.right xs
+
+singleSpec q objectsGetter = do
+    found <- querySpec q objectsGetter
+    case found of
+        []     -> notFound
+        (x:[]) -> E.right x
+        xs     -> overlappedObjects xs
+
+-- querying
+
+(~&~) p1 p2 obj = p1 obj && p2 obj
+infixr 3 ~&~
+
 is prop val        = isJust . maybeStored prop (val ==) :: Object -> Bool
 suchThat prop pred = isJust . maybeStored prop pred     :: Object -> Bool
 justAll :: Object -> Bool
 justAll _ = True
 
-filterObjects f  = liftM (filter f) 
+queryTrans :: (Object -> Bool) -> Eval Objects
+queryTrans q = querySpec q getTransactionObjects
+
+findTrans :: (Object -> Bool) -> Eval (Maybe Object)
+findTrans q  = liftM listToMaybe (queryTrans q) :: Eval (Maybe Object)
+
+singleTrans :: (Object -> Bool) -> Eval Object
+singleTrans q = singleSpec q getTransactionObjects 
 
 query :: (Object -> Bool) -> Eval Objects
-query q = do
-    objs1 <- filterObjects q getTransactionObjects
-    objs2 <- filterObjects q getObjects
-    case objs1 of
-        [] -> case objs2 of
-            [] -> E.left eNotFound
-            xs -> E.right xs
-        xs -> E.right xs
+query q = querySpec q getObjects
 
 find :: (Object -> Bool) -> Eval (Maybe Object)
 find q  = liftM listToMaybe (query q) :: Eval (Maybe Object)
 
 single :: (Object -> Bool) -> Eval Object
-single q = do
-    found <- query q
-    case found of
-        []     -> E.left eNotFound
-        (x:[]) -> E.right x
-        xs     -> E.left $ eOverlappedObjects xs
+single q = singleSpec q getObjects
 
 withDefault defVal (EitherT m) = m >>= \z -> case z of
     Left  _ -> E.right defVal
     Right r -> E.right r
 
 getProperty prop obj = maybe (noSuchProperty prop obj) E.right (obj ^? prop)
+
+read prop = getActedObject >>= getProperty prop
 
 -- evaluation
 
@@ -150,8 +164,6 @@ getActedObject :: Eval Object
 getActedObject = do
     mbActedObject <- use ctxActedObject
     maybe noActedObjectSet E.right mbActedObject
-
-read prop = getActedObject >>= getProperty prop
 
 save :: Object -> Eval ()
 save obj = do

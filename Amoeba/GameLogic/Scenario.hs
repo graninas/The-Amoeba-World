@@ -24,7 +24,7 @@ createProduct :: Energy -> Object -> Eval Object
 createProduct eCost sch = do
     pl <- read ownership
     d  <- read dislocation
-    withdrawEnergy pl eCost
+    when (eCost > 0) $ withdrawEnergy pl eCost
     return $ adjust sch [ownership .~ pl, dislocation .~ d]
 
 placeProduct prod plAlg = do
