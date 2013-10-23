@@ -1,8 +1,9 @@
 module GameLogic.AI where
 
-import Control.Lens ((^.), singular)
+import Control.Lens
 
 import GameLogic.Geometry
+import GameLogic.Player
 import GameLogic.Object as O
 import GameLogic.ObjectCell
 import GameLogic.GenericAI as GAI
@@ -36,18 +37,28 @@ nodePoint = fst . GAI.fromNode
 
 -- Path finding & search
 
+pathAllowed mbPl l obj1 obj2 = pass && playersEqual && playerAllowed mbObj1Pl
+    where
+        mbObj1Pl = obj1 ^? ownership
+        mbObj2Pl = obj2 ^? ownership
+        pass = isPassable l obj1 && isPassable l obj2
+        playersEqual = mbObj1Pl == mbObj2Pl
+        playerAllowed Nothing = True
+        playerAllowed mbPl' = mbPl' == mbPl
+
 passableNodesDist = 1
 notPassableNodesDist = 1000
-nodesDist l n1@(Node p1 o1) n2@(Node p2 o2) =
-    if isPathExist o1 o2 l
+nodesDist pl l n1@(Node p1 o1) n2@(Node p2 o2) =
+    if pathAllowed pl l o1 o2
     then passableNodesDist
     else notPassableNodesDist
+
 
 -- TODO: heuristic distance
 heurDist _ = 2
 
-nearestEmpty :: Layer -> Object -> ObjectGraph -> Maybe [ObjectNode]
-nearestEmpty l obj gr = GAI.aStar gr (nodesDist l) heurDist GAI.isNodeEmpty startNode
+nearestEmpty :: Maybe Player -> Layer -> Object -> ObjectGraph -> Maybe [ObjectNode]
+nearestEmpty mbPl l obj gr = GAI.aStar gr (nodesDist mbPl l) heurDist GAI.isNodeEmpty startNode
   where
     startNode = node (obj ^. singular objectDislocation) obj
     

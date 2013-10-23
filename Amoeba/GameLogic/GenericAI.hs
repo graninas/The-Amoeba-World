@@ -11,6 +11,7 @@ import GameLogic.GenericWorld as GW
 data Node c = Node Point c
 type NodeNeighbours c = Set.Set (Node c)
 data NodeSet c = NodeSet (NodeNeighbours c)
+
 type Graph c = Node c -> NodeNeighbours c
 
 instance Ord (Node c) where
@@ -27,15 +28,15 @@ fromNode (Node p c) = (p, c)
 lookupNode :: GenericCell c => Point -> CelledWorld c -> Node c
 lookupNode p (GenericWorld wm _) = Node p (fromMaybe GW.empty $ GW.lookup p wm)
 
-graph :: GenericCell c => CelledWorld c -> Graph c
-graph w n@(Node p c) = let
-    ps = neighbours p
+graph :: GenericCell c => CelledWorld c -> NeighboursFunc -> Graph c
+graph w neighboursFunc n@(Node p c) = let
+    ps = neighboursFunc p
     nodes = map (`lookupNode` w) ps
     ns = Set.fromList nodes
     in ns
 
 aStar :: (GenericCell c, Ord d, Num d)
-      => (Node c -> NodeNeighbours c)
+      => Graph c
       -> (Node c -> Node c -> d)
       -> (Node c -> d)
       -> (Node c -> Bool)

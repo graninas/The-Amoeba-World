@@ -47,7 +47,7 @@ getObjectAt' game p = return $ game ^? objects . ix p
 getObjects' :: Game -> Eval Objects
 getObjects' game = return $ getObjectsFromMap (game ^. objects)
 
-getObjectGraph' :: Game -> Eval ObjectGraph
+getObjectGraph' :: Game -> Eval (NeighboursFunc -> ObjectGraph)
 getObjectGraph' game = return $ GAI.graph (game ^. world)
 
 testContext :: Game -> EvaluationContext

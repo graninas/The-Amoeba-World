@@ -35,6 +35,7 @@ type Shift = Point -> Point
 type Shifts = [Shift]
 type TargetPoint = Point
 type Distance = Int
+type NeighboursFunc = Point -> Points
 
 toDoubleV3 :: L.V3 Int -> L.V3 Double
 toDoubleV3 (L.V3 x1 x2 x3) = L.V3 (fromIntegral x1) (fromIntegral x2) (fromIntegral x3)
@@ -138,7 +139,10 @@ downP  = L.V3 0 1 0 :: L.V3 Int
 relativeCorners = [ leftUpP, leftDownP, rightUpP, rightDownP ]
 relativeSides   = [ leftP, rightP, upP, downP ]
 
+neighbours :: NeighboursFunc
 neighbours p = map (p L.^+^) $ relativeCorners ++ relativeSides
+sideNeighbours p = map (p L.^+^) relativeSides
+cornerNeighbours p = map (p L.^+^) relativeCorners
 areNeighbours p1 p2 = p1 `elem` neighbours p2
 
 pointX (L.V3 x _ _) = x

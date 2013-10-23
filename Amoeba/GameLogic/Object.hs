@@ -180,26 +180,14 @@ charged (Resource c _) = c > 0
 
 batteryCharge = battery.current
 
--- Don't know how to do this using lenses.
-resourced d (la, lb) = (d ^. la, d ^. lb)
+--resourced d (la, lb) = (d ^. la, d ^. lb)
+
+isPassable l obj = case obj ^? passRestriction.restrictedLayers of
+    Just layersSet -> not $ l `S.member` layersSet
+    Nothing    -> True
 
 baseFabric :: Fabric
 baseFabric = Fabric 0 def True placeToNearestEmptyCell
-
-isPassable obj l = case obj ^? passRestriction.restrictedLayers of
-    Just lsSet -> not $ l `S.member` lsSet
-    Nothing    -> True
-
--- TODO: make it safe
--- TODO: consider ownership
-isPathExist obj1 obj2 l =  areNeighbours' mbP1 mbP2
-                        && isPassable obj1 l
-                        && isPassable obj2 l
-  where
-    areNeighbours' (Just p1) (Just p2) = areNeighbours p1 p2
-    areNeighbours' _ _ = False
-    mbP1 = obj1 ^? objectDislocation
-    mbP2 = obj2 ^? objectDislocation
 
 -- This should be used carefully.
 instance Monoid Object where

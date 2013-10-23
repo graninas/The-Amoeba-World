@@ -32,7 +32,7 @@ type Eval res = EvalType EvaluationContext res
 type EvalState res = State EvaluationContext res
 
 data DataContext = DataContext { _dataObjects :: Eval Objects
-                               , _dataObjectGraph :: Eval ObjectGraph
+                               , _dataObjectGraph :: Eval (NeighboursFunc -> ObjectGraph)
                                , _dataObjectAt :: Point -> Eval (Maybe Object) }
 
 data EvaluationContext = EvaluationContext { _ctxData :: DataContext
@@ -84,8 +84,10 @@ getObjectAt p = get >>= flip (_dataObjectAt . _ctxData) p
 getObjects :: Eval Objects
 getObjects = get >>= (_dataObjects . _ctxData)
 
-getObjectGraph :: Eval ObjectGraph
-getObjectGraph = get >>= (_dataObjectGraph . _ctxData)
+getObjectGraph :: NeighboursFunc -> Eval ObjectGraph
+getObjectGraph nsFunc = do
+    nsObjectGraphFunc <- get >>= (_dataObjectGraph . _ctxData)
+    return $ nsObjectGraphFunc nsFunc
 
 getObjectsFromMap m = m ^.. folding id
 
@@ -193,8 +195,8 @@ forProperty prop act = doForProperty :: Eval [String]
 
 evaluatePlacementAlg PlaceToNearestEmptyCell l obj = do
     p        <- getProperty objectDislocation obj
-    objGraph <- getObjectGraph
-    let mbRes = nearestEmpty l obj objGraph
+    objGraph <- getObjectGraph sideNeighbours
+    let mbRes = nearestEmpty (obj ^? ownership) l obj objGraph
     maybe notFound extractPoint mbRes
   where
         extractPoint [] = notFound
