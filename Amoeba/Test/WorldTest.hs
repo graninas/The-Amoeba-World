@@ -117,7 +117,7 @@ prop_moveSingleObject2 = moveSingleObject point3 testGame `notElem` [testGame, b
 
 --------
 
-hasDislObj = Object {_propertyMap = M.fromList [(5,PDislocation {__dislocation = Dislocation {_dislocationPoint = G.point (-1) (-1) 1}}),(4,PAge {__age = Resource {_current = 2, _capacity = Nothing}})]}
+hasDislObj = Object {_propertyMap = M.fromList [(5,PDislocation {__dislocation = Dislocation {_dislocationPoint = G.point (-1) (-1) 1}}),(4,PAge {__age = Resource {_stock = 2, _capacity = Nothing}})]}
 prop_hasDislocationTest = has dislocation hasDislObj
 
 prop_hasDislocation game = classify (isGameEmpty game) "trivial" test

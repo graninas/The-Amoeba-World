@@ -46,7 +46,7 @@ data Moving = StraightMoving { _speed :: Speed
 data Layer = Underground | Ground | Sky
   deriving (Show, Read, Eq, Ord)
 
-data Resource a = Resource { _current :: a
+data Resource a = Resource { _stock :: a
                            , _capacity :: Maybe a }
   deriving (Show, Read, Eq)
 
@@ -177,7 +177,7 @@ layers = [ underground, ground, sky ]
 charged :: Resource Energy -> Bool
 charged (Resource c _) = c > 0
 
-batteryCharge = battery.current
+batteryCharge = battery.stock
 
 modifyResourceStock res@(Resource cur (Just cap)) cnt
     | zeroCompare (cur + cnt) == LT = error $ "Resource exhausted: " ++ show res ++ ", cnt = " ++ show cnt

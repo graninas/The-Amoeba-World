@@ -31,6 +31,6 @@ testGame seed = testGame'
     testGame' = over world refreshWorldBound g
 
 testGame1 = let
-    g1 = Game {_world = GW.fromList [(point 1 1 1,Object {_propertyMap = M.fromList [(1,PDurability {__durability = Resource {_current = 4, _capacity = Just 4}}),(5,PDislocation {__dislocation = Dislocation {_dislocationPoint = point 1 1 1}})]})], _rndGen = mkStdGen 1}
+    g1 = Game {_world = GW.fromList [(point 1 1 1,Object {_propertyMap = M.fromList [(1,PDurability {__durability = Resource {_stock = 4, _capacity = Just 4}}),(5,PDislocation {__dislocation = Dislocation {_dislocationPoint = point 1 1 1}})]})], _rndGen = mkStdGen 1}
     g2 = g1 & customKaryon (point 1 1 1) player1
     in g2
