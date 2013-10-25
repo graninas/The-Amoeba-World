@@ -11,3 +11,11 @@ type MaxDurability = Durability
 type Age = Int
 type MaxAge = Age
 type Power = Int
+
+-- Maybe ovekill?
+class (Ord a, Num a) => ZeroOrd a where
+  zeroCompare :: a -> Ordering
+
+instance ZeroOrd Int where
+  zeroCompare i = compare i 0
+  

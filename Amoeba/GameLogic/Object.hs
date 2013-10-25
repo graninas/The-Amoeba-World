@@ -59,7 +59,6 @@ data Named = Named String
 data Dislocation = Dislocation { _dislocationPoint :: Point }
   deriving (Show, Read, Eq)
   
-
 data Property = PNamed { __named :: Named }
               | PDurability { __durability :: Resource Durability }
               | PBattery { __battery :: Resource Energy }
@@ -180,6 +179,14 @@ charged (Resource c _) = c > 0
 
 batteryCharge = battery.current
 
+modifyResourceStock res@(Resource cur (Just cap)) cnt
+    | zeroCompare (cur + cnt) == LT = error $ "Resource exhausted: " ++ show res ++ ", cnt = " ++ show cnt
+    | cur + cnt >= cap = cap
+    | otherwise = cur + cnt
+modifyResourceStock res@(Resource cur Nothing) cnt
+    | zeroCompare (cur + cnt) == LT = error $ "Resource exhausted: " ++ show res ++ ", cnt = " ++ show cnt
+    | otherwise = cur + cnt 
+
 --resourced d (la, lb) = (d ^. la, d ^. lb)
 
 isPassable l obj = case obj ^? passRestriction.restrictedLayers of
@@ -202,3 +209,4 @@ instance Default Fabric where
 
 instance Eq (PAccessor a) where
     acc1 == acc2 = key acc1 == key acc2
+
