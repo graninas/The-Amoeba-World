@@ -40,6 +40,11 @@ data EvaluationContext = EvaluationContext { _ctxData :: DataContext
                                            , _ctxActedObject :: Maybe Object
                                            , _ctxNextRndNum :: Eval Int }
 
+data QueryStrategy = QuerySource
+                   | QueryTrans
+                   | QueryActual
+  deriving (Show, Read, Eq)
+
 makeLenses ''DataContext
 makeLenses ''EvaluationContext
 
@@ -107,15 +112,19 @@ maybeStored prop pred obj = let
 
 filterObjects f  = liftM (filter f) 
 
-querySpec q objectsGetter = do
-    objs <- filterObjects q objectsGetter
+qTrans  q = filterObjects q getTransactionObjects
+qSrc    q = filterObjects q getObjects
+qActual q = QueryActual
+
+querySpec qStrategy q = do
+    objs <- qStrategy q
     case objs of
         [] -> notFound
         xs -> E.right xs
 
-singleSpec q objectsGetter = do
-    found <- querySpec q objectsGetter
-    case found of
+singleSpec qStrategy q = do
+    founds <- querySpec qStrategy q
+    case founds of
         []     -> notFound
         (x:[]) -> E.right x
         xs     -> overlappedObjects xs
@@ -136,17 +145,17 @@ queryTrans q = querySpec q getTransactionObjects
 findTrans :: (Object -> Bool) -> Eval (Maybe Object)
 findTrans q  = liftM listToMaybe (queryTrans q) :: Eval (Maybe Object)
 
-singleTrans :: (Object -> Bool) -> Eval Object
-singleTrans q = singleSpec q getTransactionObjects 
+--single :: (Object -> Bool) -> Eval Object
+single Trans q = singleSpec q getTransactionObjects 
+
+single :: (Object -> Bool) -> Eval Object
+single q = singleSpec q getObjects
 
 query :: (Object -> Bool) -> Eval Objects
 query q = querySpec q getObjects
 
 find :: (Object -> Bool) -> Eval (Maybe Object)
 find q  = liftM listToMaybe (query q) :: Eval (Maybe Object)
-
-single :: (Object -> Bool) -> Eval Object
-single q = singleSpec q getObjects
 
 withDefault defVal (EitherT m) = m >>= \z -> case z of
     Left  _ -> E.right defVal

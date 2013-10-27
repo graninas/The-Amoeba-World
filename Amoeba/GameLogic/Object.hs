@@ -71,6 +71,7 @@ data Property = PNamed { __named :: Named }
               | PMoving { __moving :: Moving }
               | PLayer { __layer :: Layer }
               | PCollision { __collision :: Collision }
+              | PObjectId { __objectId :: Int }
   deriving (Show, Read, Eq)
 
 type PropertyKey = Int
@@ -144,6 +145,7 @@ selfDestructableA = PAccessor 9    $ PSelfDestructable .id
 movingA           = PAccessor 10   $ PMoving           .id
 layerA            = PAccessor 11   $ PLayer            .id
 collisionA        = PAccessor 12   $ PCollision        .toCollision
+objectIdA         = PAccessor 13   $ PObjectId         .id
 
 -- TODO: remove boilerplate with TH
 named            = property (key namedA)            _named
@@ -159,6 +161,7 @@ selfDestructable = property (key selfDestructableA) _selfDestructable
 moving           = property (key movingA)           _moving
 layer            = property (key layerA)            _layer
 collision        = property (key collisionA)        _collision
+objectId         = property (key objectIdA)         _objectIdA
 
 objectDislocation = dislocation.dislocationPoint
 
@@ -216,6 +219,7 @@ dummyFabric = makeObject $ do
 
 dummyObject :: Object
 dummyObject = makeObject $ do
+    objectIdA         |= 0
     namedA            |= dummyObjectName
     layerA            |= ground
     dislocationA      |= zeroPoint
