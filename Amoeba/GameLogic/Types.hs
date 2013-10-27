@@ -12,6 +12,10 @@ type Age = Int
 type MaxAge = Age
 type Power = Int
 
+data Named = Named String
+  deriving (Show, Read, Eq)
+
+
 -- Maybe ovekill?
 class (Ord a, Num a) => ZeroOrd a where
   zeroCompare :: a -> Ordering

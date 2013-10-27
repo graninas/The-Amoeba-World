@@ -6,6 +6,7 @@ module GameLogic.Object where
 
 import Data.Default
 import Data.Monoid 
+import Data.Maybe (fromJust)
 import Control.Lens
 import Control.Monad.State
 import Prelude
@@ -16,6 +17,7 @@ import qualified Data.List as L (nub)
 import GameLogic.Types
 import GameLogic.Geometry
 import GameLogic.Player
+import Misc.Descriptions
 
 instance Monoid r => Monoid (Accessor r a) where
   mempty = Accessor mempty
@@ -51,9 +53,6 @@ data Resource a = Resource { _stock :: a
   deriving (Show, Read, Eq)
 
 data Collision = Collision { _collidings :: Objects }
-  deriving (Show, Read, Eq)
-
-data Named = Named String
   deriving (Show, Read, Eq)
 
 data Dislocation = Dislocation { _dislocationPoint :: Point }
@@ -97,6 +96,9 @@ merge (Object pm1) (Object pm2) = Object $ M.union pm1 pm2
 setProperty :: PAccessor a -> a -> State Object ()
 setProperty = (|=)
 
+makeObject :: Default a => State a () -> a
+makeObject = flip execState def
+
 -- Lenses
 makeLenses ''Object
 makeLenses ''Property
@@ -123,7 +125,7 @@ toResource (c, mbM) = resourceValidator $ Resource c mbM
 isNamedValid (Named n) = not . null $ n
 namedValidator n | isNamedValid n = n
                  | otherwise      = error $ "Invalid named property: " ++ show n
-toNamed = namedValidator . Named
+toNamed = namedValidator
 toPassRestriction = PassRestriction . S.fromList
 toDislocation = Dislocation
 
@@ -179,14 +181,6 @@ charged (Resource c _) = c > 0
 
 batteryCharge = battery.stock
 
-modifyResourceStock res@(Resource cur (Just cap)) cnt
-    | zeroCompare (cur + cnt) == LT = error $ "Resource exhausted: " ++ show res ++ ", cnt = " ++ show cnt
-    | cur + cnt >= cap = cap
-    | otherwise = cur + cnt
-modifyResourceStock res@(Resource cur Nothing) cnt
-    | zeroCompare (cur + cnt) == LT = error $ "Resource exhausted: " ++ show res ++ ", cnt = " ++ show cnt
-    | otherwise = cur + cnt 
-
 --resourced d (la, lb) = (d ^. la, d ^. lb)
 
 isPassable l obj = case obj ^? passRestriction.restrictedLayers of
@@ -210,3 +204,37 @@ instance Default Fabric where
 instance Eq (PAccessor a) where
     acc1 == acc2 = key acc1 == key acc2
 
+-- Misc
+
+-- TODO: remove it.
+dummyFabric :: Fabric
+dummyFabric = makeObject $ do
+    energyCost   .= 1
+    scheme       .= dummyObject
+    producing    .= False
+    placementAlg .= placeToPoint zeroPoint
+
+dummyObject :: Object
+dummyObject = makeObject $ do
+    namedA            |= dummyObjectName
+    layerA            |= ground
+    dislocationA      |= zeroPoint
+    durabilityA       |= (0, Nothing)
+    ownershipA        |= dummyPlayer
+    fabricA           |= dummyFabric
+    directedA         |= left
+    selfDestructableA |= selfDestructOnTarget (point 1 1 1)
+    movingA           |= straightMoving 0 right
+    batteryA          |= (0, Nothing)
+    passRestrictionA  |= layers
+    ageA              |= (0, Nothing)
+    collisionA        |= []
+
+    -- TODO: redesign it.
+nameProperty prop = show . fromJust $ dummyObject ^? prop
+
+describeNoProperty prop obj = "No property " ++ showedProp ++ " in object " ++ showedObj
+  where
+    showedProp = nameProperty prop
+    showedObj = show obj
+    

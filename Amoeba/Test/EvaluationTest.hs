@@ -79,7 +79,7 @@ prop_objectAt2 seed = (obj1 == obj2) && isJust (obj1 ^. _Right)
 prop_query1 seed = evaluatedObject == expectedSoundWave
   where
     (game, ctx) = testGameAndContext seed
-    q = find $ layer `is` sky ~&~ named `is` toNamed "SoundWave"
+    q = find $ layer `is` sky ~&~ named `is` soundWaveName
     evaluatedObject = evaluate q ctx
     expectedSoundWave = Right . Just $ soundWave player1 left 10 point3
 

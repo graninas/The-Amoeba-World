@@ -11,6 +11,7 @@ import Data.Foldable (foldlM)
 import Control.Lens ((^?), (^.))
 
 import GameLogic.Geometry
+import GameLogic.Types
 import GameLogic.Player
 import GameLogic.Object as O
 

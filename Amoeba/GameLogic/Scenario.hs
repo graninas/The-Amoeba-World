@@ -13,9 +13,34 @@ import GameLogic.Geometry
 import GameLogic.Object
 import GameLogic.Types
 import GameLogic.Player
+import Misc.Descriptions
 
+--modifyResource :: (Ord a, ZeroOrd a) => prop -> Player -> a -> Eval ()
+--modifyResource prop pl cnt | zeroCompare cnt == EQ = return ()
+--                           | zeroCompare cnt == LT = modifyResource' prop ltQ cnt
+--                           | zeroCompare cnt == GT = modifyResource' prop gtQ cnt
+--  where
+--    ltQ = ownership `is` pl
+--    gtQ = 
+--    modifyResource' prop q cnt = do
+--        obj <- single q
+--        res <- getProperty prop obj
+--        let newRes = (prop.current) .~ modifyResourceStock res cnt $ obj
+--        save newRes
 
-withdrawEnergy pl eCost = undefined
+-- TODO: make it safe
+modifyResourceStock res@(Resource cur (Just cap)) cnt
+    | zeroCompare (cur + cnt) == LT = error $ "Resource exhausted: " ++ show res ++ ", cnt = " ++ show cnt
+    | cur + cnt >= cap = cap
+    | otherwise = cur + cnt
+modifyResourceStock res@(Resource cur Nothing) cnt
+    | zeroCompare (cur + cnt) == LT = error $ "Resource exhausted: " ++ show res ++ ", cnt = " ++ show cnt
+    | otherwise = cur + cnt 
+
+withdrawEnergy pl cnt = do
+    obj <- single $ named `is` karyonName ~&~ ownership `is` pl ~&~ batteryCharge `suchThat` (>= cnt)
+    batRes <- getProperty battery obj
+    save $ batteryCharge .~ modifyResourceStock batRes cnt $ obj
 
 createProduct :: Energy -> Object -> Eval Object
 createProduct eCost sch = do

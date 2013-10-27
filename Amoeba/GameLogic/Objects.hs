@@ -8,9 +8,7 @@ import GameLogic.Geometry
 import GameLogic.Object
 import GameLogic.Player
 import GameLogic.Types
-
-makeObject :: Default a => State a () -> a
-makeObject = flip execState def
+import Misc.Descriptions
 
 plasmaFabric :: Player -> Point -> Fabric
 plasmaFabric pl p = makeObject $ do
@@ -29,7 +27,7 @@ soundWaveFabric pl dir p = makeObject $ do
 
 plasma :: Player -> Point -> Object
 plasma pl p = makeObject $ do
-    namedA       |= "Plasma"
+    namedA       |= plasmaName
     layerA       |= ground
     dislocationA |= p
     durabilityA  |= (30, Just 40)
@@ -37,7 +35,7 @@ plasma pl p = makeObject $ do
 
 karyon :: Player -> Point -> Object
 karyon pl p = makeObject $ do
-    namedA       |= "Karyon"
+    namedA       |= karyonName
     layerA       |= ground
     dislocationA |= p
     batteryA     |= (300, Just 2000)
@@ -45,7 +43,7 @@ karyon pl p = makeObject $ do
     ownershipA   |= pl
     fabricA      |= plasmaFabric pl p
 
-bullet :: String -> Speed -> Player -> Direction -> Power -> Point -> Object
+bullet :: Named -> Speed -> Player -> Direction -> Power -> Point -> Object
 bullet name speed pl dir power p = makeObject $ do
     let targetP = moveStraight power p dir
     namedA            |= name
@@ -56,37 +54,14 @@ bullet name speed pl dir power p = makeObject $ do
     selfDestructableA |= selfDestructOnTarget targetP
     movingA           |= straightMoving speed dir
 
-soundWave = bullet "SoundWave" 1
-laserBeam = bullet "LaserBeam" 10
+soundWave = bullet soundWaveName 1
+laserBeam = bullet laserBeamName 10
 
 influencer :: Player -> Direction -> Point -> Object
 influencer pl dir p = makeObject $ do
-    namedA       |= "Influencer"
+    namedA       |= influencerName
     layerA       |= ground
     dislocationA |= p
     durabilityA  |= (30, Just 30)
     ownershipA   |= pl
     fabricA      |= soundWaveFabric pl dir p
-
-dummyFabric :: Fabric
-dummyFabric = makeObject $ do
-    energyCost   .= 1
-    scheme       .= dummyObject
-    producing    .= False
-    placementAlg .= placeToPoint zeroPoint
-
-dummyObject :: Object
-dummyObject = makeObject $ do
-    namedA            |= "DummyObject"
-    layerA            |= ground
-    dislocationA      |= zeroPoint
-    durabilityA       |= (0, Nothing)
-    ownershipA        |= dummyPlayer
-    fabricA           |= dummyFabric
-    directedA         |= left
-    selfDestructableA |= selfDestructOnTarget (point 1 1 1)
-    movingA           |= straightMoving 0 right
-    batteryA          |= (0, Nothing)
-    passRestrictionA  |= layers
-    ageA              |= (0, Nothing)
-    collisionA        |= []
