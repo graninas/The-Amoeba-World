@@ -161,7 +161,7 @@ selfDestructable = property (key selfDestructableA) _selfDestructable
 moving           = property (key movingA)           _moving
 layer            = property (key layerA)            _layer
 collision        = property (key collisionA)        _collision
-objectId         = property (key objectIdA)         _objectIdA
+objectId         = property (key objectIdA)         _objectId
 
 objectDislocation = dislocation.dislocationPoint
 

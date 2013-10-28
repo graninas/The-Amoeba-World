@@ -19,7 +19,20 @@ import GameLogic.GenericAI as GAI
 import qualified GameLogic.GenericWorld as GW
 import Misc.Descriptions
 
-type TransactionMap = GW.GenericMap Object
+-- TODO: replace _originalObject by objectId when it is introduced.
+-- | Transaction Nothing (Just obj)      : obj  is added
+-- | Transaction (Just obj1) (Just obj2) : obj1 is updated and now it's obj2
+-- | Transaction (Just obj) Nothing      : obj  is removed
+-- | Transaction Nothing Nothing         : nonsense, no operation
+
+data Transaction = Transaction { _sourceObject :: Maybe Object
+                               , _updatedObject :: Maybe Object }
+  deriving (Show, Read, Eq)
+--type Transactions = [Transaction]
+type TransactionMap = GW.GenericMap Transaction
+
+type Query = Object -> Bool
+type TransQuery = Transaction -> Bool
 
 data EvalError = ENoSuchProperty String
                | ENoActedObjectSet
@@ -40,13 +53,9 @@ data EvaluationContext = EvaluationContext { _ctxData :: DataContext
                                            , _ctxActedObject :: Maybe Object
                                            , _ctxNextRndNum :: Eval Int }
 
-data QueryStrategy = QuerySource
-                   | QueryTrans
-                   | QueryActual
-  deriving (Show, Read, Eq)
-
 makeLenses ''DataContext
 makeLenses ''EvaluationContext
+makeLenses ''Transaction
 
 eNoSuchProperty = ENoSuchProperty
 eNoActedObjectSet = ENoActedObjectSet
@@ -96,25 +105,35 @@ getObjectGraph nsFunc = do
 
 getObjectsFromMap m = m ^.. folding id
 
-getTransactionObjects :: Eval Objects
-getTransactionObjects = liftM (getObjectsFromMap . _ctxTransactionMap) get
+getTransactionMap = get >>= _ctxTransactionMap
+
 
 isJustTrue :: Maybe Bool -> Bool
 isJustTrue (Just x) = x
 isJustTrue Nothing = False
 
-maybeStored prop pred obj = let
+queryProperty prop pred obj = let
     mbVal = obj ^? prop
     mbRes = liftM pred mbVal
     in if isJustTrue mbRes
             then mbVal
             else Nothing
 
-filterObjects f  = liftM (filter f) 
+filterObjects q = liftM (filter q)
+filterTransactionMap q = liftM (M.filter (transQuery q))
+
+transQuery :: Query -> TransQuery
+transQuery q (Transaction _ (Just obj)) = q obj
+transQuery q (Transaction (Just obj) Nothing) = q obj
+transQuery _ (Transaction Nothing Nothing) = False
 
 qTrans  q = filterObjects q getTransactionObjects
 qSrc    q = filterObjects q getObjects
-qActual q = QueryActual
+qActual q = do
+    transMap <- filterTransactionMap q getTransactionMap
+    objs     <- filterObjects q getObjects
+    let resObjs = 
+
 
 querySpec qStrategy q = do
     objs <- qStrategy q
@@ -134,27 +153,27 @@ singleSpec qStrategy q = do
 (~&~) p1 p2 obj = p1 obj && p2 obj
 infixr 3 ~&~
 
-is prop val        = isJust . maybeStored prop (val ==) :: Object -> Bool
-suchThat prop pred = isJust . maybeStored prop pred     :: Object -> Bool
-justAll :: Object -> Bool
+is prop val        = isJust . queryProperty prop (val ==) :: Query
+suchThat prop pred = isJust . queryProperty prop pred     :: Query
+justAll :: Query
 justAll _ = True
 
-queryTrans :: (Object -> Bool) -> Eval Objects
+queryTrans :: Query -> Eval Objects
 queryTrans q = querySpec q getTransactionObjects
 
-findTrans :: (Object -> Bool) -> Eval (Maybe Object)
+findTrans :: Query -> Eval (Maybe Object)
 findTrans q  = liftM listToMaybe (queryTrans q) :: Eval (Maybe Object)
 
---single :: (Object -> Bool) -> Eval Object
-single Trans q = singleSpec q getTransactionObjects 
+--single :: Query -> Eval Object
+single q = singleSpec q getTransactionObjects 
 
-single :: (Object -> Bool) -> Eval Object
+single :: Query -> Eval Object
 single q = singleSpec q getObjects
 
-query :: (Object -> Bool) -> Eval Objects
+query :: Query -> Eval Objects
 query q = querySpec q getObjects
 
-find :: (Object -> Bool) -> Eval (Maybe Object)
+find :: Query -> Eval (Maybe Object)
 find q  = liftM listToMaybe (query q) :: Eval (Maybe Object)
 
 withDefault defVal (EitherT m) = m >>= \z -> case z of
