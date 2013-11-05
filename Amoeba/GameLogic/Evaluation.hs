@@ -8,7 +8,7 @@ import Control.Monad.Trans.Either as E
 import Control.Monad
 import Control.Lens
 import qualified Data.Sequence as Seq
-import qualified Data.Map as Map
+import qualified Data.Map as M
 import Data.Maybe (fromJust, isJust, listToMaybe)
 import Prelude hiding (read)
 
@@ -103,10 +103,12 @@ getObjectGraph nsFunc = do
     nsObjectGraphFunc <- get >>= (_dataObjectGraph . _ctxData)
     return $ nsObjectGraphFunc nsFunc
 
-getObjectsFromMap m = m ^.. folding id
+fromMap m = m ^.. folding id
 
 getTransactionMap = get >>= _ctxTransactionMap
-
+getTransactionObjects = getTransactionMap >>= (\m -> m ^.. folding f)
+  where
+    f 
 
 isJustTrue :: Maybe Bool -> Bool
 isJustTrue (Just x) = x
@@ -132,7 +134,7 @@ qSrc    q = filterObjects q getObjects
 qActual q = do
     transMap <- filterTransactionMap q getTransactionMap
     objs     <- filterObjects q getObjects
-    let resObjs = 
+    undefined
 
 
 querySpec qStrategy q = do
@@ -158,20 +160,14 @@ suchThat prop pred = isJust . queryProperty prop pred     :: Query
 justAll :: Query
 justAll _ = True
 
-queryTrans :: Query -> Eval Objects
-queryTrans q = querySpec q getTransactionObjects
-
-findTrans :: Query -> Eval (Maybe Object)
-findTrans q  = liftM listToMaybe (queryTrans q) :: Eval (Maybe Object)
-
---single :: Query -> Eval Object
-single q = singleSpec q getTransactionObjects 
+singleActual :: Query -> Eval Object
+singleActual = singleSpec qActual
 
 single :: Query -> Eval Object
-single q = singleSpec q getObjects
+single = singleSpec qSrc
 
 query :: Query -> Eval Objects
-query q = querySpec q getObjects
+query = querySpec qSrc
 
 find :: Query -> Eval (Maybe Object)
 find q  = liftM listToMaybe (query q) :: Eval (Maybe Object)

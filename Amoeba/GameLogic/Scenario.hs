@@ -25,7 +25,7 @@ modifyResourceStock res@(Resource cur Nothing) cnt
     | otherwise = cur + cnt 
 
 withdrawEnergy pl cnt = do
-    obj <- single $ named `is` karyonName ~&~ ownership `is` pl ~&~ batteryCharge `suchThat` (>= cnt)
+    obj <- singleActual $ named `is` karyonName ~&~ ownership `is` pl ~&~ batteryCharge `suchThat` (>= cnt)
     batRes <- getProperty battery obj
     save $ batteryCharge .~ modifyResourceStock batRes cnt $ obj
 
