@@ -15,22 +15,34 @@ import qualified GameLogic.GenericWorld as GW
 
 import Test.Utils.GeometryData
 
+defaultSeed = 1
+defaultGame = initialGame defaultSeed
+
 customKaryon p pl = putObject p $ karyon pl
 
-plasma1       = putObject point1 $ plasma player1
-plasma2       = putObject point2 $ plasma player1
-soundWave1    = putObject point3 $ soundWave player1 left 10
-laserBeam1    = putObject point4 $ laserBeam player2 up 200
-karyon1       = customKaryon point5 player2
+plasma1'       = putObject point1 $ plasma player1
+plasma2'       = putObject point2 $ plasma player1
+soundWave1'    = putObject point3 $ soundWave player1 left 10
+laserBeam1'    = putObject point4 $ laserBeam player2 up 200
+karyon1'       = customKaryon point5 player2
 
+
+
+setupGame = over world refreshWorldBound
 
 testGame seed = testGame'
   where
-    g = initialGame seed & karyon1 & plasma1 & plasma2 & soundWave1 & laserBeam1
+    g = initialGame seed & karyon1' & plasma1' & plasma2' & soundWave1' & laserBeam1'
     w = g ^. world
-    testGame' = over world refreshWorldBound g
+    testGame' = setupGame g
 
 testGame1 = let
     g1 = Game {_world = GW.fromList [(point 1 1 1,Object {_propertyMap = M.fromList [(1,PDurability {__durability = Resource {_stock = 4, _capacity = Just 4}}),(5,PDislocation {__dislocation = Dislocation {_dislocationPoint = point 1 1 1}})]})], _rndGen = mkStdGen 1}
     g2 = g1 & customKaryon (point 1 1 1) player1
     in g2
+
+
+gameWithFabric = let
+    g = initialGame defaultSeed & karyon1'
+    in setupGame g 
+    

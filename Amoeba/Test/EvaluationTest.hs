@@ -19,6 +19,7 @@ import Test.Utils.TestGameData
 import Test.Utils.GeometryArbitraries
 import Test.Utils.ObjectArbitraries
 import Test.Utils.GameArbitraries
+import Test.Utils.EvaluationUtils
 
 import GameLogic.World
 import GameLogic.Player
@@ -32,37 +33,6 @@ import GameLogic.AI as AI
 import Misc.Descriptions
 import qualified GameLogic.GenericWorld as GW
 import qualified GameLogic.GenericAI as GAI
-
-nextRnd' :: Game -> Eval Int
-nextRnd' game = let (r, g) = random (game ^. rndGen)
-                    newGame = rndGen .~ g $ game
-               in do
-                   ctx <- get
-                   put $ ctx { _ctxNextRndNum = nextRnd' newGame }
-                   return r
-
-getObjectAt' :: Game -> Point -> Eval (Maybe Object)
-getObjectAt' game p = return $ game ^? objects . ix p
-
-getObjects' :: Game -> Eval Objects
-getObjects' game = return $ fromMap (game ^. objects)
-
-getObjectGraph' :: Game -> Eval (NeighboursFunc -> ObjectGraph)
-getObjectGraph' game = return $ GAI.graph (game ^. world)
-
-testContext :: Game -> EvaluationContext
-testContext game = context dataCtx rndF
-  where
-    rndF = nextRnd' game
-    dataCtx = dataContext objectsF objectGraphF objectAtF
-    objectGraphF = getObjectGraph' game
-    objectAtF = getObjectAt' game
-    objectsF = getObjects' game
-
-testGameAndContext seed = let
-    game = testGame seed
-    ctx = testContext game
-    in (game, ctx)
 
 prop_objectAt1 p seed = obj1 == obj2
   where
@@ -133,13 +103,29 @@ prop_singleMoving      game = testSingleProperty game moving
 prop_singleLayer       game = testSingleProperty game layer
 prop_singleCollision   game = testSingleProperty game collision
 
+transactionMapFromList :: [(Point, Transaction)] -> TransactionMap
+transactionMapFromList = M.fromList
+
+prop_save obj = ( classify hasDislocation "object with dislocation"
+                . classify (not hasDislocation) "object without dislocation") test
+  where
+    ctx = testContext defaultGame
+    objPoint = obj ^. singular objectDislocation
+    expectedTransMap = transactionMapFromList [(objPoint, actuatedTransaction obj)]
+    resultState = execute (save obj) ctx
+    actualTransMap = resultState ^. ctxTransactionMap
+    hasDislocation = has objectDislocation obj
+    test = not hasDislocation || (expectedTransMap == actualTransMap)
+
 rolloutTransaction (Transaction _ (Just obj))  = obj
 rolloutTransaction (Transaction (Just obj) _) = obj
 rolloutTransaction _ = error "rolloutTransaction impossible" 
 
 rolloutTransactions = map rolloutTransaction
 
---Under construction
+-- TODO: "forProperty fabric" seems like overkill because producingScenario already has fabric dealing.
+-- Under construction
+{-
 prop_forProperty game = test
   where
     ctx = testContext game
@@ -147,7 +133,7 @@ prop_forProperty game = test
     evaluatedObjects = rolloutTransactions $ fromMap $ evaluatedState ^. ctxTransactionMap
     sourceObjects = fromMap $ game ^. world.worldMap
     test = evaluatedObjects /= sourceObjects
-
+-}
 
 tests :: IO Bool
 tests = $quickCheckAll
