@@ -26,9 +26,8 @@ import Misc.Descriptions
 -- | Transaction Nothing Nothing         : nonsense, no operation
 
 data Transaction = Transaction { _sourceObject :: Maybe Object
-                               , _updatedObject :: Maybe Object }
+                               , _actualObject  :: Maybe Object }
   deriving (Show, Read, Eq)
---type Transactions = [Transaction]
 type TransactionMap = GW.GenericMap Transaction
 
 type Query = Object -> Bool
@@ -105,10 +104,21 @@ getObjectGraph nsFunc = do
 
 fromMap m = m ^.. folding id
 
-getTransactionMap = get >>= _ctxTransactionMap
-getTransactionObjects = getTransactionMap >>= (\m -> m ^.. folding f)
+getTransactionMap :: Eval TransactionMap
+getTransactionMap = get >>= E.right . _ctxTransactionMap
+
+getTransactionObjects :: Eval Objects
+getTransactionObjects = do
+    transMap <- getTransactionMap
+    let objs = M.fold f [] transMap
+    return objs
   where
-    f 
+    f (Transaction _ (Just obj)) objs = obj : objs
+    f (Transaction (Just obj) Nothing) objs = obj : objs
+    f (Transaction Nothing Nothing) _ = error "getTransactionObjects: impossible"
+
+sourcedTransaction obj = Transaction (Just obj) Nothing
+actuatedTransaction obj = Transaction Nothing (Just obj)
 
 isJustTrue :: Maybe Bool -> Bool
 isJustTrue (Just x) = x
@@ -127,7 +137,7 @@ filterTransactionMap q = liftM (M.filter (transQuery q))
 transQuery :: Query -> TransQuery
 transQuery q (Transaction _ (Just obj)) = q obj
 transQuery q (Transaction (Just obj) Nothing) = q obj
-transQuery _ (Transaction Nothing Nothing) = False
+transQuery _ (Transaction Nothing Nothing) = error "transQuery: impossible"
 
 qTrans  q = filterObjects q getTransactionObjects
 qSrc    q = filterObjects q getObjects
@@ -194,7 +204,11 @@ getActedObject = do
 save :: Object -> Eval ()
 save obj = do
     p <- getProperty objectDislocation obj
-    ctxTransactionMap . at p .= Just obj
+    transMap <- getTransactionMap
+    let newTransMap = M.update f p transMap
+    ctxTransactionMap .= newTransMap
+  where
+    f _ = Just $ actuatedTransaction obj -- TODO: fix me!!
 
 rollback :: TransactionMap -> EvalError -> EvalState String
 rollback m err = do

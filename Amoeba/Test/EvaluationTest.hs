@@ -45,7 +45,7 @@ getObjectAt' :: Game -> Point -> Eval (Maybe Object)
 getObjectAt' game p = return $ game ^? objects . ix p
 
 getObjects' :: Game -> Eval Objects
-getObjects' game = return $ getObjectsFromMap (game ^. objects)
+getObjects' game = return $ fromMap (game ^. objects)
 
 getObjectGraph' :: Game -> Eval (NeighboursFunc -> ObjectGraph)
 getObjectGraph' game = return $ GAI.graph (game ^. world)
@@ -133,16 +133,21 @@ prop_singleMoving      game = testSingleProperty game moving
 prop_singleLayer       game = testSingleProperty game layer
 prop_singleCollision   game = testSingleProperty game collision
 
-{-
-Under constraction
+rolloutTransaction (Transaction _ (Just obj))  = obj
+rolloutTransaction (Transaction (Just obj) _) = obj
+rolloutTransaction _ = error "rolloutTransaction impossible" 
+
+rolloutTransactions = map rolloutTransaction
+
+--Under construction
 prop_forProperty game = test
   where
     ctx = testContext game
     evaluatedState = execute (forProperty fabric producingScenario) ctx
-    evaluatedObjects = getObjectsFromMap $ evaluatedState ^. ctxTransactionMap
-    sourceObjects = getObjectsFromMap $ game ^. world.worldMap
+    evaluatedObjects = rolloutTransactions $ fromMap $ evaluatedState ^. ctxTransactionMap
+    sourceObjects = fromMap $ game ^. world.worldMap
     test = evaluatedObjects /= sourceObjects
--}
+
 
 tests :: IO Bool
 tests = $quickCheckAll
@@ -161,7 +166,7 @@ main = do
   where
     ctx = testContext testGame1
     (res, evaluatedState) = run (forProperty fabric producingScenario) ctx
-    evaluatedObjects = getObjectsFromMap $ evaluatedState ^. ctxTransactionMap
-    sourceObjects = getObjectsFromMap $ testGame1 ^. world.worldMap
+    evaluatedObjects = rolloutTransactions $ fromMap $ evaluatedState ^. ctxTransactionMap
+    sourceObjects = fromMap $ testGame1 ^. world.worldMap
     test = evaluatedObjects == sourceObjects
     
