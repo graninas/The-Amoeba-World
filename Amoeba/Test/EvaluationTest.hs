@@ -145,7 +145,20 @@ runTests = tests >>= \passed -> putStrLn $
 main :: IO ()
 main = do
     runTests
-    
+
+    print actualTransMap
+
+  where
+    obj = Object {_propertyMap = M.fromList [(5,PDislocation {__dislocation = Dislocation {_dislocationPoint = point 6 (-4) (-2)}})]}
+    ctx = testContext defaultGame
+    objPoint = obj ^. singular objectDislocation
+    expectedTransMap = transactionMapFromList [(objPoint, actuatedTransaction obj)]
+    resultState = execute (save obj) ctx
+    actualTransMap = resultState ^. ctxTransactionMap
+    hasDislocation = has objectDislocation obj
+    test = not hasDislocation || (expectedTransMap == actualTransMap)
+
+{-
     print sourceObjects
     print evaluatedObjects
     print res
@@ -155,4 +168,4 @@ main = do
     evaluatedObjects = rolloutTransactions $ fromMap $ evaluatedState ^. ctxTransactionMap
     sourceObjects = fromMap $ testGame1 ^. world.worldMap
     test = evaluatedObjects == sourceObjects
-    
+-}

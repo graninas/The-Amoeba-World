@@ -107,15 +107,16 @@ fromMap m = m ^.. folding id
 getTransactionMap :: Eval TransactionMap
 getTransactionMap = get >>= E.right . _ctxTransactionMap
 
-getTransactionObjects :: Eval Objects
-getTransactionObjects = do
-    transMap <- getTransactionMap
-    let objs = M.fold f [] transMap
-    return objs
+rolloutTransactionMap = M.fold f []
   where
     f (Transaction _ (Just obj)) objs = obj : objs
     f (Transaction (Just obj) Nothing) objs = obj : objs
-    f (Transaction Nothing Nothing) _ = error "getTransactionObjects: impossible"
+    f (Transaction Nothing Nothing) _ = error "rolloutTransactionMap: impossible"
+
+getTransactionObjects :: Eval Objects
+getTransactionObjects = do
+    transMap <- getTransactionMap
+    return $ rolloutTransactionMap transMap
 
 sourcedTransaction obj = Transaction (Just obj) Nothing
 actuatedTransaction obj = Transaction Nothing (Just obj)
@@ -144,8 +145,16 @@ qSrc    q = filterObjects q getObjects
 qActual q = do
     transMap <- filterTransactionMap q getTransactionMap
     objs     <- filterObjects q getObjects
-    undefined
-
+    return $ mixObjects transMap objs
+  where
+    mixObjects transM [] = rolloutTransactionMap transM
+    mixObjects transM (o:objs) | M.null transM = objs
+                               | otherwise = let objDisl = o ^. singular objectDislocation
+                                             in case M.lookup objDisl transM of -- TODO: make it safe!
+                                                Just (Transaction (Just _) Nothing) -> mixObjects (M.delete objDisl transM) objs
+                                                Just (Transaction _ (Just tObj)) -> tObj : mixObjects (M.delete objDisl transM) objs
+                                                Just (Transaction Nothing Nothing) -> error "mixObjects impossible"
+                                                Nothing -> o : mixObjects transM objs
 
 querySpec qStrategy q = do
     objs <- qStrategy q
