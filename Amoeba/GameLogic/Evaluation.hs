@@ -24,6 +24,8 @@ import Misc.Descriptions
 -- | Transaction (Just obj1) (Just obj2) : obj1 is updated and now it's obj2
 -- | Transaction (Just obj) Nothing      : obj  is removed
 -- | Transaction Nothing Nothing         : nonsense, no operation
+-- TODO: replace object: [Transaction obj1 Nothing, Transaction Nothing obj2)
+--                   or: [Transaction obj1 obj2] ?
 
 data Transaction = Transaction { _sourceObject :: Maybe Object
                                , _actualObject  :: Maybe Object }
@@ -120,6 +122,8 @@ getTransactionObjects = do
 
 sourcedTransaction obj = Transaction (Just obj) Nothing
 actuatedTransaction obj = Transaction Nothing (Just obj)
+replacedTransaction obj1 obj2 = Transaction (Just obj1) (Just obj2)
+ 
 
 isJustTrue :: Maybe Bool -> Bool
 isJustTrue (Just x) = x
@@ -210,14 +214,29 @@ getActedObject = do
     mbActedObject <- use ctxActedObject
     maybe noActedObjectSet E.right mbActedObject
 
+-- FIXME: not working
+updateTransactionMap f p = do
+    transMap <- getTransactionMap
+    let newTransMap = M.update f p transMap
+    ctx <- get
+    let (res, newCtx) = runState (ctxTransactionMap .= newTransMap) ctx
+    put ctx
+    return res
+
 save :: Object -> Eval ()
 save obj = do
     p <- getProperty objectDislocation obj
     transMap <- getTransactionMap
-    let newTransMap = M.update f p transMap
-    ctxTransactionMap .= newTransMap
+    void $ updateTransactionMap f p
   where
-    f _ = Just $ actuatedTransaction obj -- TODO: fix me!!
+    f _ = Just $ actuatedTransaction obj -- TODO: merge target cell to save.
+
+replace :: Object -> Object -> Eval ()
+replace obj1 obj2 = do
+    p <- getProperty objectDislocation obj1
+    void $ updateTransactionMap f p
+  where
+    f _ = Just $ replacedTransaction obj1 obj2 -- TODO: merge target cell to save.
 
 rollback :: TransactionMap -> EvalError -> EvalState String
 rollback m err = do
@@ -248,6 +267,10 @@ evaluatePlacementAlg PlaceToNearestEmptyCell l obj = do
   where
         extractPoint [] = notFound
         extractPoint ps = E.right $ nodePoint $ last ps
+
+evaluateMovingAlg m obj = do
+    p <- getProperty objectDislocation obj
+    return $ AI.move p m
 
 evalTransact :: Eval String -> Objects -> Eval [String]
 evalTransact act [] = return []

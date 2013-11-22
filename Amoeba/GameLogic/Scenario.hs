@@ -54,8 +54,22 @@ producingScenario = do
         then produce f
         else return "Producing paused."
 
+-- TODO: moving with obstacles
+move m = do
+    obj <- getActedObject
+    p <- evaluateMovingAlg m obj
+    replace obj $ objectDislocation .~ p $ obj
+    return "Successfully moved."
+
+movingScenario :: Eval String
+movingScenario = do
+    m <- read moving
+    move m
+
+
 mainScenario :: Eval ()
 mainScenario = do
     forProperty fabric producingScenario
+    forProperty moving movingScenario
     return ()
 
