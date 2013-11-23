@@ -1,4 +1,4 @@
 The-Amoeba-World
 ================
 
-The Amoeba World game for Ludum Dare #27
+The Amoeba World is strategy game initially started in Ludum Dare #27

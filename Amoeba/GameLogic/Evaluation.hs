@@ -220,7 +220,7 @@ updateTransactionMap f p = do
     let newTransMap = M.update f p transMap
     ctx <- get
     let (res, newCtx) = runState (ctxTransactionMap .= newTransMap) ctx
-    put ctx
+    put newCtx
     return res
 
 save :: Object -> Eval ()
