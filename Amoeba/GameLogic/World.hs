@@ -1,28 +1,68 @@
+{-# LANGUAGE TemplateHaskell #-}
 module GameLogic.World where
 
 import qualified Control.Lens as L
+import qualified Data.Map as M
+import Prelude hiding (null, lookup)
 
-import qualified GameLogic.GenericWorld as GW
-import GameLogic.Object as O
-import GameLogic.ObjectCell
 import GameLogic.Geometry
+import GameLogic.Object as O
 
-type World = GW.CelledWorld Object
-type WorldMap = GW.GenericMap Object
+data Effect = Effect
+  deriving (Show, Read, Eq)
+type Effects = [Effect]
+type EffectMap = M.Map Int Effects
 
+data Action = Action
+  deriving (Show, Read, Eq)
 
-emptyCell = O.empty
-alterCell = GW.alterCell
-deleteCell p w = alterCell w p emptyCell
-insertCell p c w = alterCell w p c
+type WorldMap = M.Map Point Object
+type World = { _worldMap :: WorldMap
+             , _
+             
+             
+             }
+  deriving (Show, Read, Eq)
 
-emptyWorld = GW.emptyWorld
-refreshWorldBound = GW.refreshWorldBound
+fromList :: [(Point, Object)] -> World
+fromList list = World wm b
+  where
+    wm = M.fromList list
+    b = occupiedArea (map fst list)
 
-worldMap :: L.Lens' World WorldMap
-worldMap = L.lens GW.worldMap GW.resetWorldMap
+resetWorldMap :: World -> WorldMap -> World
+resetWorldMap w wm = w { worldMap = wm
+                       , worldBound = worldMapBound wm }
 
-bound :: L.Getter World Bound
-bound = L.to GW.worldBound
+worldMapBound wm = foldr updateRectBound NoBound (M.keys wm)
+refreshWorldBound w = w { worldBound = worldMapBound $ worldMap w }
 
+lookup :: Point -> WorldMap -> Maybe Object
+lookup = M.lookup
+emptyMap = M.empty
+emptyWorld = World emptyMap noBound
+
+-- Lenses
+makeLenses ''World
+
+{-
+alterMap :: WorldMap -> Point -> Object -> WorldMap
+alterMap m p c = f m
+  where
+    f = M.alter alteringFunc p
+    alteringFunc oldCell | empty == c = Nothing
+                         | otherwise = Just . maybe c (merge c) $ oldCell
+                         
+alterCell :: GenericCell c => CelledWorld c -> Point -> c -> CelledWorld c
+alterCell (GenericWorld m b) p c = GenericWorld newMap b'
+  where
+    newMap = alterMapCell m p c
+    b' = if M.null newMap then NoBound
+                            else updateRectBound p b
+
+alterWorld :: GenericCell c => CelledWorld c -> [(Point, c)] -> CelledWorld c
+alterWorld = foldl alterCell'
+  where
+    alterCell' w (p, c) = alterCell w p c
+-}
 

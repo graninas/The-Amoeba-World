@@ -63,8 +63,8 @@ library
                    Test.Utils.GeometryData,
                    Test.Utils.ObjectArbitraries,
                    Test.Utils.GameArbitraries,
-                   GameLogic.ObjectCell,
-                   Test.Utils.EvaluationUtils
+                   Test.Utils.EvaluationUtils,
+                   Misc.AccessorMonoid
 
 executable Amoeba
   build-depends:   base >= 4
@@ -103,8 +103,8 @@ executable Amoeba
                    Test.Utils.GeometryData,
                    Test.Utils.ObjectArbitraries,
                    Test.Utils.GameArbitraries,
-                   GameLogic.ObjectCell,
-                   Test.Utils.EvaluationUtils
+                   Test.Utils.EvaluationUtils,
+                   Misc.AccessorMonoid
 
 c.World.Descripted
 
