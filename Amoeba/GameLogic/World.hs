@@ -18,7 +18,7 @@ data Action = Action
 
 type WorldMap = M.Map Point Object
 type World = { _worldMap :: WorldMap
-             , _
+             , _effectMap :: EffectMap
              
              
              }

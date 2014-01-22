@@ -64,7 +64,9 @@ library
                    Test.Utils.ObjectArbitraries,
                    Test.Utils.GameArbitraries,
                    Test.Utils.EvaluationUtils,
-                   Misc.AccessorMonoid
+                   Misc.AccessorMonoid,
+                   Middleware.Raws.Parser,
+                   Middleware.Raws.Structure
 
 executable Amoeba
   build-depends:   base >= 4
@@ -104,7 +106,9 @@ executable Amoeba
                    Test.Utils.ObjectArbitraries,
                    Test.Utils.GameArbitraries,
                    Test.Utils.EvaluationUtils,
-                   Misc.AccessorMonoid
+                   Misc.AccessorMonoid,
+                   Middleware.Raws.Parser,
+                   Middleware.Raws.Structure
 
 c.World.Descripted
 

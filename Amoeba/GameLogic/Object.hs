@@ -55,20 +55,23 @@ data Resource a = Resource { _stock :: a
 
 data Object = Object {
                         -- Properties:
-                         _objectId :: Int
-                       , _objectType :: ObjectType
+                         _objectId :: Int               -- static property
+                       , _objectType :: Int             -- predefined property
                        
-                        -- Resources:
-                       , _lifebounds :: Resource Int
-                       , _durability :: Resource Int
-                       , _energy :: Resource Int
-                       , _ownership :: Player
+                       -- Runtime properties, resources:
+                       , _ownership :: Player           -- runtime property... or can be effect!
+
+                       , _lifebound  :: Resource Int    -- runtime property
+                       , _durability :: Resource Int    -- runtime property
+                       , _energy     :: Resource Int    -- runtime property
+                       
+                       
 
                        -- , __effects :: Effects'
                        -- , __actions :: Actions' 
                        } -- Эффекты и действия не обязательно должны быть здесь. Они могут находиться и во вне, например, в списке эффектов/действий для объекта или куска карты. Буквально, на объект "навешаны" эффекты.
   deriving (Show, Read, Eq)
-  
+
 type Objects = [Object]
 
 -- Lenses
