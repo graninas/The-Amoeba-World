@@ -1,13 +1,12 @@
-module GameLogic.Objects where
+module GameLogic.Assets.Objects where
 
 import Control.Monad.State
 import Data.Default
 import Control.Lens
 
-import GameLogic.Geometry
-import GameLogic.Object
-import GameLogic.Player
-import GameLogic.Types
+import GameLogic.Base.Geometry
+import GameLogic.Data.Object
+import GameLogic.Data.Player
 import Misc.Descriptions
 
 plasmaFabric :: Player -> Point -> Fabric

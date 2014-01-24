@@ -1,7 +1,7 @@
 {-# LANGUAGE NoMonomorphismRestriction #-}
 {-# LANGUAGE Rank2Types #-}
 
-module GameLogic.Scenario where
+module GameLogic.Assets.Scenarios where
 
 import Control.Lens
 import Control.Monad

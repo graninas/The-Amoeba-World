@@ -1,6 +1,6 @@
-module GameLogic.Player where
+module GameLogic.Data.Player where
 
-import GameLogic.Types
+type PlayerId = Int
 
 data Player = Player PlayerId
   deriving (Show, Read, Eq)

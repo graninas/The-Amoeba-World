@@ -1,4 +1,4 @@
-module GameLogic.GenericAI where
+module GameLogic.AI.GenericAI where
 
 import qualified Data.Set as Set
 import qualified Data.Graph.AStar as AStar

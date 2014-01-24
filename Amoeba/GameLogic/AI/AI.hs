@@ -1,4 +1,4 @@
-module GameLogic.AI where
+module GameLogic.AI.AI where
 
 import Control.Lens
 

@@ -48,17 +48,12 @@ library
                    Test.GeometryTest,
                    GameView.Scene,
                    Test.ScenarioTest,
-                   GameLogic.Game,
-                   GameLogic.Scenario,
-                   GameLogic.AI,
                    Test.ObjectTest,
                    Test.StateInjectionTest,
-                   GameLogic.Evaluation,
                    Test.EvaluationTest,
                    Test.LensTest,
                    Misc.Descriptions,
                    Test.Utils.TestGameData,
-                   GameLogic.GenericAI,
                    Test.Utils.GeometryArbitraries,
                    Test.Utils.GeometryData,
                    Test.Utils.ObjectArbitraries,
@@ -66,7 +61,15 @@ library
                    Test.Utils.EvaluationUtils,
                    Misc.AccessorMonoid,
                    Middleware.Raws.Parser,
-                   Middleware.Raws.Structure
+                   Middleware.Raws.Structure,
+                   GameLogic.Language.Parser,
+                   GameLogic.Runtime.Game,
+                   GameLogic.AI.AI,
+                   GameLogic.AI.GenericAI,
+                   GameLogic.Assets.Scenarios,
+                   GameLogic.Data.Facade,
+                   GameLogic.Runtime.Evaluation,
+                   Test.ParserTest
 
 executable Amoeba
   build-depends:   base >= 4
@@ -90,17 +93,12 @@ executable Amoeba
                    Test.GeometryTest,
                    GameView.Scene,
                    Test.ScenarioTest,
-                   GameLogic.Game,
-                   GameLogic.Scenario,
-                   GameLogic.AI,
                    Test.ObjectTest,
                    Test.StateInjectionTest,
-                   GameLogic.Evaluation,
                    Test.EvaluationTest,
                    Test.LensTest,
                    Misc.Descriptions,
                    Test.Utils.TestGameData,
-                   GameLogic.GenericAI,
                    Test.Utils.GeometryArbitraries,
                    Test.Utils.GeometryData,
                    Test.Utils.ObjectArbitraries,
@@ -108,7 +106,15 @@ executable Amoeba
                    Test.Utils.EvaluationUtils,
                    Misc.AccessorMonoid,
                    Middleware.Raws.Parser,
-                   Middleware.Raws.Structure
+                   Middleware.Raws.Structure,
+                   GameLogic.Language.Parser,
+                   GameLogic.Runtime.Game,
+                   GameLogic.AI.AI,
+                   GameLogic.AI.GenericAI,
+                   GameLogic.Assets.Scenarios,
+                   GameLogic.Data.Facade,
+                   GameLogic.Runtime.Evaluation,
+                   Test.ParserTest
 
 c.World.Descripted
 
