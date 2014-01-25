@@ -13,20 +13,29 @@ tokenEmptyComment = ";"
 tokenCommentNoSpaces = ";This is comment and no spaces."
 tokenComment = ";This is comment."
 
-itemItemNoResources = "Item \"ItemName\""
-itemResource1 = unlines ["Item \"ItemName\"",
+itemResource1 = unlines ["Item \"ItemName1\"",
                          "    lifebound = (0, 5000)"]
-itemResource3 = unlines ["Item \"ItemName\"",
-                         "    lifebound = (0, 5000)",
-                         "    durabilirty = (100, 100)",
+itemResource3 = unlines ["Item \"ItemName2\"",
+                         "    lifebound = (0, 1000)",
+                         "    durabilirty = (10, 50)",
                          "    energy = (300, 2000)"]
 
-resource1 = "    lifebound = (10, 100)"
-resource2 = "    durability = (100, 1000)"
-resources2 = resource1 ++ "\n" ++ resource2
-resources2_ = resource1 ++ "\n" ++ resource2 ++ "\n"
+items1 = itemResource1 ++ "\n" ++ itemResource3
+items2 = itemResource1 ++ "\n" ++ tokenComment ++ "\n" ++ itemResource3
 
-
+example = unlines [ "; General items"
+                  , ""
+                  , "Item \"Karyon\""
+                  , "    lifebound = (0, 5000)"
+                  , "    durabilirty = (100, 100)"
+                  , "    energy = (300, 2000) "
+                  , ""
+                  , "; Conductor"
+                  , "Item \"Conductor\""
+                  , "    lifebound = (0, 1000)"
+                  , "    durability = (100, 100)"
+                  , "    energy = (0, 100)"
+                  ]
 
 tests :: IO Bool
 tests = $quickCheckAll
@@ -46,15 +55,14 @@ main :: IO ()
 main = do
     runTests
     
-    printParsed parseResource resource1
-    printParsed parseResource resource2
-    printParsed parseResources resources2
-    printParsed parseResources resources2_
+    printParsed parse example
+    {-
+    printParsed parseTokens items1
+    printParsed parseTokens items2
 
-    printParsed parseToken itemItemNoResources
     printParsed parseItem itemResource1
     printParsed parseItem itemResource3
-
     printParsed parseToken tokenEmptyComment
     printParsed parseToken tokenCommentNoSpaces
     printParsed parseToken tokenComment
+    -}
