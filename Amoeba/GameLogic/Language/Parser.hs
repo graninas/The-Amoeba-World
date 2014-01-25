@@ -44,25 +44,26 @@ items :: GenParser Char st [Object]
 items = undefined
 
 token :: GenParser Char st Token
-token = comment <|> item <?> "Token not found."
+token = comment <|> item <?> "token"
 
 item :: GenParser Char st Token
 item = try $ do
     string "Item" >> spaces
     itemName <- stringConstant
-    spaces >> eol
     rs <- resources
     return $ Item itemName rs
 
 resources :: GenParser Char st [ResourceToken]
-resources = many $ do
-    r <- resource
-    spaces >> eol
-    return r
+resources = many eol >> many resourceLine
+
+resourceLine :: GenParser Char st ResourceToken
+resourceLine = try (do r <- resource
+                       many eol
+                       return r) <?> "resourceLine"
 
 resource :: GenParser Char st ResourceToken
-resource = try $ do
-    ident <- identation 4
+resource = do
+    identation 4
     name <- identifier
     spaces >> char '=' >> spaces
     val <- resourceValue
@@ -72,7 +73,7 @@ resourceValue :: GenParser Char st (Int, Int)
 resourceValue = do
     char '('
     v1 <- integerConstant
-    char ','
+    spaces >> char ',' >> spaces
     v2 <- integerConstant
     char ')'
     return (v1, v2)
@@ -87,7 +88,21 @@ parseToken :: String -> Either String Token
 parseToken input = case parse token [] input of
     Left err -> Left $ show err
     Right token -> Right token
+    
+parseItem :: String -> Either String Token
+parseItem input = case parse item [] input of
+    Left err -> Left $ show err
+    Right token -> Right token
 
+parseResource :: String -> Either String ResourceToken
+parseResource input = case parse resource [] input of
+    Left err -> Left $ show err
+    Right token -> Right token
+    
+parseResources :: String -> Either String [ResourceToken]
+parseResources input = case parse resources [] input of
+    Left err -> Left $ show err
+    Right token -> Right token
 
 --parse :: String -> Either [Objects]
 
