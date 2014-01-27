@@ -13,6 +13,7 @@ data ResourceToken = IntResource String (Int, Int)
 
 data Token = Comment String
            | Item String [ResourceToken]
+           | EmptyToken
   deriving (Show, Read, Eq)
 
 symbols = "!@#$%^&*()`~-_=+[]{};'\\:\"|,./<>?"
@@ -45,22 +46,27 @@ tokens :: GenParser Char st [Token]
 tokens = many token
 
 token :: GenParser Char st Token
-token = comment <|> item <?> "token"
+token = emptyToken <|> comment <|> item <?> "token"
+
+emptyToken :: GenParser Char st Token
+emptyToken = eol >> return EmptyToken
+
+comment :: GenParser Char st Token
+comment = do
+    char ';'
+    str <- many (noneOf "\n\r")
+    eol
+    return $ Comment str
 
 item :: GenParser Char st Token
-item = try $ do
-    string "Item" >> spaces
+item = do
+    string "Item" >> many1 space
     itemName <- stringConstant
     rs <- resources
     return $ Item itemName rs
 
 resources :: GenParser Char st [ResourceToken]
-resources = try eol >> many resourceLine
-
-resourceLine :: GenParser Char st ResourceToken
-resourceLine = try (do r <- resource
-                       many eol
-                       return r) <?> "resourceLine"
+resources = many resource
 
 resource :: GenParser Char st ResourceToken
 resource = do
@@ -68,6 +74,7 @@ resource = do
     name <- identifier
     spaces >> char '=' >> spaces
     val <- resourceValue
+    spaces >> try eol
     return $ IntResource name val
 
 resourceValue :: GenParser Char st (Int, Int)
@@ -78,12 +85,6 @@ resourceValue = do
     v2 <- integerConstant
     char ')'
     return (v1, v2)
-
-comment :: GenParser Char st Token
-comment = try $ do
-    char ';'
-    str <- many (space <|> tab <|> alphaNum <|> oneOf symbols)
-    return $ Comment str
 
 ------------------------------------------------------------
 

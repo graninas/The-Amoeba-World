@@ -3,6 +3,8 @@
 rm -rf "./.bin/TestBin/"*
 rm -rf "./.bin/Test/"*
 
+./copy-test-data.sh
+
 cd ./Amoeba/Test/
 
 if [ "$1" != "" ]; then

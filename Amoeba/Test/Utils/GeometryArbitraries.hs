@@ -6,7 +6,7 @@ import Control.Monad
 import System.Random
 import qualified Linear as L
 
-import GameLogic.Geometry
+import GameLogic.Base.Geometry
 
 instance Arbitrary (L.V3 Int) where
     arbitrary = liftM3 point arbitrary arbitrary arbitrary
