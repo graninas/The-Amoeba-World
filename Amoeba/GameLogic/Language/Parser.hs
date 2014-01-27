@@ -19,6 +19,8 @@ data Token = Comment String
 symbols = "!@#$%^&*()`~-_=+[]{};'\\:\"|,./<>?"
 quote = char '"'
 underscore = char '_'
+trueSpace = char ' ' <|> tab
+trueSpaces = many trueSpace
 
 stringConstant :: GenParser Char st String
 stringConstant = between quote quote (many alphaNum)
@@ -38,7 +40,9 @@ eol :: GenParser Char st String
 eol = try (string "\n\r") <|> try (string "\r\n") <|> try (string "\n") <|> try (string "\r") <?> "eol"
 
 identation :: Int -> GenParser Char st String
-identation cnt = count cnt (space <|> tab)
+identation cnt = count cnt trueSpace
+
+lineEnd = trueSpaces >> optional eol
 
 --------------------------------------------------------
 
@@ -55,13 +59,14 @@ comment :: GenParser Char st Token
 comment = do
     char ';'
     str <- many (noneOf "\n\r")
-    eol
+    lineEnd
     return $ Comment str
 
 item :: GenParser Char st Token
 item = do
-    string "Item" >> many1 space
+    string "Item" >> many1 trueSpace
     itemName <- stringConstant
+    lineEnd
     rs <- resources
     return $ Item itemName rs
 
@@ -72,16 +77,16 @@ resource :: GenParser Char st ResourceToken
 resource = do
     identation 4
     name <- identifier
-    spaces >> char '=' >> spaces
+    trueSpaces >> char '=' >> trueSpaces
     val <- resourceValue
-    spaces >> try eol
+    lineEnd
     return $ IntResource name val
 
 resourceValue :: GenParser Char st (Int, Int)
 resourceValue = do
     char '('
     v1 <- integerConstant
-    spaces >> char ',' >> spaces
+    trueSpaces >> char ',' >> trueSpaces
     v2 <- integerConstant
     char ')'
     return (v1, v2)

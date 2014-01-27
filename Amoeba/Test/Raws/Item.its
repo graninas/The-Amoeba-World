@@ -1,0 +1,4 @@
+Item "Karyon"
+    lifebound = (0, 5000)
+    durability = (100, 100)
+    energy = (300, 2000)

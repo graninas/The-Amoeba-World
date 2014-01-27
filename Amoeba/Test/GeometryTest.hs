@@ -17,7 +17,7 @@ prop_inSegmentSwap (x1, x2) y = inSegment (x1, x2) y == inSegment (x2, x1) y
 
 prop_inBoundsEmpty p = not (inBounds p [])
 prop_inBoundsSelf1 p _ = inBounds p [pointBound p]
-prop_inBoundsSelf2 p bs = inBounds p $ pointBound p : bs 
+prop_inBoundsSelf2 p bs = inBounds p $ pointBound p : bs
 prop_inBoundsNoBounds p bs = inBounds p $ noBound : bs
 
 prop_rectBound1 = rectBound point1 point2 == Rectangled point1 point2
