@@ -7,11 +7,8 @@ import Control.Monad.State
 import Prelude hiding ((.), id)
 
 import Middleware.Wire
-import GameLogic.Scene
 import Application.Environment
 import Application.Constants
-import Application.GameFlow                 
-import qualified World.World as W
 
 -- | Evals main loop. Takes a wire to loop and start world.
 startMainLoop wire world = do
