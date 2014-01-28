@@ -41,21 +41,7 @@ library
                    GameView.View,
                    GameView.Items,
                    GameView.Color,
-                   Test.SceneGraph,
-                   Test.WorldTest,
-                   Test.GeometryTest,
                    GameView.Scene,
-                   Test.ScenarioTest,
-                   Test.ObjectTest,
-                   Test.StateInjectionTest,
-                   Test.EvaluationTest,
-                   Test.LensTest,
-                   Test.Utils.TestGameData,
-                   Test.Utils.GeometryArbitraries,
-                   Test.Utils.GeometryData,
-                   Test.Utils.ObjectArbitraries,
-                   Test.Utils.GameArbitraries,
-                   Test.Utils.EvaluationUtils,
                    Misc.AccessorMonoid,
                    GameLogic.Language.Parser,
                    GameLogic.Runtime.Game,
@@ -64,7 +50,8 @@ library
                    GameLogic.Assets.Scenarios,
                    GameLogic.Data.Facade,
                    GameLogic.Runtime.Evaluation,
-                   Test.ParserTest
+                   Test.GeometryTest,
+                   Application.Config.Parser
 
 executable Amoeba
   build-depends:   base >= 4
@@ -81,21 +68,7 @@ executable Amoeba
                    GameView.View,
                    GameView.Items,
                    GameView.Color,
-                   Test.SceneGraph,
-                   Test.WorldTest,
-                   Test.GeometryTest,
                    GameView.Scene,
-                   Test.ScenarioTest,
-                   Test.ObjectTest,
-                   Test.StateInjectionTest,
-                   Test.EvaluationTest,
-                   Test.LensTest,
-                   Test.Utils.TestGameData,
-                   Test.Utils.GeometryArbitraries,
-                   Test.Utils.GeometryData,
-                   Test.Utils.ObjectArbitraries,
-                   Test.Utils.GameArbitraries,
-                   Test.Utils.EvaluationUtils,
                    Misc.AccessorMonoid,
                    GameLogic.Language.Parser,
                    GameLogic.Runtime.Game,
@@ -104,7 +77,8 @@ executable Amoeba
                    GameLogic.Assets.Scenarios,
                    GameLogic.Data.Facade,
                    GameLogic.Runtime.Evaluation,
-                   Test.ParserTest
+                   Test.GeometryTest,
+                   Application.Config.Parser
 
 c.World.Descripted
 
@@ -125,6 +99,26 @@ c.World.Stochastic
 eLogic.World.Types
 
 eLogic.World.Utils
+
+eLogic.World.World
+
+eLogic.World.World
+
+eLogic.World.World
+
+eLogic.World.World
+
+eLogic.World.World
+
+eLogic.World.World
+
+eLogic.World.World
+
+eLogic.World.World
+
+eLogic.World.World
+
+eLogic.World.World
 
 eLogic.World.World
 

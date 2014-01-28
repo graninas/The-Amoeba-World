@@ -25,7 +25,7 @@ runTests = tests >>= \passed -> putStrLn $
   if passed then "All tests passed."
             else "Some tests failed."
 
-example1 = ("Example1", "./Raws/Items.its",
+example1 = ("Example1", "./Data/Raws/Items.its",
             Right [Comment " General items",EmptyToken,Item "Karyon" [IntResource "lifebound" (0,5000),IntResource "durability" (100,100),IntResource "energy" (300,2000)],EmptyToken,Comment " Conductor",Item "Conductor" [IntResource "lifebound" (0,1000),IntResource "durability" (100,100),IntResource "energy" (0,100)]]
             )
 
