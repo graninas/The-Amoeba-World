@@ -7,6 +7,8 @@ rm -rf "./.bin/Test/"*
 
 cd ./Amoeba/Test/
 
+set -e
+
 if [ "$1" != "" ]; then
 TESTS=`echo "$@" | tr " " "|"`
 echo Tests to build: "$@"
@@ -25,3 +27,5 @@ done
 
 chmod u+x ../.bin/Test/*.bin
 cd ..
+
+set +e

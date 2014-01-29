@@ -33,7 +33,6 @@ library
   other-modules:   
                    Amoeba,
                    Application.Boot,
-                   Application.Constants,
                    Application.Environment,
                    Application.MainLoop,
                    GameView.Render,
@@ -42,7 +41,6 @@ library
                    GameView.Items,
                    GameView.Color,
                    GameView.Scene,
-                   Misc.AccessorMonoid,
                    GameLogic.Language.Parser,
                    GameLogic.Runtime.Game,
                    GameLogic.AI.AI,
@@ -51,7 +49,10 @@ library
                    GameLogic.Data.Facade,
                    GameLogic.Runtime.Evaluation,
                    Test.GeometryTest,
-                   Application.Config.Parser
+                   Application.Config.Parser,
+                   Middleware.Config.Config,
+                   Middleware.Config.Scheme,
+                   Middleware.Config.Facade
 
 executable Amoeba
   build-depends:   base >= 4
@@ -60,7 +61,6 @@ executable Amoeba
   main-is:         Amoeba.hs
   other-modules:   
                    Application.Boot,
-                   Application.Constants,
                    Application.Environment,
                    Application.MainLoop,
                    GameView.Render,
@@ -69,7 +69,6 @@ executable Amoeba
                    GameView.Items,
                    GameView.Color,
                    GameView.Scene,
-                   Misc.AccessorMonoid,
                    GameLogic.Language.Parser,
                    GameLogic.Runtime.Game,
                    GameLogic.AI.AI,
@@ -78,7 +77,10 @@ executable Amoeba
                    GameLogic.Data.Facade,
                    GameLogic.Runtime.Evaluation,
                    Test.GeometryTest,
-                   Application.Config.Parser
+                   Application.Config.Parser,
+                   Middleware.Config.Config,
+                   Middleware.Config.Scheme,
+                   Middleware.Config.Facade
 
 c.World.Descripted
 
