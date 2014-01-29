@@ -8,7 +8,7 @@ description:    The Amoeba World Conquest Game
 license:        GPL-3
 
 library
-  build-depends:   
+  build-depends:
                    base >= 4,
                    vector,
                    OpenGL,
@@ -27,29 +27,34 @@ library
                    transformers,
                    BigSpaceLibrary,
                    linear,
+                   ConfigFile
   ghc-options:     -O1
   hs-source-dirs:  Amoeba
   main-is:         Amoeba.hs
-  other-modules:   
+  other-modules:
                    Amoeba,
                    Application.Boot,
                    Application.Environment,
                    Application.MainLoop,
-                   GameLogic.Language.Parser,
-                   GameLogic.Runtime.Game,
                    GameLogic.AI.AI,
                    GameLogic.AI.GenericAI,
+                   GameLogic.Assets.Objects,
                    GameLogic.Assets.Scenarios,
+                   GameLogic.Base.Geometry,
                    GameLogic.Data.Facade,
+                   GameLogic.Data.Object,
+                   GameLogic.Data.Player,
+                   GameLogic.Language.Parser,
                    GameLogic.Runtime.Evaluation,
-                   Test.GeometryTest,
-                   Application.Config.Parser,
+                   GameLogic.Runtime.Game,
+                   GameLogic.Runtime.World,
                    Middleware.Config.Config,
-                   Middleware.Config.Scheme,
                    Middleware.Config.Facade,
-                   View.View,
+                   Middleware.Config.Language,
+                   Middleware.Config.Scheme,
+                   View.Color,
                    View.Config,
-                   Middleware.Config.Language
+                   View.View
 
 executable Amoeba
   build-depends:   base >= 4
@@ -75,46 +80,3 @@ executable Amoeba
                    View.View,
                    View.Config,
                    Middleware.Config.Language
-
-c.World.Descripted
-
-World.GenericWorld
-
-gic.World.Geometry
-
-GameLogic.World.Id
-
-ogic.World.Objects
-
-Logic.World.Player
-
-c.World.Properties
-
-c.World.Stochastic
-
-eLogic.World.Types
-
-eLogic.World.Utils
-
-eLogic.World.World
-
-eLogic.World.World
-
-eLogic.World.World
-
-eLogic.World.World
-
-eLogic.World.World
-
-eLogic.World.World
-
-eLogic.World.World
-
-eLogic.World.World
-
-eLogic.World.World
-
-eLogic.World.World
-
-eLogic.World.World
-
