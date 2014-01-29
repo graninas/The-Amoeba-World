@@ -50,7 +50,6 @@ library
                    GameLogic.Runtime.World,
                    Middleware.Config.Config,
                    Middleware.Config.Facade,
-                   Middleware.Config.Language,
                    Middleware.Config.Scheme,
                    View.Color,
                    View.Config,
@@ -78,5 +77,4 @@ executable Amoeba
                    Middleware.Config.Scheme,
                    Middleware.Config.Facade,
                    View.View,
-                   View.Config,
-                   Middleware.Config.Language
+                   View.Config

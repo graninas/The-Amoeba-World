@@ -14,3 +14,11 @@ getView = do
     let w = SDL.videoInfoWidth vInfo
     let h = SDL.videoInfoHeight vInfo
     return $ View surface (Screen w h)
+
+
+setupScreen :: (Screen, Int) -> String -> IO View
+setupScreen (scr@(Screen scrWidth scrHeight), scrBpp) caption = do
+    surface <- SDL.setVideoMode scrWidth scrHeight scrBpp [SDL.SWSurface]
+    SDL.setCaption caption []
+    SDL.flip surface
+    return $ View surface scr
