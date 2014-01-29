@@ -3,23 +3,36 @@ module Middleware.Config.Config where
 import qualified Data.ConfigFile as CF
 import Data.Either.Utils
 
-data Section = Section String
-data Option = Option String
+import qualified Control.Monad.Reader as R
 
-data Config = Config String String
-  deriving (Show, Read, Eq)
+data Sect = Sect String
+data Opt = Opt String
+data Cfg = Cfg String String
 
-sect = Section
-opt = Option
+sect = Sect
+opt = Opt
 
-(Section s) <| (Option o) = Config s o
+(Sect s) <| (Opt o) = Cfg s o
 
-getSection (Config s _) = s
-getOption (Config _ o) = o
+getSect (Cfg s _) = s
+getOpt (Cfg _ o) = o
 
-getConfig cp cfg = forceEither $ CF.get cp (getSection cfg) (getOption cfg)
+getOption cp cfg = forceEither $ CF.get cp (getSect cfg) (getOpt cfg)
 
 loadConfiguration fileName = do
     conf <- CF.readfile CF.emptyCP fileName
     let cp = forceEither conf
     return cp {CF.optionxform = id}
+
+intOption :: Cfg -> R.Reader CF.ConfigParser Int
+intOption cfg = do
+    cp <- R.ask
+    return $ getOption cp cfg
+    
+stringOption :: Cfg -> R.Reader CF.ConfigParser String
+stringOption cfg = do
+    cp <- R.ask
+    return $ getOption cp cfg
+    
+getConfig cp loader = return $ R.runReader loader cp
+

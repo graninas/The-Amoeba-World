@@ -1,10 +1,8 @@
-module GameView.View where
+module View.View where
 
 import qualified Graphics.UI.SDL.Video as SDL
 import qualified Graphics.UI.SDL.Types as SDL
 
-data Screen = Screen { screenWidth :: Int
-                     , screenHeight :: Int }
 
 data View = View { viewSurface :: SDL.Surface
                  , viewScreen :: Screen }

@@ -35,12 +35,6 @@ library
                    Application.Boot,
                    Application.Environment,
                    Application.MainLoop,
-                   GameView.Render,
-                   GameView.SceneGraph,
-                   GameView.View,
-                   GameView.Items,
-                   GameView.Color,
-                   GameView.Scene,
                    GameLogic.Language.Parser,
                    GameLogic.Runtime.Game,
                    GameLogic.AI.AI,
@@ -52,7 +46,10 @@ library
                    Application.Config.Parser,
                    Middleware.Config.Config,
                    Middleware.Config.Scheme,
-                   Middleware.Config.Facade
+                   Middleware.Config.Facade,
+                   View.View,
+                   View.Config,
+                   Middleware.Config.Language
 
 executable Amoeba
   build-depends:   base >= 4
@@ -63,12 +60,6 @@ executable Amoeba
                    Application.Boot,
                    Application.Environment,
                    Application.MainLoop,
-                   GameView.Render,
-                   GameView.SceneGraph,
-                   GameView.View,
-                   GameView.Items,
-                   GameView.Color,
-                   GameView.Scene,
                    GameLogic.Language.Parser,
                    GameLogic.Runtime.Game,
                    GameLogic.AI.AI,
@@ -80,7 +71,10 @@ executable Amoeba
                    Application.Config.Parser,
                    Middleware.Config.Config,
                    Middleware.Config.Scheme,
-                   Middleware.Config.Facade
+                   Middleware.Config.Facade,
+                   View.View,
+                   View.Config,
+                   Middleware.Config.Language
 
 c.World.Descripted
 

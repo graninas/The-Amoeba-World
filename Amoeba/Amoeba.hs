@@ -10,8 +10,8 @@ main::IO ()
 main = do
 
     cfg <- loadConfiguration optionsFile
-    putStrLn $ getConfig cfg appName
-    putStrLn $ getConfig cfg screenWidth
-    putStrLn $ getConfig cfg screenHeight
+    putStrLn $ getOption cfg appName
+    
+    boot cfg
     
     putStrLn "All Ok."

@@ -5,7 +5,7 @@ import qualified Graphics.UI.SDL.TTF.General as TTF
 
 import Control.Exception (bracket_, bracket)
 
-import GameView.View
+import View.Config
 
 withTtf = bracket_ TTF.init TTF.quit
 

@@ -1,6 +1,11 @@
 module Application.Boot where
 
-import Application.Environment
---import Application.MainLoop
+import View.Config
 
-boot = undefined
+import Middleware.Config.Facade
+
+boot cfg = do
+    
+    viewCfg <- getConfig cfg viewConfig
+    
+    print viewCfg
