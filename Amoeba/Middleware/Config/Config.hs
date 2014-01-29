@@ -24,15 +24,14 @@ loadConfiguration fileName = do
     let cp = forceEither conf
     return cp {CF.optionxform = id}
 
-intOption :: Cfg -> R.Reader CF.ConfigParser Int
-intOption cfg = do
+type CfgReader a = Cfg -> R.Reader CF.ConfigParser a
+
+option cfg = do
     cp <- R.ask
     return $ getOption cp cfg
-    
-stringOption :: Cfg -> R.Reader CF.ConfigParser String
-stringOption cfg = do
-    cp <- R.ask
-    return $ getOption cp cfg
+
+intOption = option :: CfgReader Int
+stringOption = option :: CfgReader String
     
 getConfig cp loader = return $ R.runReader loader cp
 
