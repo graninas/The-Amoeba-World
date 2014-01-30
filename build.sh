@@ -4,7 +4,7 @@ set -e
 
 echo "Building..."
 cd Amoeba
-ghc -threaded --make -outputdir ../.bin -o ../.bin/Amoeba Amoeba.hs
+ghc -threaded --make -outputdir ../.bin -o ../.bin/Amoeba Main.hs
 cd ..
 
 set +e

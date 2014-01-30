@@ -53,7 +53,10 @@ library
                    Middleware.Config.Scheme,
                    View.Color,
                    View.Config,
-                   View.View
+                   View.View,
+                   Main,
+                   View.Language,
+                   View.SdlFacade
 
 executable Amoeba
   build-depends:   base >= 4
@@ -77,4 +80,7 @@ executable Amoeba
                    Middleware.Config.Scheme,
                    Middleware.Config.Facade,
                    View.View,
-                   View.Config
+                   View.Config,
+                   Main,
+                   View.Language,
+                   View.SdlFacade

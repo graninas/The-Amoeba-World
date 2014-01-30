@@ -1,24 +1,16 @@
 module View.View where
 
-import qualified Graphics.UI.SDL.Video as SDL
-import qualified Graphics.UI.SDL.Types as SDL
+import View.Language
 
+import qualified View.SdlFacade as SDL
 
 data View = View { viewSurface :: SDL.Surface
                  , viewScreen :: Screen }
-                 
-getView :: IO View
-getView = do
-    surface <- SDL.getVideoSurface
-    vInfo <- SDL.getVideoInfo
-    let w = SDL.videoInfoWidth vInfo
-    let h = SDL.videoInfoHeight vInfo
-    return $ View surface (Screen w h)
 
 
-setupScreen :: (Screen, Int) -> String -> IO View
-setupScreen (scr@(Screen scrWidth scrHeight), scrBpp) caption = do
-    surface <- SDL.setVideoMode scrWidth scrHeight scrBpp [SDL.SWSurface]
+setupScreen :: Screen -> String -> IO View
+setupScreen scr@(Screen w h bpp) caption = do
+    surface <- SDL.setVideoMode w h bpp [SDL.SWSurface]
     SDL.setCaption caption []
     SDL.flip surface
     return $ View surface scr

@@ -31,7 +31,6 @@ option cfg = do
     return $ getOption cp cfg
 
 intOption = option :: CfgReader Int
-stringOption = option :: CfgReader String
+strOption = option :: CfgReader String
     
-getConfig cp loader = return $ R.runReader loader cp
-
+extract cp loader = return $ R.runReader loader cp

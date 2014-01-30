@@ -7,6 +7,6 @@ appName = deflt <| opt "applicationName"
 
 
 video = sect "VIDEO"
-screenWidth = video <| opt "screenWidth"
+screenWidth  = video <| opt "screenWidth"
 screenHeight = video <| opt "screenHeight"
-colorDepth = video <| opt "colorDepth"
+colorDepth   = video <| opt "colorDepth"

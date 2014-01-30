@@ -1,4 +1,4 @@
-module Main where
+module Amoeba where
 
 import Middleware.Config.Facade
 
@@ -6,8 +6,8 @@ import Application.Boot
 
 optionsFile = "./Data/Options.cfg"
 
-main::IO ()
-main = do
+run::IO ()
+run = do
 
     cfg <- loadConfiguration optionsFile
     putStrLn $ getOption cfg appName
