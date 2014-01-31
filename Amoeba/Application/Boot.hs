@@ -1,23 +1,29 @@
 module Application.Boot where
 
-import Application.Environment
 import View.Config
 import View.View
 import Middleware.Config.Facade
 
+import Application.Environment
+import Application.Runtime.Engine
+import Application.Runtime.Logic
+
+boot cfg = do
+    viewSettings <- loadViewSettings cfg
+    withEnvironment $ do
+        view <- setupView viewSettings
+        putStrLn "Loaded."
+        startMainLoop cfg view logic
+        getLine
+    putStrLn "Unloaded."
+    
 loadViewSettings cfg = do
     screen <- extract cfg screenInfo
     caption <- extract cfg captionInfo
     print screen
     print caption
     return (screen, caption)
-
-boot cfg = do
-    (screen, caption) <- loadViewSettings cfg
-    withEnvironment $ do
-        view <- setupScreen screen caption
-        putStrLn "Loaded."
-        getLine
-    putStrLn "Unloaded."
     
+
+
     

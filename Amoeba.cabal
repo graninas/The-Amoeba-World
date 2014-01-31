@@ -56,7 +56,10 @@ library
                    View.View,
                    Main,
                    View.Language,
-                   View.SdlFacade
+                   View.SdlFacade,
+                   Application.Runtime.Logic,
+                   Application.Runtime.Engine,
+                   Application.Runtime.Language
 
 executable Amoeba
   build-depends:   base >= 4
@@ -83,4 +86,7 @@ executable Amoeba
                    View.Config,
                    Main,
                    View.Language,
-                   View.SdlFacade
+                   View.SdlFacade,
+                   Application.Runtime.Logic,
+                   Application.Runtime.Engine,
+                   Application.Runtime.Language

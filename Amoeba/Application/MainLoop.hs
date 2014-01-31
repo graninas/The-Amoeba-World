@@ -10,6 +10,9 @@ import Middleware.Wire
 import Application.Environment
 import Application.Constants
 
+type WStateIO = StateT World IO
+type WWire a b = Wire () WStateIO a b
+
 -- | Evals main loop. Takes a wire to loop and start world.
 startMainLoop wire world = do
     setupScreen screenSettings applicationName
@@ -24,7 +27,7 @@ gameLoop w session gf = do
         Left ex -> return ()
         Right gf' -> gameLoop w' session' gf'
 
-mainWire :: WWire GameFlow GameFlow
+mainWire :: Wire () WStateIO GameFlow GameFlow
 mainWire = for 15 . (   runMove
                     <|> runWorld
                     <|> runRender

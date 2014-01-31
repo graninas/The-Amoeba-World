@@ -5,6 +5,8 @@ import Data.Either.Utils
 
 import qualified Control.Monad.Reader as R
 
+newtype Configuration = Configuration CF.ConfigParser
+
 data Sect = Sect String
 data Opt = Opt String
 data Cfg = Cfg String String
@@ -17,14 +19,14 @@ opt = Opt
 getSect (Cfg s _) = s
 getOpt (Cfg _ o) = o
 
-getOption cp cfg = forceEither $ CF.get cp (getSect cfg) (getOpt cfg)
+getOption (Configuration cp) cfg = forceEither $ CF.get cp (getSect cfg) (getOpt cfg)
 
 loadConfiguration fileName = do
     conf <- CF.readfile CF.emptyCP fileName
     let cp = forceEither conf
-    return cp {CF.optionxform = id}
+    return ( Configuration cp {CF.optionxform = id} )
 
-type CfgReader a = Cfg -> R.Reader CF.ConfigParser a
+type CfgReader a = Cfg -> R.Reader Configuration a
 
 option cfg = do
     cp <- R.ask
@@ -33,4 +35,4 @@ option cfg = do
 intOption = option :: CfgReader Int
 strOption = option :: CfgReader String
     
-extract cp loader = return $ R.runReader loader cp
+extract cfg loader = return $ R.runReader loader cfg
