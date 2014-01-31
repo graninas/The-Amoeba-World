@@ -23,20 +23,3 @@ gameLoop wire s input = do
         Left ex -> return 10
         Right x -> return 20
 
-
-{-
-startMainLoop cfg view wire = do
-    let rt = runtime cfg view
-    let w = gameLoop wire (Right ())
-    execStateT w rt
-    
-
-gameLoop w input = do
-    s <- clockSession_
-    (output, w') <- stepWire w s input
-    case output of
-        Left ex -> return ex
-        Right x -> gameLoop w' x
-        
-        
--}
