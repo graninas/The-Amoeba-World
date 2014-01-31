@@ -13,18 +13,22 @@ startMainLoop :: Configuration -> View -> WWire Int Int -> IO Int
 startMainLoop cfg view wire = do
     let rt = runtime cfg view
     (s, session') <- stepSession clockSession_
-    (output, w') <- stepWire wire s (Right 10)
+    let state = gameLoop wire s (Right 10)
+    let newState = execStateT state rt
+    return 10
+
+gameLoop wire s input = do
+    (output, w') <- stepWire wire s input
     case output of
         Left ex -> return 10
         Right x -> return 20
-    
 
 
 {-
 startMainLoop cfg view wire = do
     let rt = runtime cfg view
-    gameLoop wire (Right ())
-    --execStateT w rt
+    let w = gameLoop wire (Right ())
+    execStateT w rt
     
 
 gameLoop w input = do

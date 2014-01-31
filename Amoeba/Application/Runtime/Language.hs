@@ -14,7 +14,7 @@ data Runtime = Runtime { rtConfiguration :: Configuration
                        
 
 type WStateIO = StateT Runtime IO
-type WWire a b = Wire (Timed NominalDiffTime ()) () IO a b
+type WWire a b = Wire (Timed NominalDiffTime ()) () WStateIO a b
 
 
 runtime = Runtime
