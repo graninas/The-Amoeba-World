@@ -1,9 +1,7 @@
 module View.Config where
 
 import View.Language
-
 import Middleware.Config.Facade
-import Control.Monad (liftM3)
 
 screenInfo = do
     sw <- intOption screenWidth
@@ -13,5 +11,7 @@ screenInfo = do
 
 captionInfo = strOption appName
 
-i = intOption
-viewConfig' = liftM3 Screen (i screenWidth) (i screenHeight) (i colorDepth)
+loadViewSettings cfg = do
+    screen <- extract cfg screenInfo
+    caption <- extract cfg captionInfo
+    return (screen, caption)
