@@ -2,7 +2,9 @@
 
 set -e
 
-./build-tests.sh "$@"
-./run-tests-verbose.sh "$@"
+./scripts/clean-test-data.sh "$@"
+./scripts/copy-test-data.sh
+./scripts/build-tests.sh "$@"
+./scripts/run-tests-verbose.sh "$@"
 
 set +e

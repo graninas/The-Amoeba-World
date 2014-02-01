@@ -7,7 +7,7 @@ import qualified Middleware.Config.Facade as Cfg
 import Application.Environment
 import Application.Runtime.Engine
 import Application.Runtime.Logic
-import Application.Storage.Loader
+import Application.Storage.WorldLoader
 
 logPathLoader = Cfg.strOption Cfg.logPath
 dataPathLoader = Cfg.strOption Cfg.dataPath

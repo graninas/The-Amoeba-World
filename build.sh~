@@ -1,0 +1,11 @@
+#!/bin/bash
+
+set -e
+
+
+
+set +e
+
+echo "Copying..."
+rm -f "./Game/Amoeba"
+cp "./.bin/Amoeba" ./Game/

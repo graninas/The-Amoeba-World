@@ -44,7 +44,6 @@ library
                    GameLogic.Data.Facade,
                    GameLogic.Data.Object,
                    GameLogic.Data.Player,
-                   GameLogic.Language.Parser,
                    GameLogic.Runtime.Evaluation,
                    GameLogic.Runtime.Game,
                    GameLogic.Runtime.World,
@@ -60,7 +59,11 @@ library
                    Application.Runtime.Logic,
                    Application.Runtime.Engine,
                    Application.Runtime.Language,
-                   Application.Storage.Loader
+                   Application.Storage.WorldLoader,
+                   GameLogic.Language.Parsers.WorldParser,
+                   Middleware.Parsing.Facade,
+                   Middleware.Parsing.Common,
+                   Middleware.Parsing.ParsecFacade
 
 executable Amoeba
   build-depends:   base >= 4
@@ -71,7 +74,6 @@ executable Amoeba
                    Application.Boot,
                    Application.Environment,
                    Application.MainLoop,
-                   GameLogic.Language.Parser,
                    GameLogic.Runtime.Game,
                    GameLogic.AI.AI,
                    GameLogic.AI.GenericAI,
@@ -91,4 +93,9 @@ executable Amoeba
                    Application.Runtime.Logic,
                    Application.Runtime.Engine,
                    Application.Runtime.Language,
-                   Application.Storage.Loader
+                   Application.Storage.WorldLoader,
+                   GameLogic.Language.Parsers.WorldParser,
+                   Middleware.Parsing.Facade,
+                   Middleware.Parsing.Common,
+                   Middleware.Parsing.ParsecFacade
+sers.ItemParser
