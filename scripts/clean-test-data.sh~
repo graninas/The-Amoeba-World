@@ -2,5 +2,5 @@
 
 echo "Cleaning test data..."
 rm -r "./.bin/TestBin"
-rm -r "./.bin/Test*"
+rm -r "./.bin/Test"
 
