@@ -29,3 +29,12 @@ identation :: Int -> GenParser Char st String
 identation cnt = count cnt trueSpace
 
 lineEnd = trueSpaces >> optional eol
+
+commentString :: GenParser Char st String
+commentString = do
+    char ';'
+    str <- many (noneOf "\n\r")
+    lineEnd
+    return str
+
+assignment = trueSpaces >> char '=' >> trueSpaces

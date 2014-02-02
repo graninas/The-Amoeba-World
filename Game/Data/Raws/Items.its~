@@ -16,6 +16,3 @@ Item "Plasma"
     lifebound = (0, 1000)
     durability = (100, 100)
     energy = (0, 100)
-
-; Empty
-Item "Empty"

@@ -3,6 +3,8 @@ module GameLogic.Language.Parsers.ItemParser where
 import Middleware.Parsing.Facade as P
 import GameLogic.Data.Facade
 
+import Control.Monad (liftM)
+
 data ResourceToken = IntResource String (Int, Int)
   deriving (Show, Read, Eq)
 
@@ -15,17 +17,13 @@ itemTokens :: GenParser Char st [ItemToken]
 itemTokens = many itemToken
 
 itemToken :: GenParser Char st ItemToken
-itemToken = emptyToken <|> comment <|> item <?> "token"
+itemToken = emptyToken <|> comment <|> item <?> "itemToken"
 
 emptyToken :: GenParser Char st ItemToken
 emptyToken = eol >> return EmptyToken
 
 comment :: GenParser Char st ItemToken
-comment = do
-    char ';'
-    str <- many (noneOf "\n\r")
-    lineEnd
-    return $ Comment str
+comment = liftM Comment commentString
 
 item :: GenParser Char st ItemToken
 item = do
