@@ -1,0 +1,31 @@
+
+; General items
+
+Item "Karyon"
+    lifebound = (0, 5000)
+    durability = (100, 100)
+    energy = (300, 2000)
+
+; Conductor
+Item "Conductor"
+    lifebound = (0, 1000)
+    durability = (100, 100)
+    energy = (0, 100)
+
+; World definition file
+
+World "Pandora"
+    width = 20
+    height = 20
+    defaultCell = Object "Empty" "Player0"
+    cells =
+        (10, 10): Object "Karyon" "Player1"
+        (9, 9):   Object "Plasma" "Player1"
+        (9, 10):  Object "Plasma" "Player1"
+        (9, 11):  Object "Plasma" "Player1"
+        (10, 9):  Object "Plasma" "Player1"
+        (10, 11): Object "Plasma" "Player1"
+        (11, 9):  Object "Plasma" "Player1"
+        (11, 10): Object "Plasma" "Player1"
+        (11, 11): Object "Plasma" "Player1"
+        (15, 15): Object "Karyon" "Player2"

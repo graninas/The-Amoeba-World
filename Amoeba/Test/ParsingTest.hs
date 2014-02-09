@@ -26,10 +26,13 @@ world1 = ("World1", "./Data/Raws/World1.arf",
                , EmptyToken
                , World "Pandora" [ IntProperty "width" 20, IntProperty "height" 20, ObjectProperty "defaultCell" (Object "Empty" "Player0")
                                  , CellsProperty "cells" [ CellProperty (10, 10) (Object "Karyon" "Player1")
-                                                         , CellProperty (9, 9) (Object "Plasma" "Player1")]]
-               ])
+                                                         , CellProperty (9, 9) (Object "Plasma" "Player1")]] ])
 world2 = ( "World2"
          , "./Data/Raws/World2.arf"
+         , parseRawTokens
+         , undefined )
+world3 = ( "World3"
+         , "./Data/Raws/World3.arf"
          , parseRawTokens
          , undefined )
 
@@ -62,6 +65,17 @@ prop_parseWorld2 = monadicIO $ do
   where
     pred expected _ parsed = expected == parsed
 
+prop_parseWorld3 = monadicIO $ do
+    r <- run $ readFile "./Data/Raws/World3.adt"
+    res <- run $ examineExample world3 (pred (read r))
+    assert res
+  where
+    pred expected _ parsed = expected == parsed
+
+writeAdt rawFile destFile = do
+    p <- parseExample parseRawTokens rawFile
+    writeFile destFile $ show p
+
 tests :: IO Bool
 tests = $quickCheckAll
 
@@ -70,4 +84,8 @@ runTests = tests >>= \passed -> putStrLn $
             else "Some tests failed."
 
 main :: IO ()
-main = runTests
+main = do
+    runTests
+    putStr ""
+    --writeAdt "./Data/Raws/World3.arf" "./Data/Raws/World3.adt"
+    
