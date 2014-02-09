@@ -63,7 +63,10 @@ library
                    GameLogic.Language.Parsers.WorldParser,
                    Middleware.Parsing.Facade,
                    Middleware.Parsing.Common,
-                   Middleware.Parsing.ParsecFacade
+                   Middleware.Parsing.ParsecFacade,
+                   GameLogic.Language.RawToken,
+                   GameLogic.Language.Parsers.RawParser,
+                   GameLogic.Language.Parsers.Common
 
 executable Amoeba
   build-depends:   base >= 4
@@ -97,5 +100,8 @@ executable Amoeba
                    GameLogic.Language.Parsers.WorldParser,
                    Middleware.Parsing.Facade,
                    Middleware.Parsing.Common,
-                   Middleware.Parsing.ParsecFacade
+                   Middleware.Parsing.ParsecFacade,
+                   GameLogic.Language.RawToken,
+                   GameLogic.Language.Parsers.RawParser,
+                   GameLogic.Language.Parsers.Common
 sers.ItemParser

@@ -1,31 +1,11 @@
 module GameLogic.Language.Parsers.ItemParser where
 
+import GameLogic.Language.RawToken
+import GameLogic.Language.Parsers.Common
+
 import Middleware.Parsing.Facade as P
-import GameLogic.Data.Facade
 
-import Control.Monad (liftM)
-
-data ResourceToken = IntResource String (Int, Int)
-  deriving (Show, Read, Eq)
-
-data ItemToken = Comment String
-               | Item String [ResourceToken]
-               | EmptyToken
-  deriving (Show, Read, Eq)
-
-itemTokens :: GenParser Char st [ItemToken]
-itemTokens = many itemToken
-
-itemToken :: GenParser Char st ItemToken
-itemToken = emptyToken <|> comment <|> item <?> "itemToken"
-
-emptyToken :: GenParser Char st ItemToken
-emptyToken = eol >> return EmptyToken
-
-comment :: GenParser Char st ItemToken
-comment = liftM Comment commentString
-
-item :: GenParser Char st ItemToken
+item :: GenParser Char st RawToken
 item = do
     string "Item" >> many1 trueSpace
     itemName <- stringConstant
@@ -33,10 +13,10 @@ item = do
     rs <- resources
     return $ Item itemName rs
 
-resources :: GenParser Char st [ResourceToken]
+resources :: GenParser Char st [PropertyToken]
 resources = many resource
 
-resource :: GenParser Char st ResourceToken
+resource :: GenParser Char st PropertyToken
 resource = do
     identation 4
     name <- identifier
@@ -46,18 +26,6 @@ resource = do
     return $ IntResource name val
 
 resourceValue :: GenParser Char st (Int, Int)
-resourceValue = do
-    char '('
-    v1 <- integerConstant
-    trueSpaces >> char ',' >> trueSpaces
-    v2 <- integerConstant
-    char ')'
-    return (v1, v2)
+resourceValue = intTuple2
 
-------------------------------------------------------------
-
-parseItemTokens :: String -> Either String [ItemToken]
-parseItemTokens input = case P.parse itemTokens [] input of
-    Left err -> Left $ show err
-    Right ts -> Right ts
 

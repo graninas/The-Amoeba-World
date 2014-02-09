@@ -4,3 +4,5 @@
 .dist-buildwrapper
 .bin
 .project~
+./Game/Amoeba
+*~

@@ -1,35 +1,11 @@
 module GameLogic.Language.Parsers.WorldParser where
 
+import GameLogic.Language.RawToken
+import GameLogic.Language.Parsers.Common
+
 import Middleware.Parsing.Facade as P
-import GameLogic.Parsers.Common
 
-import Control.Monad (liftM)
-
-import GameLogic.Data.Facade
-
-data PropertyToken = IntProperty String Int
-                   | ObjectProperty String
-                   | CellsProperty
-  deriving (Show, Read, Eq)
-
-data WorldToken = Comment String
-               | World String [PropertyToken]
-               | EmptyToken
-  deriving (Show, Read, Eq)
-
-worldTokens :: GenParser Char st [WorldToken]
-worldTokens = many worldToken
-
-worldToken :: GenParser Char st WorldToken
-worldToken = emptyToken <|> comment <|> item <?> "worldToken"
-
-emptyToken :: GenParser Char st WorldToken
-emptyToken = eol >> return EmptyToken
-
-comment :: GenParser Char st WorldToken
-comment = liftM Comment commentString
-
-world :: GenParser Char st WorldToken
+world :: GenParser Char st RawToken
 world = do
     string "World" >> many1 trueSpace
     itemName <- stringConstant
@@ -50,32 +26,38 @@ property = do
         "defaultCell" -> objectProperty name
         "cells" -> cellsProperty name
 
+intProperty :: String -> GenParser Char st PropertyToken
 intProperty name = do
     assignment
     val <- integerConstant
     lineEnd
     return $ IntProperty name val
 
+objectProperty :: String -> GenParser Char st PropertyToken
 objectProperty name = do
     assignment
     o <- object
-    
+    lineEnd
+    return $ ObjectProperty name o 
 
+object :: GenParser Char st RawToken
+object = do
+    string "Object" >> many1 trueSpace
+    objectName <- stringConstant
+    many trueSpace
+    playerName <- stringConstant
+    return $ Object objectName playerName
 
-; World definition file
+cellsProperty :: String -> GenParser Char st PropertyToken
+cellsProperty name = do
+    cs <- trueSpaces >> eol >> many1 cell
+    return $ CellsProperty name cs
 
-World "Pandora"
-    width = 20
-    height = 20
-    defaultCell = Object "Empty"
-    cells =
-        (10, 10): Object "Karyon" "Player1"
-        (9, 9):   Object "Plasma" "Player1"
-        (9, 10):  Object "Plasma" "Player1"
-        (9, 11):  Object "Plasma" "Player1"
-        (10, 9):  Object "Plasma" "Player1"
-        (10, 11): Object "Plasma" "Player1"
-        (11, 9):  Object "Plasma" "Player1"
-        (11, 10): Object "Plasma" "Player1"
-        (11, 11): Object "Plasma" "Player1"
-        (15, 15): Object "Karyon" "Player2"
+cell :: GenParser Char st PropertyToken
+cell = do
+    identation 8
+    coords <- intTuple2
+    trueSpaces >> char ':' >> trueSpaces
+    o <- object
+    lineEnd
+    return $ CellProperty coords o

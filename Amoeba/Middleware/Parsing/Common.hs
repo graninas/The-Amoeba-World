@@ -38,3 +38,12 @@ commentString = do
     return str
 
 assignment = trueSpaces >> char '=' >> trueSpaces
+
+intTuple2 :: GenParser Char st (Int, Int)
+intTuple2 = do
+    char '('
+    v1 <- integerConstant
+    trueSpaces >> char ',' >> trueSpaces
+    v2 <- integerConstant
+    char ')'
+    return (v1, v2)

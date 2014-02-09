@@ -7,11 +7,15 @@ import Test.QuickCheck.Monadic (assert, monadicIO, run)
 import Test.QuickCheck.All
 
 import GameLogic.Data.Facade
+import GameLogic.Language.RawToken
 import GameLogic.Language.Parsers.ItemParser
 import GameLogic.Language.Parsers.WorldParser
+import GameLogic.Language.Parsers.RawParser
 
-items1 = ("Items1", "./Data/Raws/Items.its",
-         parseItemTokens,
+-- 'ARF' stands for 'Amoeba Raw File' or 'Amoeba Raw Format' if you wish.
+
+items1 = ("Items1", "./Data/Raws/Items.arf",
+         parseRawTokens,
          Right [Comment " General items",EmptyToken,Item "Karyon" [IntResource "lifebound" (0,5000),IntResource "durability" (100,100),IntResource "energy" (300,2000)],EmptyToken,Comment " Conductor",Item "Conductor" [IntResource "lifebound" (0,1000),IntResource "durability" (100,100),IntResource "energy" (0,100)]])
 
 parseExample (testName, dataFile, parser, res) = do

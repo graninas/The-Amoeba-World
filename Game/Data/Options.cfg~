@@ -1,9 +1,0 @@
-[DEFAULT]
-applicationName: The Amoeba World
-logPath: ./Logs/
-dbPath: ./Data/Db
-
-[VIDEO]
-screenWidth: 640
-screenHeight: 480
-colorDepth: 32
