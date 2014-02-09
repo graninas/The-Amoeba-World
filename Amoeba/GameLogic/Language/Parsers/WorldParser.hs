@@ -1,6 +1,6 @@
 module GameLogic.Language.Parsers.WorldParser where
 
-import GameLogic.Language.RawToken
+import GameLogic.Language.Parsers.RawToken
 import GameLogic.Language.Parsers.Common
 
 import Middleware.Parsing.Facade as P

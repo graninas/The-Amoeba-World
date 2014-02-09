@@ -1,6 +1,6 @@
 module GameLogic.Language.Parsers.RawParser where
 
-import GameLogic.Language.RawToken
+import GameLogic.Language.Parsers.RawToken
 import GameLogic.Language.Parsers.WorldParser
 import GameLogic.Language.Parsers.ItemParser
 import GameLogic.Language.Parsers.Common

@@ -16,7 +16,7 @@ boot cfg = do
     logPath <- Cfg.extract cfg logPathLoader
     dataPath <- Cfg.extract cfg dataPathLoader
 
-    game <- loadGame dataPath
+    game <- loadWorld dataPath
     viewSettings <- loadViewSettings cfg
     withEnvironment $ do
         view <- setupView viewSettings

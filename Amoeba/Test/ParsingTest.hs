@@ -7,7 +7,7 @@ import Test.QuickCheck.Monadic (assert, monadicIO, run)
 import Test.QuickCheck.All
 import Control.Monad (liftM)
 
-import GameLogic.Language.RawToken
+import GameLogic.Language.Parsers.RawToken
 import GameLogic.Language.Parsers.ItemParser
 import GameLogic.Language.Parsers.WorldParser
 import GameLogic.Language.Parsers.RawParser
