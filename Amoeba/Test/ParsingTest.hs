@@ -28,12 +28,20 @@ world1 = ("World1", "./Data/Raws/World1.arf",
                                  , CellsProperty "cells" [ CellProperty (10, 10) (Object "Karyon" "Player1")
                                                          , CellProperty (9, 9) (Object "Plasma" "Player1")]]
                ])
+world2 = ( "World2"
+         , "./Data/Raws/World2.arf"
+         , parseRawTokens
+         , undefined )
 
-parseExample parser dataFile = liftM parser (readFile dataFile) 
+parseExample parser dataFile = liftM parser (readFile dataFile)
 
 testExample ex@(testName, dataFile, parser, res) = do
     parsed <- parseExample parser dataFile
     return $ res == parsed
+
+examineExample ex@(testName, dataFile, parser, res) pred = do
+    parsed <- parseExample parser dataFile
+    return $ pred res parsed
 
 prop_parseItems1 = monadicIO $ do
     res <- run $ testExample items1
@@ -47,6 +55,12 @@ prop_parseWorld1 = monadicIO $ do
     res <- run $ testExample world1
     assert res
 
+prop_parseWorld2 = monadicIO $ do
+    r <- run $ readFile "./Data/Raws/World2.adt"
+    res <- run $ examineExample world2 (pred (read r))
+    assert res
+  where
+    pred expected _ parsed = expected == parsed
 
 tests :: IO Bool
 tests = $quickCheckAll
@@ -57,5 +71,3 @@ runTests = tests >>= \passed -> putStrLn $
 
 main :: IO ()
 main = runTests
-
-
