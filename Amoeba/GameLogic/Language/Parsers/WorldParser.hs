@@ -50,7 +50,7 @@ object = do
 
 cellsProperty :: String -> GenParser Char st PropertyToken
 cellsProperty name = do
-    cs <- trueSpaces >> eol >> many1 cell
+    cs <- assignment >> eol >> many1 cell
     return $ CellsProperty name cs
 
 cell :: GenParser Char st PropertyToken

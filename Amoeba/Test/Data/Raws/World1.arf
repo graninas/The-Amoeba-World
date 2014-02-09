@@ -3,15 +3,7 @@
 World "Pandora"
     width = 20
     height = 20
-    defaultCell = Object "Empty"
+    defaultCell = Object "Empty" "Player0"
     cells =
         (10, 10): Object "Karyon" "Player1"
         (9, 9):   Object "Plasma" "Player1"
-        (9, 10):  Object "Plasma" "Player1"
-        (9, 11):  Object "Plasma" "Player1"
-        (10, 9):  Object "Plasma" "Player1"
-        (10, 11): Object "Plasma" "Player1"
-        (11, 9):  Object "Plasma" "Player1"
-        (11, 10): Object "Plasma" "Player1"
-        (11, 11): Object "Plasma" "Player1"
-        (15, 15): Object "Karyon" "Player2"
