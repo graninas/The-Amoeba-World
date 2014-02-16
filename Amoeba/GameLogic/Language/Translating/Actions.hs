@@ -20,3 +20,4 @@ addItem (Item name props) = do
     log $ "Adding object template for: " ++ show name
     insertObjectTemplate name props
     return ""
+addItem t = return $ "addItem: Item expected but got " ++ show t

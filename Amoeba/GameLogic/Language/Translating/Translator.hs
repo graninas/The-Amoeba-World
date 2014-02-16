@@ -43,9 +43,8 @@ apply' sc t = do
 
 translate _ [] = return ()
 translate sc (t:ts) = do
-    apply' sc t
+    apply sc t
     translate sc ts
-
 
 translateToWorld [] = Left "There are no tokens." 
 translateToWorld tokens = return $ evalState (runEitherT (translate scheme tokens)) indexingRt
@@ -53,10 +52,8 @@ translateToWorld tokens = return $ evalState (runEitherT (translate scheme token
 translateToWorld' _ [] = Left "There are no tokens." 
 translateToWorld' eF tokens = return $ eF (runEitherT (translate scheme tokens)) indexingRt
 
-
 toWorld rawString = do
     ts <- RP.parseRawTokens rawString :: Either String [RawToken]
-    res <- translateToWorld' execState ts
-    return $ trtItemMap res
+    translateToWorld' runState ts
 
     
