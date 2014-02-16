@@ -1,7 +1,7 @@
-module GameLogic.Language.Parsers.WorldParser where
+module GameLogic.Language.Parsing.WorldParser where
 
-import GameLogic.Language.Parsers.RawToken
-import GameLogic.Language.Parsers.Common
+import GameLogic.Language.Parsing.Common
+import GameLogic.Language.RawToken
 
 import Middleware.Parsing.Facade as P
 

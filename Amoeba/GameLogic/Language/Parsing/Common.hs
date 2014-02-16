@@ -1,7 +1,7 @@
-module GameLogic.Language.Parsers.Common where
+module GameLogic.Language.Parsing.Common where
 
 import Middleware.Parsing.Facade as P
-import GameLogic.Language.Parsers.RawToken
+import GameLogic.Language.RawToken
 
 import Control.Monad (liftM)
 

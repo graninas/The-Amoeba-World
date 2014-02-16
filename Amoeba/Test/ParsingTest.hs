@@ -7,10 +7,10 @@ import Test.QuickCheck.Monadic (assert, monadicIO, run)
 import Test.QuickCheck.All
 import Control.Monad (liftM)
 
-import GameLogic.Language.Parsers.RawToken
-import GameLogic.Language.Parsers.ItemParser
-import GameLogic.Language.Parsers.WorldParser
-import GameLogic.Language.Parsers.RawParser
+import GameLogic.Language.Parsing.ItemParser
+import GameLogic.Language.Parsing.WorldParser
+import GameLogic.Language.Parsing.RawParser
+import GameLogic.Language.RawToken
 
 -- 'ARF' stands for 'Amoeba Raw File' or 'Amoeba Raw Format' if you wish.
 

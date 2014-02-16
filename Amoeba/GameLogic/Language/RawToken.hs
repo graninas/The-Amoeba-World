@@ -1,4 +1,4 @@
-module GameLogic.Language.Parsers.RawToken where
+module GameLogic.Language.RawToken where
 
 type Caption = String
 type Name = String

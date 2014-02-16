@@ -1,9 +1,10 @@
-module GameLogic.Language.Parsers.RawParser where
+module GameLogic.Language.Parsing.RawParser where
 
-import GameLogic.Language.Parsers.RawToken
-import GameLogic.Language.Parsers.WorldParser
-import GameLogic.Language.Parsers.ItemParser
-import GameLogic.Language.Parsers.Common
+import GameLogic.Language.Parsing.WorldParser
+import GameLogic.Language.Parsing.ItemParser
+import GameLogic.Language.Parsing.Common
+
+import GameLogic.Language.RawToken
 
 import Middleware.Parsing.Facade as P
 

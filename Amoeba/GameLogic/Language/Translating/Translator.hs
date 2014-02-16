@@ -1,11 +1,14 @@
-module GameLogic.Language.Translator where
+module GameLogic.Language.Translating.Translator where
 
-import GameLogic.Language.Parsers.RawParser as RP
-import GameLogic.Language.Parsers.RawToken as RT
+import GameLogic.Language.Parsing.RawParser as RP
+import GameLogic.Language.RawToken as RT
+
 import qualified GameLogic.Runtime.World as W
 import qualified GameLogic.Data.Facade as D
 
-import qualified Data.Map as M
+import GameLogic.Language.Translating.Scheme
+import GameLogic.Language.Translating.Runtime
+
 import Prelude hiding (log)
 
 import Control.Monad.State
@@ -46,13 +49,6 @@ World "Pandora"
         (15, 15): Object "Karyon" "Player2"
 -}
 
-data TransRt = TransRt { trtNextId :: State TransRt Int
-                       , trtItemMap :: M.Map String String -- TODO
-                       , trtWorldConstructor :: String -- TODO
-                       , trtLog :: [String]
-                       }
-
-type Trans a = EitherT String (State TransRt) a
 
 nextId :: Int -> State TransRt Int
 nextId prevId = do
@@ -61,42 +57,8 @@ nextId prevId = do
     put $ ctx { trtNextId = nextId nId }
     return nId
 
+indexingRt = initialRt (nextId 1)
 
-
-initialRt = TransRt (nextId 1) M.empty "Empty" []
-
-
-
-(/>) trigger act = \token -> if trigger token
-                             then act token
-                             else return $ "Token not triggered: " ++ show token
-
-log s = do
-    ctx <- get
-    let newCtx = ctx { trtLog = (s : trtLog ctx) }
-    put newCtx
-
--- actions:
-skip, addItem :: RawToken -> Trans String
-skip t = do
-    log $ "Skip for: " ++ show t
-    return ""
-addItem t = do
-    log $ "Adding object template for: " ++ show t
-    return ""
-
--- triggers:
-onComment (RT.Comment _) = True
-onComment _ = False
-onEmpty RT.EmptyToken = True
-onEmpty _ = False
-onItem (Item n props) = True
-onItem _ = False
-
-scheme = [ onComment /> skip
-         , onEmpty /> skip
-         , onItem /> addItem
-         ]
 
 apply sc t = mapM_ ($ t) sc
 
@@ -107,7 +69,7 @@ translate sc (t:ts) = do
         
 
 translateToWorld [] = Left "There are no tokens." 
-translateToWorld tokens = return $ execState (runEitherT (translate scheme tokens)) initialRt
+translateToWorld tokens = return $ execState (runEitherT (translate scheme tokens)) indexingRt
 
 toWorld rawString = do
     ts <- RP.parseRawTokens rawString :: Either String [RawToken]

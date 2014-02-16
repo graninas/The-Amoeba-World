@@ -1,7 +1,7 @@
 module Main where
 
-import GameLogic.Language.Parsers.RawToken
-import GameLogic.Language.Translator
+import GameLogic.Language.RawToken
+import GameLogic.Language.Translating.Translator
 import GameLogic.Runtime.World
 
 import Control.Monad (liftM)
