@@ -11,7 +11,7 @@ main = do
     
     tokens <- readFile "./Data/Raws/World3.arf"
     
-    let res = toWorld tokens :: Either String String
+    let res = toWorld tokens
     
     print res
     

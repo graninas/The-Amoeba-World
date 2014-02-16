@@ -6,6 +6,7 @@ import qualified GameLogic.Runtime.World as W
 import qualified GameLogic.Data.Facade as D
 
 import qualified Data.Map as M
+import Prelude hiding (log)
 
 import Control.Monad.State
 import Control.Monad.Trans
@@ -48,6 +49,7 @@ World "Pandora"
 data TransRt = TransRt { trtNextId :: State TransRt Int
                        , trtItemMap :: M.Map String String -- TODO
                        , trtWorldConstructor :: String -- TODO
+                       , trtLog :: [String]
                        }
 
 type Trans a = EitherT String (State TransRt) a
@@ -61,7 +63,7 @@ nextId prevId = do
 
 
 
-initialRt = TransRt (nextId 1) M.empty "Empty"
+initialRt = TransRt (nextId 1) M.empty "Empty" []
 
 
 
@@ -69,12 +71,20 @@ initialRt = TransRt (nextId 1) M.empty "Empty"
                              then act token
                              else return $ "Token not triggered: " ++ show token
 
+log s = do
+    ctx <- get
+    let newCtx = ctx { trtLog = (s : trtLog ctx) }
+    put newCtx
 
 -- actions:
-skip :: RawToken -> Trans String
-skip t = return $ "Skip for: " ++ show t
-addItem t = return $ "Adding object template for: " ++ show t
-    
+skip, addItem :: RawToken -> Trans String
+skip t = do
+    log $ "Skip for: " ++ show t
+    return ""
+addItem t = do
+    log $ "Adding object template for: " ++ show t
+    return ""
+
 -- triggers:
 onComment (RT.Comment _) = True
 onComment _ = False
@@ -88,15 +98,20 @@ scheme = [ onComment /> skip
          , onItem /> addItem
          ]
 
+apply sc t = mapM_ ($ t) sc
 
-translator _ [] = left "Test1."
-translator _ ts = left "Test2."
+translate _ [] = return ()
+translate sc (t:ts) = do
+    apply sc t
+    translate sc ts
         
 
-translateToWorld tokens = evalState (runEitherT (translator scheme tokens)) initialRt
+translateToWorld [] = Left "There are no tokens." 
+translateToWorld tokens = return $ execState (runEitherT (translate scheme tokens)) initialRt
 
 toWorld rawString = do
     ts <- RP.parseRawTokens rawString :: Either String [RawToken]
-    translateToWorld ts
+    ctx <- translateToWorld ts
+    return $ trtLog ctx
 
     
