@@ -16,6 +16,7 @@ skip t = do
     log $ "Skip for: " ++ show t
     return ""
     
-addItem t = do
-    log $ "Adding object template for: " ++ show t
+addItem (Item name props) = do
+    log $ "Adding object template for: " ++ show name
+    insertObjectTemplate name props
     return ""

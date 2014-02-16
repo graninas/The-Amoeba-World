@@ -4,6 +4,7 @@ module GameLogic.Data.Object where
 import Control.Lens
 
 import GameLogic.Data.Player
+import GameLogic.Data.Types
 
 
 data Resource a = Resource { _stock :: a
@@ -14,8 +15,8 @@ type IntResource = Resource Int
 
 data Object = Object {
                         -- Properties:
-                         _objectId :: Int               -- static property
-                       , _objectType :: Int             -- predefined property
+                         _objectId :: ObjectId          -- static property
+                       , _objectType :: ObjectType      -- predefined property
                        
                        -- Runtime properties, resources:
                        , _ownership :: Player           -- runtime property... or can be effect!

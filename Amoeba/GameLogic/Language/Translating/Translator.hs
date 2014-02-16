@@ -15,39 +15,7 @@ import Control.Monad.State
 import Control.Monad.Trans
 import Control.Monad.Trans.Either as E
 import Control.Monad
-
-{-
-; General items
-
-Item "Karyon"
-    lifebound = (0, 5000)
-    durability = (100, 100)
-    energy = (300, 2000)
-
-; Conductor
-Item "Conductor"
-    lifebound = (0, 1000)
-    durability = (100, 100)
-    energy = (0, 100)
-
-; World definition file
-
-World "Pandora"
-    width = 20
-    height = 20
-    defaultCell = Object "Empty" "Player0"
-    cells =
-        (10, 10): Object "Karyon" "Player1"
-        (9, 9):   Object "Plasma" "Player1"
-        (9, 10):  Object "Plasma" "Player1"
-        (9, 11):  Object "Plasma" "Player1"
-        (10, 9):  Object "Plasma" "Player1"
-        (10, 11): Object "Plasma" "Player1"
-        (11, 9):  Object "Plasma" "Player1"
-        (11, 10): Object "Plasma" "Player1"
-        (11, 11): Object "Plasma" "Player1"
-        (15, 15): Object "Karyon" "Player2"
--}
+import Data.Either.Combinators (isRight)
 
 
 nextId :: Int -> State TransRt Int
@@ -60,20 +28,31 @@ nextId prevId = do
 indexingRt = initialRt (nextId 1)
 
 
-apply sc t = mapM_ ($ t) sc
-
+apply sc t = sequence_ (map ($ t) sc)
+    {-
+    let acts = [act | act <- map ($ t) sc]
+    case acts of
+        [] -> left $ "No translator for token " ++ show t
+        (act : []) -> act
+        _ -> left $ "Redundant translators for token " ++ show t
+    -}
+    
 translate _ [] = return ()
 translate sc (t:ts) = do
     apply sc t
     translate sc ts
-        
+
 
 translateToWorld [] = Left "There are no tokens." 
-translateToWorld tokens = return $ execState (runEitherT (translate scheme tokens)) indexingRt
+translateToWorld tokens = return $ evalState (runEitherT (translate scheme tokens)) indexingRt
+
+translateToWorld' _ [] = Left "There are no tokens." 
+translateToWorld' eF tokens = return $ eF (runEitherT (translate scheme tokens)) indexingRt
+
 
 toWorld rawString = do
     ts <- RP.parseRawTokens rawString :: Either String [RawToken]
-    ctx <- translateToWorld ts
-    return $ trtLog ctx
+    res <- translateToWorld' execState ts
+    return $ trtItemMap res
 
     
