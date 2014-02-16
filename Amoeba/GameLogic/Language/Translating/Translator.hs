@@ -13,7 +13,7 @@ import Prelude hiding (log)
 
 import Control.Monad.State
 import Control.Monad.Trans
-import Control.Monad.Trans.Either as E
+import Control.Monad.Trans.Either
 import Control.Monad
 import Data.Either.Combinators (isRight)
 

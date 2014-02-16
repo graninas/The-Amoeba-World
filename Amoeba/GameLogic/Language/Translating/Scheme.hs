@@ -8,5 +8,5 @@ import GameLogic.Language.Translating.Actions
 scheme = [ onComment /> skip
          , onEmpty /> skip
          , onItem /> addItem
-         --, onWorld /> setupWorld
+         , onWorld /> setupWorld
          ]
