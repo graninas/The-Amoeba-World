@@ -27,19 +27,23 @@ nextId prevId = do
 
 indexingRt = initialRt (nextId 1)
 
-
+-- Makes from scheme's list the list of context modificators.
+-- Folds the new list with applying to current context.
 apply sc t = sequence_ (map ($ t) sc)
-    {-
-    let acts = [act | act <- map ($ t) sc]
-    case acts of
-        [] -> left $ "No translator for token " ++ show t
-        (act : []) -> act
-        _ -> left $ "Redundant translators for token " ++ show t
-    -}
-    
+
+{- Equal function:
+apply' sc t = do
+    ctx <- get
+    let ctxModifier t ctx mod = do
+        put ctx
+        mod t
+        get
+    foldM_ (ctxModifier t) ctx sc
+-}
+
 translate _ [] = return ()
 translate sc (t:ts) = do
-    apply sc t
+    apply' sc t
     translate sc ts
 
 
