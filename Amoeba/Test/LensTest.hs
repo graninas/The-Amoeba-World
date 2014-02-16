@@ -14,9 +14,11 @@ import qualified Data.Sequence as Seq
 import Test.QuickCheck
 import Test.QuickCheck.All
 
+{-
 instance Monoid r => Monoid (Accessor r a) where
   mempty = Accessor mempty
   mappend (Accessor a) (Accessor b) = Accessor $ a <> b
+-}
 
 type MyMap = Map.Map Int String
 
@@ -88,8 +90,9 @@ checks1 = (check1, check2)
 checks2 = [check1, check2, check3]
 checks3 = [check3,          check4]
 checks4 = [check3 . to not, check4]
-checks5 = check3 . to not <> check4     -- needs a Nonoid instance for Accessor
-checks6 = check3          <> check4              -- needs a Nonoid instance for Accessor
+-- broken with lens-4.0.3
+--checks5 = check3 . to not <> check4     -- needs a Monoid instance for Accessor
+--checks6 = check3          <> check4     -- needs a Monoid instance for Accessor
 
 isJustTrue (Just x) = x
 isJustTrue Nothing = False
@@ -106,8 +109,9 @@ q9  = allOf traverse (isJustTrue . (d ^?)) checks3 -- False
 q10 = anyOf traverse (isJustTrue . (d ^?)) checks3 -- True
 q11 = allOf traverse (isJustTrue . (d ^?)) checks4 -- True
 q12 = anyOf traverse (isJustTrue . (d ^?)) checks4 -- True
-q13 = isJustTrue . (d ^?) $ checks5                -- True
-q14 = isJustTrue . (d ^?) $ checks6                -- False
+-- broken with lens-4.0.3
+--q13 = isJustTrue . (d ^?) $ checks5                -- True
+--q14 = isJustTrue . (d ^?) $ checks6                -- False
 
 tests :: IO Bool
 tests = $quickCheckAll
@@ -117,6 +121,4 @@ runTests = tests >>= \passed -> putStrLn $
             else "Some tests failed."
 
 main :: IO ()
-main = do
-    runTests
-    print q14
+main = runTests

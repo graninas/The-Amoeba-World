@@ -17,18 +17,23 @@ data Action = Action
   deriving (Show, Read, Eq)
 
 type WorldMap = M.Map Point Object
-type World = { _worldMap :: WorldMap
-             , _effectMap :: EffectMap
-             
-             
-             }
+data World = World { _worldMap :: WorldMap
+                   , _effectMap :: EffectMap
+                   , _width :: Int
+                   , _height :: Int
+                   , _defaultCell :: Maybe Object
+                   }
   deriving (Show, Read, Eq)
 
+emptyWorld = World M.empty M.empty 0 0 Nothing
+
+{-
 fromList :: [(Point, Object)] -> World
 fromList list = World wm b
   where
     wm = M.fromList list
     b = occupiedArea (map fst list)
+
 
 resetWorldMap :: World -> WorldMap -> World
 resetWorldMap w wm = w { worldMap = wm
@@ -40,12 +45,11 @@ refreshWorldBound w = w { worldBound = worldMapBound $ worldMap w }
 lookup :: Point -> WorldMap -> Maybe Object
 lookup = M.lookup
 emptyMap = M.empty
-emptyWorld = World emptyMap noBound
 
 -- Lenses
 makeLenses ''World
 
-{-
+
 alterMap :: WorldMap -> Point -> Object -> WorldMap
 alterMap m p c = f m
   where

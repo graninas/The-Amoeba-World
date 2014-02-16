@@ -67,7 +67,8 @@ library
                    GameLogic.Language.Parsers.RawParser,
                    GameLogic.Language.Parsers.Common,
                    GameLogic.Language.Parsers.RawToken,
-                   GameLogic.Language.Translator
+                   GameLogic.Language.Translator,
+                   Test.EitherMonadCallTest
 
 executable Amoeba
   build-depends:   base >= 4
@@ -105,5 +106,6 @@ executable Amoeba
                    GameLogic.Language.Parsers.RawParser,
                    GameLogic.Language.Parsers.Common,
                    GameLogic.Language.Parsers.RawToken,
-                   GameLogic.Language.Translator
+                   GameLogic.Language.Translator,
+                   Test.EitherMonadCallTest
 sers.ItemParser

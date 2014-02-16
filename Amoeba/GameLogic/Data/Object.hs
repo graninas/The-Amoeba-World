@@ -39,3 +39,4 @@ isResourceValid (Resource c Nothing)  = c >= 0
 resourceValidator r | isResourceValid r = r
                     | otherwise         = error $ "Invalid resource property: " ++ show r
 toResource (c, mbM) = resourceValidator $ Resource c mbM
+

@@ -26,10 +26,9 @@ worker = do
     return [n1, n2, n3, n4]
 
 
--- The state, wich will be injected into client code.
+-- The state, which will be injected into client code.
 nextId :: Int -> State Context Int
-nextId prevId = let nId = prevId + 1
-                in do
+nextId prevId = do let nId = prevId + 1
                    ctx <- get
                    put $ ctx { ctxNextId1 = nextId nId
                              , ctxNextId2 = nextId nId
@@ -37,8 +36,7 @@ nextId prevId = let nId = prevId + 1
                    return nId
 
 nextRnd :: StdGen -> State Context Int
-nextRnd prevG = let (r, g) = random prevG
-                in do
+nextRnd prevG = do let (r, g) = random prevG
                    ctx <- get
                    put $ ctx { ctxNextId1 = nextRnd g
                              , ctxNextId2 = nextRnd g
