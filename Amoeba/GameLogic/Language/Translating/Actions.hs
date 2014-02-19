@@ -6,9 +6,9 @@ import GameLogic.Language.Translating.Runtime
 import Prelude hiding (log)
 import Control.Monad.Trans.Either (left)
 
-(/>) trigger act = \token -> if trigger token
-                             then act token
-                             else logExt $ "Token not triggered: " ++ show token
+(/>) trigger act token = if trigger token
+                         then act token
+                         else logExt $ "Token not triggered: " ++ show token
 
 
 skip, addItem :: RawToken -> Trans ()
@@ -22,7 +22,11 @@ addItem t = left $ "addItem: Item expected but got " ++ show t
 
 
 setupWorld (World name props) = do
-    log $ "Setting World."
+    log "Setting World."
+--    wh <- getProperty "width" props
+--    ht <- getProperty "height" props
+--    cells <- getWorldCells props
+--    constructWorld wg ht cells
     
     
 setupWorld t = left $ "setupWorld: World expected but got " ++ show t

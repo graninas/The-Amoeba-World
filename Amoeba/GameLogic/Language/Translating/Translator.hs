@@ -29,10 +29,14 @@ indexingRt = initialRt (nextId 1)
 
 -- Makes from scheme's list the list of context modificators.
 -- Folds the new list with applying to current context.
-apply sc t = sequence_ (map ($ t) sc)
+apply sc t = mapM_ ($ t) sc
 
-{- Equal function:
-apply' sc t = do
+{- Same function:
+apply sc t = sequence_ (map ($ t) sc)
+-}
+
+{- Same function:
+apply sc t = do
     ctx <- get
     let ctxModifier t ctx mod = do
         put ctx
