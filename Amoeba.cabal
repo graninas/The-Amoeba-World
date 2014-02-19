@@ -69,8 +69,8 @@ library
                    GameLogic.Language.Parsers.RawToken,
                    GameLogic.Language.Translator,
                    Test.EitherMonadCallTest,
-                   Test.TypeFamilyTest,
-                   Test.TypeFamilyTest2
+                   Test.TypeFamilyTest2,
+                   Test.TypeFamilyTest1
 
 executable Amoeba
   build-depends:   base >= 4
@@ -110,6 +110,6 @@ executable Amoeba
                    GameLogic.Language.Parsers.RawToken,
                    GameLogic.Language.Translator,
                    Test.EitherMonadCallTest,
-                   Test.TypeFamilyTest,
-                   Test.TypeFamilyTest2
+                   Test.TypeFamilyTest2,
+                   Test.TypeFamilyTest1
 sers.ItemParser
