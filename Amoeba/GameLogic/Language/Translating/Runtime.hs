@@ -1,4 +1,3 @@
-{-# LANGUAGE RankNTypes #-}
 module GameLogic.Language.Translating.Runtime where
 
 import Control.Monad (when, liftM)
@@ -40,13 +39,6 @@ logExt s = do
 initialRt idCounter = TransRt idCounter M.empty "Empty" [] False
 
 -- Specific
-
-{-
-getProperty :: forall b . String -> PropertyToken -> Trans b
-getProperty name (IntProperty n i) | name == n = return i
-getProperty name (IntResource n r) | name == n = return r
-getProperty name _ = left $ "There is no property with name " ++ name ++ "."
--}
 
 getItemMap = liftM trtItemMap get
 putItemMap m = do

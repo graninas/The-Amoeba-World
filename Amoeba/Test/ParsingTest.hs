@@ -11,22 +11,23 @@ import GameLogic.Language.Parsing.ItemParser
 import GameLogic.Language.Parsing.WorldParser
 import GameLogic.Language.Parsing.RawParser
 import GameLogic.Language.RawToken
+import qualified GameLogic.Language.Scheme as S
 
 -- 'ARF' stands for 'Amoeba Raw File' or 'Amoeba Raw Format' if you wish.
 
 items1 = ("Items1", "./Data/Raws/Items.arf",
          parseRawTokens,
-         Right [Comment " General items",EmptyToken,Item "Karyon" [IntResource "lifebound" (0,5000),IntResource "durability" (100,100),IntResource "energy" (300,2000)],EmptyToken,Comment " Conductor",Item "Conductor" [IntResource "lifebound" (0,1000),IntResource "durability" (100,100),IntResource "energy" (0,100)]])
+         Right [Comment " General items",EmptyToken,Item S.karyon [IntResource S.lifebound (0,5000),IntResource S.durability (100,100),IntResource S.energy (300,2000)],EmptyToken,Comment " Conductor",Item S.conductor [IntResource S.lifebound (0,1000),IntResource S.durability (100,100),IntResource S.energy (0,100)]])
 items2 = ("Items2", "./Data/Raws/Item.arf",
          parseRawTokens,
-         Right [Item "Karyon" [IntResource "lifebound" (0,5000), IntResource "durability" (100,100), IntResource "energy" (300,2000)]])
+         Right [Item S.karyon [IntResource S.lifebound (0,5000), IntResource S.durability (100,100), IntResource S.energy (300,2000)]])
 world1 = ("World1", "./Data/Raws/World1.arf",
          parseRawTokens,
          Right [ Comment " World definition file"
                , EmptyToken
-               , World "Pandora" [ IntProperty "width" 20, IntProperty "height" 20, ObjectProperty "defaultCell" (Object "Empty" "Player0")
-                                 , CellsProperty "cells" [ CellProperty (10, 10) (Object "Karyon" "Player1")
-                                                         , CellProperty (9, 9) (Object "Plasma" "Player1")]] ])
+               , World "Pandora" [ IntProperty S.width 20, IntProperty S.height 20, ObjectProperty S.defaultCell (Object S.empty S.player0)
+                                 , CellsProperty S.cells [ CellProperty S.cell (10, 10) (Object S.karyon S.player1)
+                                                         , CellProperty S.cell (9, 9) (Object S.plasma S.player1)]] ])
 world2 = ( "World2"
          , "./Data/Raws/World2.arf"
          , parseRawTokens

@@ -7,7 +7,7 @@ type PlayerName = String
 data PropertyToken = IntProperty Name Int
                    | ObjectProperty Name RawToken
                    | CellsProperty Name [PropertyToken]
-                   | CellProperty (Int, Int) RawToken
+                   | CellProperty Name (Int, Int) RawToken
                    | IntResource Name (Int, Int)
   deriving (Show, Read, Eq)
 

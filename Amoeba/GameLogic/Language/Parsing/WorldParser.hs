@@ -2,12 +2,13 @@ module GameLogic.Language.Parsing.WorldParser where
 
 import GameLogic.Language.Parsing.Common
 import GameLogic.Language.RawToken
+import qualified GameLogic.Language.Scheme as S
 
 import Middleware.Parsing.Facade as P
 
 world :: GenParser Char st RawToken
 world = do
-    string "World" >> many1 trueSpace
+    string S.world >> many1 trueSpace
     itemName <- stringConstant
     lineEnd
     rs <- properties
@@ -16,15 +17,31 @@ world = do
 properties :: GenParser Char st [PropertyToken]
 properties = many property
 
+{- Uncomment for GHC 7.6.
+{-# LANGUAGE MultiWayIf #-}
 property :: GenParser Char st PropertyToken
 property = do
     identation 4
     name <- identifier
-    case name of
-        "width" -> intProperty name
-        "height" -> intProperty name
-        "defaultCell" -> objectProperty name
-        "cells" -> cellsProperty name
+    if | name == width       -> intProperty name
+       | name == height      -> intProperty name
+       | name == defaultCell -> objectProperty name
+       | name == cells       -> cellsProperty name
+       | otherwise           -> fail $ "unknown property: " ++ name
+       
+-}
+
+property :: GenParser Char st PropertyToken
+property = do
+    identation 4
+    name <- identifier
+    chooseProperty name
+  where
+        chooseProperty name | name == S.width       = intProperty name
+                            | name == S.height      = intProperty name
+                            | name == S.defaultCell = objectProperty name
+                            | name == S.cells       = cellsProperty name
+                            | otherwise             = fail $ "unknown property: " ++ name
 
 intProperty :: String -> GenParser Char st PropertyToken
 intProperty name = do
@@ -38,11 +55,11 @@ objectProperty name = do
     assignment
     o <- object
     lineEnd
-    return $ ObjectProperty name o 
+    return $ ObjectProperty name o
 
 object :: GenParser Char st RawToken
 object = do
-    string "Object" >> many1 trueSpace
+    string S.object >> many1 trueSpace
     objectName <- stringConstant
     many trueSpace
     playerName <- stringConstant
@@ -60,4 +77,4 @@ cell = do
     trueSpaces >> char ':' >> trueSpaces
     o <- object
     lineEnd
-    return $ CellProperty coords o
+    return $ CellProperty S.cell coords o

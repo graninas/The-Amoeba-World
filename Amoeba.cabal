@@ -70,7 +70,8 @@ library
                    GameLogic.Language.Translator,
                    Test.EitherMonadCallTest,
                    Test.TypeFamilyTest2,
-                   Test.TypeFamilyTest1
+                   Test.TypeFamilyTest1,
+                   GameLogic.Language.Scheme
 
 executable Amoeba
   build-depends:   base >= 4
@@ -111,5 +112,6 @@ executable Amoeba
                    GameLogic.Language.Translator,
                    Test.EitherMonadCallTest,
                    Test.TypeFamilyTest2,
-                   Test.TypeFamilyTest1
+                   Test.TypeFamilyTest1,
+                   GameLogic.Language.Scheme
 sers.ItemParser

@@ -6,8 +6,8 @@ import GameLogic.Language.RawToken as RT
 import qualified GameLogic.Runtime.World as W
 import qualified GameLogic.Data.Facade as D
 
-import GameLogic.Language.Translating.Scheme
 import GameLogic.Language.Translating.Runtime
+import GameLogic.Language.Translating.Rules
 
 import Prelude hiding (log)
 

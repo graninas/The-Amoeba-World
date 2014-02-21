@@ -22,9 +22,9 @@ instance Show (PropertyToken Int) where
 instance Show (PropertyToken (Int, Int)) where
     show (IntResource _ i) = show i
 
-class Show a => Prop a where
+class (Show a) => Prop a where
     type Out a b :: *
-    getProperty :: a -> Out a ()
+    getProperty :: (a ~ Out b ()) => a -> Out a ()
     printProperty :: a -> String
 
 instance Prop (PropertyToken a) where
