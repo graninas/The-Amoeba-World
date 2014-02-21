@@ -45,8 +45,6 @@ library
                    GameLogic.Data.Object,
                    GameLogic.Data.Player,
                    GameLogic.Runtime.Evaluation,
-                   GameLogic.Runtime.Game,
-                   GameLogic.Runtime.World,
                    Middleware.Config.Config,
                    Middleware.Config.Facade,
                    Middleware.Config.Scheme,
@@ -71,7 +69,10 @@ library
                    Test.EitherMonadCallTest,
                    Test.TypeFamilyTest2,
                    Test.TypeFamilyTest1,
-                   GameLogic.Language.Scheme
+                   GameLogic.Language.Scheme,
+                   GameLogic.Data.World,
+                   GameLogic.Data.Game,
+                   Test.Utils.WorldArfData
 
 executable Amoeba
   build-depends:   base >= 4
@@ -82,7 +83,6 @@ executable Amoeba
                    Application.Boot,
                    Application.Environment,
                    Application.MainLoop,
-                   GameLogic.Runtime.Game,
                    GameLogic.AI.AI,
                    GameLogic.AI.GenericAI,
                    GameLogic.Assets.Scenarios,
@@ -113,5 +113,7 @@ executable Amoeba
                    Test.EitherMonadCallTest,
                    Test.TypeFamilyTest2,
                    Test.TypeFamilyTest1,
-                   GameLogic.Language.Scheme
+                   GameLogic.Language.Scheme,
+                   GameLogic.Data.Game,
+                   Test.Utils.WorldArfData
 sers.ItemParser

@@ -3,6 +3,8 @@ module GameLogic.Language.Translating.Actions where
 import GameLogic.Language.RawToken
 import GameLogic.Language.Translating.Runtime
 
+import GameLogic.Data.World
+
 import Prelude hiding (log)
 import Control.Monad.Trans.Either (left)
 
@@ -10,40 +12,31 @@ import Control.Monad.Trans.Either (left)
 (/>) :: Show a => (a -> Bool) -> (a -> Trans ()) -> a -> Trans ()
 (/>) trigger act token = if trigger token
                          then act token
-                         else logExt $ "Token not triggered: " ++ show token
+                         else logExt $ "Token hasn't been triggered: " ++ show token
 
 -- Action that do nothing, only logs info.
 skip :: Show a => a -> Trans ()
 skip t =  log $ "Skip for: " ++ show t
 
 -- Action inserts item as object template.
-addItem (Item name props) = do
+addItem (ItemToken name props) = do
     log $ "Adding object template for: " ++ show name
     insertObjectTemplate name props
-addItem t = left $ "addItem: Item expected but got " ++ show t
+addItem t = left $ "addItem: unexpected token got: " ++ show t
 
-{-
-setupWorld (World name props) = do
-    log "Setting World."
-    wh <- get int "width" props
-    ht <- get int "height" props
-    cells <- getWorldCells props
-    constructWorld wg ht cells
-setupWorld t = left $ "setupWorld: World expected but got " ++ show t
-
-getIntProperty :: String -> PropertyToken -> Trans Int
-getIntProperty name (IntProperty n i : ps) | name == n = return i
-getIntProperty name _ = 
-
-getWorldCells props = do
--}
-
---setupWorld :: a -> PropertyToken -> Trans ()
-setupWorld rules (World name props) = do
+setupWorld rules (WorldToken name props) = do
     log $ "Setting World: " ++ name ++ "."
     translate rules props
-setupWorld _ t = left $ "setupWorld: World expected but got " ++ show t
+setupWorld _ t = left $ "setupWorld: unexpected token got: " ++ show t
 
-setWidth _ = log $ "setWidth"
-setHeight _ = log $ "setHeight"
+setWidth (IntProperty _ i) = do
+    log "setWidth"
+--    w <- getWorld
+--    setWorld $ w { 
+    
+setWidth p = left $ "setWidth: unexpected property got: " ++ show p
+
+setHeight (IntProperty _ i) = log $ "setHeight"
+setHeight p = left $ "setHeight: unexpected property got: " ++ show p
+
 setCells _ = log $ "setCells"

@@ -51,8 +51,6 @@ b :: (PropertyBag a, Prop p, p ~ Elem a) => p -> a
 b p = insert (getProperty p) empty
 -}
 
-main = do
+main = putStrLn "Ok."
 
-  --  let x = b prop1
-
-    putStrLn "Ok."
+    

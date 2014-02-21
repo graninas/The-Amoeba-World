@@ -1,12 +1,12 @@
 {-# LANGUAGE TemplateHaskell #-}
-module GameLogic.Runtime.World where
+module GameLogic.Data.World where
 
 import qualified Control.Lens as L
 import qualified Data.Map as M
 import Prelude hiding (null, lookup)
 
 import GameLogic.Base.Geometry
-import GameLogic.Data.Facade as O
+import GameLogic.Data.Object
 
 data Effect = Effect
   deriving (Show, Read, Eq)
@@ -17,11 +17,11 @@ data Action = Action
   deriving (Show, Read, Eq)
 
 type WorldMap = M.Map Point Object
-data World = World { _worldMap :: WorldMap
-                   , _effectMap :: EffectMap
-                   , _width :: Int
-                   , _height :: Int
-                   , _defaultCell :: Maybe Object
+data World = World { worldMap :: WorldMap
+                   , effectMap :: EffectMap
+                   , width :: Int
+                   , height :: Int
+                   , defaultCell :: Maybe Object
                    }
   deriving (Show, Read, Eq)
 

@@ -3,7 +3,7 @@ module Main where
 import GameLogic.Language.RawToken
 import GameLogic.Language.Translating.Translator
 import GameLogic.Language.Translating.Runtime
-import GameLogic.Runtime.World
+import GameLogic.Data.World
 
 import Control.Monad (liftM)
 import Data.Either.Combinators
@@ -17,8 +17,8 @@ main = do
     tokens <- readFile "./Data/Raws/World3.arf"
     let res = toWorld tokens
     putStrLn $ unlines . fromRight' . extractLog $ res
-    putStrLn $ show . fromRight' . extractItemMap $ res
-    putStrLn $ show . fromRight' . extractResult $ res
+    print ((fromRight' . extractItemMap) res)
+    print ((fromRight' . extractResult) res)
 
     
 

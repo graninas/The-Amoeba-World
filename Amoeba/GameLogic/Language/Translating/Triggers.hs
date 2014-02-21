@@ -3,16 +3,16 @@ module GameLogic.Language.Translating.Triggers where
 import GameLogic.Language.RawToken
 
 onComment :: RawToken -> Bool
-onComment (Comment _) = True
+onComment (CommentToken _) = True
 onComment _ = False
 
 onEmpty EmptyToken = True
 onEmpty _ = False
 
-onItem (Item n props) = True
+onItem (ItemToken n props) = True
 onItem _ = False
 
-onWorld (World name props) = True
+onWorld (WorldToken name props) = True
 onWorld _ = False
 
 onProp :: String -> PropertyToken -> Bool

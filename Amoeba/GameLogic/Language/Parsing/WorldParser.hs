@@ -12,13 +12,13 @@ world = do
     itemName <- stringConstant
     lineEnd
     rs <- properties
-    return $ World itemName rs
+    return $ WorldToken itemName rs
 
 properties :: GenParser Char st [PropertyToken]
 properties = many property
 
 {- Uncomment for GHC 7.6.
-{-# LANGUAGE MultiWayIf #-}
+ LANGUAGE MultiWayIf
 property :: GenParser Char st PropertyToken
 property = do
     identation 4
@@ -63,7 +63,7 @@ object = do
     objectName <- stringConstant
     many trueSpace
     playerName <- stringConstant
-    return $ Object objectName playerName
+    return $ ObjectToken objectName playerName
 
 cellsProperty :: String -> GenParser Char st PropertyToken
 cellsProperty name = do

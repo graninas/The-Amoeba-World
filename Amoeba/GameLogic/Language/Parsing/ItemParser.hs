@@ -11,7 +11,7 @@ item = do
     itemName <- stringConstant
     lineEnd
     rs <- resources
-    return $ Item itemName rs
+    return $ ItemToken itemName rs
 
 resources :: GenParser Char st [PropertyToken]
 resources = many resource

@@ -3,19 +3,12 @@ module GameLogic.Language.Translating.Translator where
 import GameLogic.Language.Parsing.RawParser as RP
 import GameLogic.Language.RawToken as RT
 
-import qualified GameLogic.Runtime.World as W
-import qualified GameLogic.Data.Facade as D
-
 import GameLogic.Language.Translating.Runtime
 import GameLogic.Language.Translating.Rules
 
-import Prelude hiding (log)
-
 import Control.Monad.State
-import Control.Monad.Trans
-import Control.Monad.Trans.Either
-import Control.Monad
-import Data.Either.Combinators (isRight)
+--import Control.Monad.Trans
+import Control.Monad.Trans.Either (runEitherT)
 
 
 nextId :: Int -> State TransRt Int

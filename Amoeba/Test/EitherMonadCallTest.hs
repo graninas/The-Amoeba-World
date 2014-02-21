@@ -17,4 +17,4 @@ callEitherMonad = do
 
 main = do
     let res = callEitherMonad
-    putStrLn $ show res
+    print res

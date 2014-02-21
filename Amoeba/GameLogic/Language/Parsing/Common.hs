@@ -9,4 +9,4 @@ emptyToken :: GenParser Char st RawToken
 emptyToken = eol >> return EmptyToken
 
 comment :: GenParser Char st RawToken
-comment = liftM Comment commentString
+comment = liftM CommentToken commentString

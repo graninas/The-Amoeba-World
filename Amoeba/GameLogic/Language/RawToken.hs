@@ -11,9 +11,9 @@ data PropertyToken = IntProperty Name Int
                    | IntResource Name (Int, Int)
   deriving (Show, Read, Eq)
 
-data RawToken = Comment String
-               | World Name [PropertyToken]
-               | Item Name [PropertyToken]
-               | Object Name PlayerName
+data RawToken = CommentToken String
+               | WorldToken Name [PropertyToken]
+               | ItemToken Name [PropertyToken]
+               | ObjectToken Name PlayerName
                | EmptyToken
   deriving (Show, Read, Eq)

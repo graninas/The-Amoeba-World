@@ -1,11 +1,11 @@
 {-# LANGUAGE TemplateHaskell #-}
 
-module GameLogic.Game where
+module GameLogic.Data.Game where
 
 import Control.Lens
 import System.Random
 
-import GameLogic.World
+import GameLogic.Data.World
 
 data Game = Game { _world :: World
                  , _rndGen :: StdGen }
