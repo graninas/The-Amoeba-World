@@ -74,7 +74,4 @@ apply rules t = do
     foldM_ (ctxModifier t) ctx rules
 -}
 
-translate _ [] = return ()
-translate rules (t:ts) = do
-    apply rules t
-    translate rules ts
+translate rules = mapM_ (apply rules)

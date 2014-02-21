@@ -42,8 +42,8 @@ getWorldCells props = do
 setupWorld rules (World name props) = do
     log $ "Setting World: " ++ name ++ "."
     translate rules props
+setupWorld _ t = left $ "setupWorld: World expected but got " ++ show t
 
-
-setWidth = undefined
-setHeight = undefined
-setCells = undefined
+setWidth _ = log $ "setWidth"
+setHeight _ = log $ "setHeight"
+setCells _ = log $ "setCells"
