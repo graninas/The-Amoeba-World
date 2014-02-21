@@ -6,15 +6,17 @@ import GameLogic.Language.Translating.Runtime
 import Prelude hiding (log)
 import Control.Monad.Trans.Either (left)
 
+-- Binds trigger to an action
 (/>) :: Show a => (a -> Bool) -> (a -> Trans ()) -> a -> Trans ()
 (/>) trigger act token = if trigger token
                          then act token
                          else logExt $ "Token not triggered: " ++ show token
 
-
+-- Action that do nothing, only logs info.
 skip :: Show a => a -> Trans ()
 skip t =  log $ "Skip for: " ++ show t
 
+-- Action inserts item as object template.
 addItem (Item name props) = do
     log $ "Adding object template for: " ++ show name
     insertObjectTemplate name props
@@ -37,7 +39,10 @@ getWorldCells props = do
 -}
 
 --setupWorld :: a -> PropertyToken -> Trans ()
-setupWorld propsScheme t = undefined
+setupWorld rules (World name props) = do
+    log $ "Setting World: " ++ name ++ "."
+    translate rules props
+
 
 setWidth = undefined
 setHeight = undefined

@@ -56,3 +56,25 @@ insertObjectTemplate name props = do
         Just _ -> left $ "Object template for item " ++ name ++ " is duplicated."
     log $ "Object template for item " ++ name ++ " added."
 
+-- Makes from rules list the list of context modificators.
+-- Folds the new list with applying to current context.
+apply rules t = mapM_ ($ t) rules
+
+{- Same function:
+apply rules t = sequence_ (map ($ t) rules)
+-}
+
+{- Same function:
+apply rules t = do
+    ctx <- get
+    let ctxModifier t ctx mod = do
+        put ctx
+        mod t
+        get
+    foldM_ (ctxModifier t) ctx rules
+-}
+
+translate _ [] = return ()
+translate rules (t:ts) = do
+    apply rules t
+    translate rules ts
