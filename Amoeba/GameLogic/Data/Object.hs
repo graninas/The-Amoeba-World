@@ -6,7 +6,6 @@ import Control.Lens
 import GameLogic.Data.Player
 import GameLogic.Data.Types
 
-
 data Resource a = Resource { _stock :: a
                            , _capacity :: Maybe a }
   deriving (Show, Read, Eq)
@@ -27,7 +26,7 @@ data Object = Object {
 
                        -- , __effects :: Effects'
                        -- , __actions :: Actions' 
-                       } -- Эффекты и действия не обязательно должны быть здесь. Они могут находиться и во вне, например, в списке эффектов/действий для объекта или куска карты. Буквально, на объект "навешаны" эффекты.
+                       }
   deriving (Show, Read, Eq)
 
 type Objects = [Object]

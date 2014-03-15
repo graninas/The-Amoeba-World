@@ -1,11 +1,6 @@
-module GameLogic.Data.Facade (
-      module GameLogic.Data.Player
-    , module GameLogic.Data.Object
-    , module GameLogic.Data.World
-    , module GameLogic.Data.Game
-    ) where
+module GameLogic.Data.Facade (module X) where
 
-import GameLogic.Data.Player
-import GameLogic.Data.Object
-import GameLogic.Data.World
-import GameLogic.Data.Game
+import GameLogic.Data.Player as X
+import GameLogic.Data.Object as X
+import GameLogic.Data.World as X
+import GameLogic.Data.Game as X

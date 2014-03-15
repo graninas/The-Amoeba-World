@@ -1,4 +1,3 @@
-{-# LANGUAGE TemplateHaskell #-}
 module GameLogic.Data.World where
 
 import qualified Control.Lens as L
