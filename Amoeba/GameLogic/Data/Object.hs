@@ -7,7 +7,7 @@ import GameLogic.Data.Player
 import GameLogic.Data.Types
 
 data Resource a = Resource { _stock :: a
-                           , _capacity :: Maybe a }
+                           , _capacity :: a }
   deriving (Show, Read, Eq)
   
 type IntResource = Resource Int
@@ -34,9 +34,6 @@ type Objects = [Object]
 makeLenses ''Object
 makeLenses ''Resource
 
-isResourceValid (Resource c (Just m)) = (c >= 0) && (c <= m)
-isResourceValid (Resource c Nothing)  = c >= 0
-resourceValidator r | isResourceValid r = r
-                    | otherwise         = error $ "Invalid resource property: " ++ show r
-toResource (c, mbM) = resourceValidator $ Resource c mbM
+isResourceValid (s, c) = (s >= 0) && (s <= c || c == 0)
+toResource = uncurry Resource
 

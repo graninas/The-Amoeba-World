@@ -4,6 +4,7 @@ import GameLogic.Language.RawToken
 import GameLogic.Language.Translation.Runtime
 
 import GameLogic.Data.World
+import GameLogic.Data.Object
 
 import Prelude hiding (log)
 import Control.Monad.Trans.Either (left)
@@ -27,7 +28,7 @@ skip t =  log $ "Skip for: " ++ show t
 
 -- Action inserts item as object template.
 
-makeObjectTemplate = undefined
+makeObjectTemplate = error "1"
 
 
 getObjectTypeId _ = do
@@ -49,14 +50,15 @@ addObjectTemplate rules name props = do
     insertObjectTemplate name objTemplate
     log $ "Object template for item " ++ name ++ " added."
 
-makeEnergy = undefined
-makeDurability = undefined
-makeLifebound = undefined
-
 addItem rules (ItemToken name props) = do
     log $ "Adding object template for: " ++ show name
     addObjectTemplate rules name props
 addItem _ t = left $ "addItem: unexpected token got: " ++ show t
+
+-- TODO: too special and too unobvious functions. Maybe I can better?
+makeIntResource (IntResource name i) | isResourceValid i = return (name, toResource i)
+makeIntResource (IntResource name i) = left $ "Invalid resource '" ++ name ++ "': " ++ show i
+makeIntResource p = left $ "makeIntResource: unexpected property got: " ++ show p
 
 setupWorld rules (WorldToken name props) = do
     log $ "Setting World: " ++ name ++ "."
