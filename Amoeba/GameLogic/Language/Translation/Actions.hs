@@ -5,6 +5,7 @@ import GameLogic.Language.Translation.Runtime
 
 import GameLogic.Data.World
 import GameLogic.Data.Object
+import GameLogic.Data.Types
 
 import Prelude hiding (log)
 import Control.Monad.Trans.Either (left)
@@ -15,25 +16,14 @@ import Control.Monad (liftM)
 (/>) trigger act token = if trigger token
                          then act token
                          else logExt $ "Token hasn't been triggered: " ++ show token
--- The same, but can return some result.
-(<-/>) :: Show a => (a -> Bool) -> (a -> Trans b) -> a -> Trans (Maybe b)
-(<-/>) trigger act token = if trigger token
-                           then liftM Just $ act token
-                           else do logExt $ "Token hasn't been triggered: " ++ show token
-                                   return Nothing
 
 -- Action that does nothing, only logs info.
 skip :: Show a => a -> Trans ()
 skip t =  log $ "Skip for: " ++ show t
 
--- Action inserts item as object template.
-
-makeObjectTemplate = error "1"
-
-
-getObjectTypeId _ = do
-    prevTypeId <- getObjectTemplateMapSize
-    return $ prevTypeId + 1
+getObjectType _ = do
+    prevType <- getObjectTemplateMapSize
+    return $ prevType + 1
 
 checkObjectTemplateUniqueness name = do
     mbObjectTemplate <- lookupObjectTemplate name
@@ -41,19 +31,17 @@ checkObjectTemplateUniqueness name = do
         Nothing -> return ()
         Just _ -> left $ "Object template for item " ++ name ++ " is duplicated."
 
-addObjectTemplate rules name props = do
+addObjectTemplate :: String -> [PropertyToken] -> Trans ()
+addObjectTemplate name props = do
     checkObjectTemplateUniqueness name
-    objTypeId <- getObjectTypeId name
-    
-    objTemplate <- evaluate (makeObjectTemplate objTypeId) rules props
-    
-    insertObjectTemplate name objTemplate
+    objType <- getObjectType name
+    insertObjectTemplate name (objType, props)
     log $ "Object template for item " ++ name ++ " added."
 
-addItem rules (ItemToken name props) = do
+addItem (ItemToken name props) = do
     log $ "Adding object template for: " ++ show name
-    addObjectTemplate rules name props
-addItem _ t = left $ "addItem: unexpected token got: " ++ show t
+    addObjectTemplate name props
+addItem t = left $ "addItem: unexpected token got: " ++ show t
 
 -- TODO: too special and too unobvious functions. Maybe I can better?
 makeIntResource (IntResource name i) | isResourceValid i = return (name, toResource i)

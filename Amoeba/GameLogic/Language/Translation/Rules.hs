@@ -6,10 +6,7 @@ import GameLogic.Language.Scheme
 
 scheme = [ onComment /> skip
          , onEmpty /> skip
-         , onItem /> addItem [ onProp energy <-/> makeIntResource
-                             , onProp durability <-/> makeIntResource
-                             , onProp lifebound <-/> makeIntResource
-                             ]
+         , onItem /> addItem
          , onWorld /> setupWorld [ onProp width /> setWidth
                                  , onProp height /> setHeight
                                  , onProp cells /> setCells

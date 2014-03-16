@@ -3,7 +3,6 @@ module GameLogic.Data.Object where
 
 import Control.Lens
 
-import GameLogic.Data.Player
 import GameLogic.Data.Types
 
 data Resource a = Resource { _stock :: a
@@ -36,4 +35,4 @@ makeLenses ''Resource
 
 isResourceValid (s, c) = (s >= 0) && (s <= c || c == 0)
 toResource = uncurry Resource
-
+emptyResource = Resource 0 0

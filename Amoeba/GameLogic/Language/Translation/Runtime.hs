@@ -2,8 +2,8 @@ module GameLogic.Language.Translation.Runtime where
 
 import Control.Monad (when, liftM)
 import Control.Monad.State
---import Control.Monad.Trans
 import Control.Monad.Trans.Either as E
+import Data.Maybe (catMaybes)
 import qualified Data.Map as M
 import Prelude hiding (log)
 
@@ -12,9 +12,19 @@ import GameLogic.Data.World
 import GameLogic.Data.Object
 import GameLogic.Language.RawToken
 
+{- Translation Runtime.
+Takes translation rules and RawToken tree and returns complete World object.
+Rules == tree-like translation scheme consisting of a triggers binded to an actions.
 
-type ObjectConstructor = ObjectId -> PlayerId -> Object
-type ObjectTemplate = (ObjectType, ObjectConstructor)
+For now, there is an overhead: the 'trigger->action bind operator' looks through full current list of rules
+and selects an appropriate rule by name. It could be improved to select that rule from map.
+Or even list/map could be modified to a plain structure, so 'selecting' might be thrown out.
+
+Also, it is possible to merge and unify RawToken and PropertyToken.
+-}
+
+
+type ObjectTemplate = (ObjectType, [PropertyToken])
 type ObjectTemplateMap = M.Map String ObjectTemplate
 
 data TransRt = TransRt { trtNextId :: State TransRt Int
@@ -27,7 +37,6 @@ data TransRt = TransRt { trtNextId :: State TransRt Int
 type Trans a = EitherT String (State TransRt) a
 
 -- System
-
 getExtendedLogs :: Trans Bool
 getExtendedLogs = liftM trtExtendedLogs get
 
@@ -50,20 +59,14 @@ logExt s = do
     isExtendedLogs <- getExtendedLogs
     when isExtendedLogs (log s)
     
-
-
 initialRt idCounter = TransRt idCounter M.empty emptyWorld [] False
 
 -- Makes from rules list the list of context modifiers.
 -- Folds the new list with applying to current context.
-apply_ rules t = mapM_ ($ t) rules
-apply rules t = mapM ($ t) rules
+apply_ rules token = mapM_ ($ token) rules
 
+-- translate :: rules -> [RawToken] -> Trans ()
 translate rules = mapM_ (apply_ rules)
-
-evaluate f rules ts = do
-    tRs <- mapM (apply rules) ts
-    return $ f tRs
 
 -- Specific
 -- TODO: use Lenses to update it.
@@ -79,5 +82,5 @@ putObjectTemplateMap m = do
 insertObjectTemplate name objTemplate = do
     m <- getObjectTemplateMap
     putObjectTemplateMap $ M.insert name objTemplate m
-    
+
 lookupObjectTemplate name = liftM (M.lookup name) getObjectTemplateMap

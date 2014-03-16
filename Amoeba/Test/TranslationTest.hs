@@ -13,14 +13,12 @@ extractItemMap = liftM (trtObjectTemplateMap . snd)
 extractLog = liftM (trtLog . snd)
 extractResult = liftM fst
 
-detemplateMap = M.map (\(objType, objConstr) -> (objType, objConstr 1 1))
-
 main = do
     
     tokens <- readFile "./Data/Raws/World3.arf"
     let res = toWorld tokens
     putStrLn $ unlines . fromRight' . extractLog $ res
-    print $ detemplateMap ((fromRight' . extractItemMap) res)
+    print ((fromRight' . extractItemMap) res)
     print ((fromRight' . extractResult) res)
 
     

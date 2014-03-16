@@ -1,11 +1,6 @@
-module GameLogic.Data.Player where
+module GameLogic.Assets.Players where
 
 import GameLogic.Data.Types
-
-data Player = Player PlayerId
-  deriving (Show, Read, Eq)
-
-type Players = [Player]
 
 -- Ordinary players have Id > 0
 player1 = Player 1

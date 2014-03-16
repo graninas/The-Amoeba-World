@@ -43,7 +43,6 @@ library
                    GameLogic.Base.Geometry,
                    GameLogic.Data.Facade,
                    GameLogic.Data.Object,
-                   GameLogic.Data.Player,
                    GameLogic.Runtime.Evaluation,
                    Middleware.Config.Config,
                    Middleware.Config.Facade,
@@ -73,7 +72,8 @@ library
                    GameLogic.Data.World,
                    GameLogic.Data.Game,
                    Test.Utils.WorldArfData,
-                   Test.PatternGuardTest
+                   Test.PatternGuardTest,
+                   GameLogic.Assets.Players
 
 executable Amoeba
   build-depends:   base >= 4
