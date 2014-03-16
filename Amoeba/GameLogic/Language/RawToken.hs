@@ -8,7 +8,7 @@ data PropertyToken = IntProperty Name Int
                    | ObjectProperty Name RawToken
                    | CellsProperty Name [PropertyToken]
                    | CellProperty Name (Int, Int) RawToken
-                   | IntResource Name (Int, Int)
+                   | IntResourceProperty Name (Int, Int)
   deriving (Show, Read, Eq)
 
 data RawToken = CommentToken String

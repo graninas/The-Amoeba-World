@@ -34,5 +34,6 @@ makeLenses ''Object
 makeLenses ''Resource
 
 isResourceValid (s, c) = (s >= 0) && (s <= c || c == 0)
+toResource :: (Int, Int) -> IntResource
 toResource = uncurry Resource
-emptyResource = Resource 0 0
+emptyResource = Resource 0 0 :: IntResource

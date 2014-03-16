@@ -84,3 +84,4 @@ insertObjectTemplate name objTemplate = do
     putObjectTemplateMap $ M.insert name objTemplate m
 
 lookupObjectTemplate name = liftM (M.lookup name) getObjectTemplateMap
+

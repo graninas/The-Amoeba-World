@@ -23,7 +23,7 @@ resource = do
     trueSpaces >> char '=' >> trueSpaces
     val <- resourceValue
     lineEnd
-    return $ IntResource name val
+    return $ IntResourceProperty name val
 
 resourceValue :: GenParser Char st (Int, Int)
 resourceValue = intTuple2
