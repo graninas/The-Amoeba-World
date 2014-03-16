@@ -90,6 +90,4 @@ insertObjectTemplate name objTemplate = do
 
 lookupObjectTemplate name = liftM (M.lookup name) getObjectTemplateMap
 
-getNextId = do
-    nextIdF <- liftM trtNextId get
-    nextIdF 
+getNextId = join (liftM trtNextId get) 

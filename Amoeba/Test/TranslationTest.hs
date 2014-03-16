@@ -17,11 +17,9 @@ main = do
     
     tokens <- readFile "./Data/Raws/World3.arf"
     let res = toWorld tokens
-    putStrLn $ unlines . fromRight' . extractLog $ res
-    print ((fromRight' . extractItemMap) res)
-    print ((fromRight' . extractResult) res)
-
-    
+    print $ extractLog res
+    print $ extractItemMap res
+    print $ extractResult res
 
 
     

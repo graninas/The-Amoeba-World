@@ -7,14 +7,14 @@ import qualified GameLogic.Language.Scheme as S
 
 items1 = ("Items1", "./Data/Raws/Items.arf",
          Right [ CommentToken " General items", EmptyToken
-               , ItemToken S.karyon [ IntResource S.lifebound (0,5000)
-                                    , IntResource S.durability (100,100)
-                                    , IntResource S.energy (300,2000)]
+               , ItemToken S.karyon [ IntResourceProperty S.lifebound (0,5000)
+                                    , IntResourceProperty S.durability (100,100)
+                                    , IntResourceProperty S.energy (300,2000)]
                , EmptyToken, CommentToken " Conductor"
-               , ItemToken S.conductor [IntResource S.lifebound (0,1000),IntResource S.durability (100,100),IntResource S.energy (0,100)]])
+               , ItemToken S.conductor [IntResourceProperty S.lifebound (0,1000),IntResourceProperty S.durability (100,100),IntResourceProperty S.energy (0,100)]])
 
 items2 = ("Items2", "./Data/Raws/Item.arf",
-         Right [ItemToken S.karyon [IntResource S.lifebound (0,5000), IntResource S.durability (100,100), IntResource S.energy (300,2000)]])
+         Right [ItemToken S.karyon [IntResourceProperty S.lifebound (0,5000), IntResourceProperty S.durability (100,100), IntResourceProperty S.energy (300,2000)]])
 
 world1 = ("World1", "./Data/Raws/World1.arf",
          Right [ CommentToken " World definition file"

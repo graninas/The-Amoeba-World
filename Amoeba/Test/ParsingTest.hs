@@ -14,6 +14,8 @@ import GameLogic.Language.RawToken
 
 import Test.Utils.WorldArfData
 
+bug = putStrLn
+
 parseExample dataFile = liftM parseRawTokens (readFile dataFile)
 
 testExample ex@(testName, dataFile, res) = do
@@ -47,6 +49,14 @@ prop_parseWorld3 = monadicIO $ do
     r <- run $ readFile "./Data/Raws/World3.adt"
     res <- run $ examineExample world3 (pred (read r))
     assert res
+  where
+    pred expected _ parsed = expected == parsed
+
+prop_bug11Reproduction = whenFail (bug "Inconclusive: Bug 11")
+    (monadicIO $ do
+        r <- run $ readFile "./Data/Raws/Bug11.arf"
+        res <- run $ examineExample world3 (pred (read r))
+        assert res)
   where
     pred expected _ parsed = expected == parsed
 
