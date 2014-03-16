@@ -11,7 +11,7 @@ import Control.Monad.State
 import Control.Monad.Trans.Either (runEitherT)
 
 
-nextId :: Int -> State TransRt Int
+nextId :: Int -> Trans Int
 nextId prevId = do
     let nId = prevId + 1
     ctx <- get

@@ -27,7 +27,7 @@ Also, it is possible to merge and unify RawToken and PropertyToken.
 type ObjectTemplate = (ObjectType, [PropertyToken])
 type ObjectTemplateMap = M.Map String ObjectTemplate
 
-data TransRt = TransRt { trtNextId :: State TransRt Int
+data TransRt = TransRt { trtNextId :: Trans Int
                        , trtObjectTemplateMap :: ObjectTemplateMap
                        , trtWorld :: World
                        , trtLog :: [String]
@@ -39,15 +39,6 @@ type Trans a = EitherT String (State TransRt) a
 -- System
 getExtendedLogs :: Trans Bool
 getExtendedLogs = liftM trtExtendedLogs get
-
-getWorld :: Trans World
-getWorld = liftM trtWorld get
-
--- TODO: use Lenses to update it.
-setWorld w = do
-    ctx <- get
-    let ctx' = ctx { trtWorld = w }
-    put ctx'
 
 -- TODO: use Lenses to update it.
 log s = do
@@ -70,6 +61,20 @@ translate rules = mapM_ (apply_ rules)
 
 -- Specific
 -- TODO: use Lenses to update it.
+getWorld :: Trans World
+getWorld = liftM trtWorld get
+
+-- TODO: use Lenses to update it.
+setWorld w = do
+    ctx <- get
+    let ctx' = ctx { trtWorld = w }
+    put ctx'
+
+insertWorldObject p o = do
+    w <- getWorld
+    let w' = insertObject p o w
+    setWorld w'
+
 getObjectTemplateMap :: Trans ObjectTemplateMap
 getObjectTemplateMap = liftM trtObjectTemplateMap get
 
@@ -85,3 +90,6 @@ insertObjectTemplate name objTemplate = do
 
 lookupObjectTemplate name = liftM (M.lookup name) getObjectTemplateMap
 
+getNextId = do
+    nextIdF <- liftM trtNextId get
+    nextIdF 

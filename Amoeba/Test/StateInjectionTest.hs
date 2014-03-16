@@ -13,7 +13,7 @@ data Context = Context { ctxNextId1 :: State Context Int
                        , ctxNextId2 :: State Context Int }
 
 
--- Client code. Knowns nothing about random gens, but uses external state.
+-- Client code. Knows nothing about random gens, but uses external state.
 getNextId1 = get >>= ctxNextId1
 getNextId2 = get >>= ctxNextId2
 

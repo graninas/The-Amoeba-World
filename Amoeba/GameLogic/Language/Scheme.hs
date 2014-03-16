@@ -20,3 +20,4 @@ empty = "Empty"
 
 player0 = "Player0"
 player1 = "Player1"
+player2 = "Player2"

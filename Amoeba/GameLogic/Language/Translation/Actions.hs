@@ -2,16 +2,20 @@ module GameLogic.Language.Translation.Actions where
 
 import GameLogic.Language.RawToken
 import GameLogic.Language.Translation.Runtime
-import qualified GameLogic.Language.Scheme as Scheme
 
 import GameLogic.Data.World
 import GameLogic.Data.Object
 import GameLogic.Data.Types
+import GameLogic.Base.Geometry (point)
 
 import Prelude hiding (log)
 import Control.Monad.Trans.Either (left)
 import Control.Monad (liftM)
 import qualified Data.Map as M
+
+-- This imports are for hacks.
+import qualified GameLogic.Language.Scheme as Scheme
+import qualified GameLogic.Assets.Players as Players
 
 -- Binds the trigger to the action
 (/>) :: Show a => (a -> Bool) -> (a -> Trans ()) -> a -> Trans ()
@@ -83,16 +87,30 @@ getObjectTemplate name = do
         Nothing -> left $ "Object template for object " ++ name ++ " not found."
 
 -- TODO: too special and too unobvious functions. Maybe I can better?
-addObject (x, y) (ObjectToken name plName) = do
+-- TODO: hacks. I'd like to finish it right now.
+
+playersMap = M.fromList [ (Scheme.player0, Players.dummyPlayer)
+                        , (Scheme.player1, Players.player1)
+                        , (Scheme.player2, Players.player2) ]
+
+toWordlPoint (x, y) = point x y 0
+
+addObject p (ObjectToken name plName) = do
     (objType, props) <- getObjectTemplate name
     intResourceMap <- translateIntResourceTokens props
     energyResource <- getResource Scheme.energy intResourceMap
     durabilityResource <- getResource Scheme.durability intResourceMap
     lifeboundResource <- getResource Scheme.lifebound intResourceMap
-    return ()
+    player <- getPlayer plName playersMap
+    objId <- getNextId
+    let object = Object objId objType player lifeboundResource durabilityResource energyResource
+    insertWorldObject (toWordlPoint p) object
 
-getResource rName intResourceMap = case M.lookup rName intResourceMap of
-    Nothing -> left $ "Resource with name " ++ rName ++ " not found."
+getPlayer name m = case M.lookup name m of
+    Nothing -> left $ "Player with name " ++ name ++ " not found."
+    Just p -> return p
+getResource name m = case M.lookup name m of
+    Nothing -> left $ "Resource with name " ++ name ++ " not found."
     Just r -> return r
 
 makeIntResource (IntResourceProperty name i) | isResourceValid i = return (name, toResource i)
@@ -101,5 +119,5 @@ makeIntResource p = left $ "makeIntResource: unexpected property got: " ++ show 
 
 translateIntResourceTokens props = do
     intResources <- mapM makeIntResource props
-    return $ foldr (uncurry M.insert) M.empty intResources
+    return $ M.fromList intResources
 
