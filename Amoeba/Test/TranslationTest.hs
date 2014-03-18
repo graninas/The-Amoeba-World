@@ -13,6 +13,7 @@ import qualified Data.Monoid as Monoid
 extractItemMap = liftM (trtObjectTemplateMap . snd)
 extractLog = liftM (trtLog . snd)
 extractResult = liftM fst
+extractWorld = liftM (trtWorld . snd)
 
 tryRight :: Monoid.Monoid m => Either n m -> m
 tryRight (Right r) = r
@@ -25,6 +26,7 @@ main = do
     putStrLn $ unlines . tryRight $ extractLog res
     print $ tryRight $ extractItemMap res
     print $ extractResult res
+    print $ extractWorld res
 
 
     
