@@ -28,6 +28,6 @@ main = do
     print $ extractResult res
     print $ extractWorld res
 
-
+    --writeFile "./Data/Raws/World3"
     
     putStrLn "Ok."

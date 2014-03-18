@@ -28,3 +28,6 @@ world2 = ( "World2"
 world3 = ( "World3"
          , "./Data/Raws/World3.arf"
          , undefined )
+bug11 = ( "Bug11 Reproduction Test"
+         , "./Data/Raws/Bug11.arf"
+         , undefined )
