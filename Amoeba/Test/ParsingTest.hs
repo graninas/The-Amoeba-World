@@ -24,9 +24,9 @@ examineExample ex@(testName, dataFile, res) pred = do
     parsed <- parseExample dataFile
     return $ pred res parsed
 
-data InconclusiveRun = Skip | Run
+data InconclusiveRun = Skip | Examine
     
-inconclusive test Run _ = monadicIO (test >>= assert)
+inconclusive test Examine _ = monadicIO (test >>= assert)
 inconclusive test Skip msg = mapResult mpF (monadicIO fakeSkipWithMsg)
   where
     fakeSkipWithMsg = do
@@ -34,6 +34,9 @@ inconclusive test Skip msg = mapResult mpF (monadicIO fakeSkipWithMsg)
         test >>= assert
     mpF (MkResult (Just False) a b c d e f) = MkResult (Just True) a b c True e f
     mpF r = r
+
+skip incFunc t = incFunc t Skip
+examine incFunc t = incFunc t Examine
 
 prop_parseItems1 = monadicIO $ do
     res <- run $ testExample items1
@@ -61,7 +64,7 @@ prop_parseWorld3 = monadicIO $ do
   where
     pred expected _ parsed = expected == parsed
 
-prop_bug11Reproduction = inconclusive test Skip "Bug11: Invalid spaces parsing in ARF"
+prop_bug11Reproduction = skip inconclusive test "Bug11: Invalid spaces parsing in ARF"
   where
     test = do r <- run $ readFile "./Data/Raws/World3.tok"
               run $ examineExample bug11 (pred (read r))
