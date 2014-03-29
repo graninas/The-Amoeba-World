@@ -3,27 +3,39 @@ module Application.Boot where
 import View.Config
 import View.View
 import qualified Middleware.Config.Facade as Cfg
+import qualified Middleware.Tracing.Log as Log
 
 import Application.Environment
-import Application.Runtime.Engine
-import Application.Runtime.Logic
-import Application.Storage.WorldLoader
+import Application.Game.Engine
+import Application.Game.Logic
+import Application.Storage.GameLoader
 
-logPathLoader = Cfg.strOption Cfg.logPath
-dataPathLoader = Cfg.strOption Cfg.dataPath
+logFileLoader = Cfg.filePathLoader Cfg.logPath "Amoeba.log"
 
+-- TODO: move it in config file?
+worldFileLoader = Cfg.filePathLoader Cfg.rawsPath "World.arf"
+
+-- TOOD: this function should be in Either monad.
 boot cfg = do
-    logPath <- Cfg.extract cfg logPathLoader
-    dataPath <- Cfg.extract cfg dataPathLoader
-
-    game <- loadWorld dataPath
+    -- TODO: Improve simple logging.
+    logFilePath <- Cfg.extract cfg logFileLoader
+    Log.setupLogger logFilePath
+    Log.debug "Logger started."
+    
+    worldPath <- Cfg.extract cfg worldFileLoader
+    game <- loadGame worldPath
+    Log.debug "Game loaded."
+    
     viewSettings <- loadViewSettings cfg
+    Log.debug "View settings loaded."
+    
     withEnvironment $ do
         view <- setupView viewSettings
-        putStrLn "Loaded."
-        startMainLoop cfg view logic
+        Log.debug "View prepared."
+        startMainLoop cfg view game logic
         getLine
-    putStrLn "Unloaded."
+    
+    Log.debug "Game unloaded."
     
 
 

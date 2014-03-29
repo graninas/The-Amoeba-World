@@ -6,7 +6,7 @@ import GameLogic.Language.Translation.Runtime
 import GameLogic.Data.World
 
 import Control.Monad (liftM)
-import Data.Either.Combinators
+import Control.Monad.State (runState)
 import qualified Data.Map as M
 import qualified Data.Monoid as Monoid
 
@@ -22,12 +22,12 @@ tryRight _ = Monoid.mempty
 main = do
     
     tokens <- readFile "./Data/Raws/World3.arf"
-    let res = toWorld tokens
+    let res = toWorld' runState tokens
     putStrLn $ unlines . tryRight $ extractLog res
     print $ tryRight $ extractItemMap res
     print $ extractResult res
     print $ extractWorld res
 
-    --writeFile "./Data/Raws/World3"
+    --writeFile "./Data/Raws/World3.adt" (show . extractWorld $ res)
     
     putStrLn "Ok."

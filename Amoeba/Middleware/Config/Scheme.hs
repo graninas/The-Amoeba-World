@@ -2,12 +2,15 @@ module Middleware.Config.Scheme where
 
 import Middleware.Config.Config
 
-deflt = sect "DEFAULT"
-appName = deflt <| opt "applicationName"
-logPath = deflt <| opt "logPath"
-dataPath = deflt <| opt "dataPath"
+defaultSection = sect "DEFAULT"
+appName  = defaultSection <| opt "applicationName"
+rootPath = defaultSection <| opt "rootPath"
+logPath  = defaultSection <| opt "logPath"
+dataPath = defaultSection <| opt "dataPath"
+rawsPath = defaultSection <| opt "rawsPath"
 
-video = sect "VIDEO"
-screenWidth  = video <| opt "screenWidth"
-screenHeight = video <| opt "screenHeight"
-colorDepth   = video <| opt "colorDepth"
+
+videoSection = sect "VIDEO"
+screenWidth  = videoSection <| opt "screenWidth"
+screenHeight = videoSection <| opt "screenHeight"
+colorDepth   = videoSection <| opt "colorDepth"

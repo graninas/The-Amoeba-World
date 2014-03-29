@@ -24,7 +24,7 @@ getOption (Configuration cp) cfg = forceEither $ CF.get cp (getSect cfg) (getOpt
 loadConfiguration fileName = do
     conf <- CF.readfile CF.emptyCP fileName
     let cp = forceEither conf
-    return ( Configuration cp {CF.optionxform = id} )
+    return ( Configuration cp {CF.optionxform = id, CF.accessfunc = CF.interpolatingAccess 10} )
 
 type CfgReader a = Cfg -> R.Reader Configuration a
 

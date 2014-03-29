@@ -6,3 +6,5 @@
 .project~
 ./Game/Amoeba
 *~
+.tree
+.swp

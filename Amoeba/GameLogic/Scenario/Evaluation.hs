@@ -1,6 +1,6 @@
 {-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE NoMonomorphismRestriction #-}
-module GameLogic.Runtime.Evaluation where
+module GameLogic.Scenario.Evaluation where
 
 import Control.Monad.State
 import Control.Monad.Trans
