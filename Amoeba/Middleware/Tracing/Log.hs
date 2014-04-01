@@ -1,4 +1,4 @@
-module Middleware.Tracing.Log (setupLogger, debug) where
+module Middleware.Tracing.Log (setupLogger, info, finish) where
 
 import System.Log.Logger
 import System.Log.Handler.Simple
@@ -11,8 +11,11 @@ loggerName = "Amoeba.Application"
 defaultFormatter = simpleLogFormatter logFormat
 
 setupLogger logFileName = do
-    handler <- fileHandler logFileName NOTICE
+    handler <- fileHandler logFileName INFO
     let handler' = setFormatter handler defaultFormatter
     updateGlobalLogger loggerName $ addHandler handler'
+    updateGlobalLogger loggerName $ setLevel INFO
     
-debug = debugM loggerName
+info = infoM loggerName
+
+finish = removeAllHandlers

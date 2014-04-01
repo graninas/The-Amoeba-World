@@ -13,9 +13,9 @@ loadGame worldPath = do
     case toWorld worldContents of
         Left err -> do
             -- TODO: this function should be in Either monad.
-            Log.debug $ "Error of loading world: " ++ err
+            Log.info $ "Error of loading world: " ++ err
             fail $ "Error of loading world: " ++ err
         Right w -> do
-            Log.debug "World loaded."
+            Log.info "World loaded."
             seed <- getSeed
             return $ mkGame w seed
