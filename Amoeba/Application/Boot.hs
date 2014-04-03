@@ -4,8 +4,8 @@ import View.Config
 import View.View
 import qualified Middleware.Config.Facade as Cfg
 import qualified Middleware.Tracing.Log as Log
+import Middleware.SDL.Environment
 
-import Application.Environment
 import Application.Game.Engine
 import Application.Game.Logic
 import Application.Storage.GameLoader
@@ -33,8 +33,8 @@ boot cfg = do
     withEnvironment $ do
         view <- setupView viewSettings
         Log.info "View prepared."
-        startMainLoop cfg view game logic
-        getLine
+        execResult <- startMainLoop cfg view game logic
+        Log.info $ "ExecutionResult: " ++ show execResult
     
     Log.info "Game unloaded."
     Log.finish

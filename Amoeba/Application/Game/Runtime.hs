@@ -11,4 +11,7 @@ data GameRt = GameRt { grtConfiguration :: Configuration
 
 runtime = GameRt
 
-
+data ExecutionResult = Running
+                     | Finished
+                     | Error
+  deriving (Show)

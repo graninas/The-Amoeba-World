@@ -34,7 +34,6 @@ library
   other-modules:
                    Amoeba,
                    Application.Boot,
-                   Application.Environment,
                    Application.MainLoop,
                    GameLogic.AI.AI,
                    GameLogic.AI.GenericAI,
@@ -73,7 +72,9 @@ library
                    Application.Storage.GameLoader,
                    Application.Game.Control,
                    Middleware.Tracing.Log,
-                   Middleware.Config.Extra
+                   Middleware.Config.Extra,
+                   Middleware.SDL.Environment,
+                   Test.WireTest
 
 executable Amoeba
   build-depends:   base >= 4
@@ -82,7 +83,6 @@ executable Amoeba
   main-is:         Amoeba.hs
   other-modules:   
                    Application.Boot,
-                   Application.Environment,
                    Application.MainLoop,
                    GameLogic.AI.AI,
                    GameLogic.AI.GenericAI,
@@ -117,5 +117,7 @@ executable Amoeba
                    Application.Storage.GameLoader,
                    Application.Game.Control,
                    Middleware.Tracing.Log,
-                   Middleware.Config.Extra
+                   Middleware.Config.Extra,
+                   Middleware.SDL.Environment,
+                   Test.WireTest
 sers.ItemParser

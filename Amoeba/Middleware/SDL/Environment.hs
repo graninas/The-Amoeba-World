@@ -1,4 +1,4 @@
-module Application.Environment where
+module Middleware.SDL.Environment where
 
 import qualified Graphics.UI.SDL as SDL
 import qualified Graphics.UI.SDL.TTF.General as TTF
