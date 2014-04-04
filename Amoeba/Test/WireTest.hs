@@ -35,23 +35,16 @@ wire1 = time
 wire2 :: MyWire () Int
 wire2 = for 4 . pure (1 :: Int)
 
--- mkGen_ :: Monad m => (a -> m (Either e b)) -> Wire s e m a b
--- evalStateT :: StateT s IO a -> s -> IO s
--- type GameStateTIO = StateT () IO
+wire3 = mkGen_ $ \x -> do
+    liftIO $ putStrLn "wire3"
+    return $ Right 10
 
---wire3 :: MyWire () Int
-wire3 = mkGen_ $ \x -> evalStateT effect ()
-  where
-     effect :: GameStateTIO (Either () Int)
-     effect = do
-        liftIO $ putStrLn "In wire3!"
-        return $ Right (19 :: Int)
 
 main :: IO ()
 main = do
     
-    res <- runStateT (startLoop wire1) ()
-    print res
+    res1 <- runStateT (startLoop wire1) ()
+    print res1
 
     res2 <- runStateT (startLoop wire3) ()
     print res2
