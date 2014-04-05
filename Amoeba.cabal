@@ -70,11 +70,12 @@ library
                    GameLogic.Scenario.Evaluation,
                    Application.Game.Runtime,
                    Application.Storage.GameLoader,
-                   Application.Game.Control,
                    Middleware.Tracing.Log,
                    Middleware.Config.Extra,
                    Middleware.SDL.Environment,
-                   Test.WireTest
+                   Test.WireTest,
+                   Application.Game.Engine.Types,
+                   Middleware.FRP.NetwireFacade
 
 executable Amoeba
   build-depends:   base >= 4
@@ -115,9 +116,10 @@ executable Amoeba
                    GameLogic.Scenario.Evaluation,
                    Application.Game.Runtime,
                    Application.Storage.GameLoader,
-                   Application.Game.Control,
                    Middleware.Tracing.Log,
                    Middleware.Config.Extra,
                    Middleware.SDL.Environment,
-                   Test.WireTest
+                   Test.WireTest,
+                   Application.Game.Engine.Types,
+                   Middleware.FRP.NetwireFacade
 sers.ItemParser
