@@ -6,7 +6,6 @@ import Control.Monad.Trans
 import Control.Monad.Trans.State.Lazy
 import Prelude hiding ((.), id)
 import Data.Monoid
-import Data.Default
 
 import qualified Graphics.UI.SDL as SDL
 import qualified Graphics.UI.SDL.Events as SDL
@@ -27,32 +26,6 @@ data WireOutput = Quit String
 
 type GameStateTIO = StateT () IO
 type MyWire a b = Wire (Timed NominalDiffTime ()) InhibitAction GameStateTIO a b
-{-
-startLoop wire = do
-    (delta, session') <- stepSession clockSession_
-    (eitherResult, w') <- stepWire wire delta (Right ())
-    loop' eitherResult w'
-
-loop' (Left (QuitAction res)) _ = return (Quit res)
-loop' (Left ContinueAction) w = loop' (Right ()) w
-loop' (Right ()) w = do
-    (delta, session') <- stepSession clockSession_
-    (eitherResult, w') <- stepWire w delta (Right ())
-    loop' eitherResult w'
-
-
-wire1 :: (HasTime t s) => Wire s e m a t
-wire1 = time
-
-wire2 :: MyWire () Int
-wire2 = for 4 . pure (1 :: Int)
-
-wire3 :: MyWire () Int
-wire3 = mkGen_ $ \_ -> do
-    liftIO $ putStrLn "wire3"
-    return $ Right 10
-
--}
 
 startLoop = loop' clockSession_ (Right 1)
 

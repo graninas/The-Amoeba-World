@@ -33,8 +33,8 @@ boot cfg = do
     withEnvironment $ do
         view <- setupView viewSettings
         Log.info "View prepared."
-        execResult <- startMainLoop cfg view game logic
-        Log.info $ "ExecutionResult: " ++ show execResult
+        (inhibitor, _) <- startMainLoop logic cfg view game
+        Log.info $ "Inhibitor: " ++ inhibitor
     
     Log.info "Game unloaded."
     Log.finish

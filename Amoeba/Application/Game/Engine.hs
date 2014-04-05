@@ -10,11 +10,20 @@ import Control.Wire
 import Control.Monad.State
 import Prelude hiding ((.), id)
 
-startMainLoop :: Configuration -> View -> Game -> WWire () ExecutionResult -> IO ExecutionResult
-startMainLoop cfg view game wire = do
-    let rt = runtime cfg view game
-    (s, session') <- stepSession clockSession_
-    --let state = gameLoop wire s Running
-    --(val, _) <- runStateT state rt
-    --return val
-    undefined
+type Inhibitor = String
+
+type GameStateTIO = StateT GameRt IO
+type GWire a b = Wire (Timed NominalDiffTime ()) Inhibitor GameStateTIO a b
+
+startMainLoop :: GWire () () -> Configuration -> View -> Game -> IO (Inhibitor, GameRt)
+startMainLoop wire c v g = runStateT (startLoop wire) rt
+  where
+    rt = runtime c v g
+
+startLoop = loop' clockSession_ (Right ())
+
+loop' _ (Left res) _ = return res
+loop' s input w = do
+    (delta, s') <- stepSession s
+    (eitherResult, w') <- stepWire w delta input
+    loop' s' eitherResult w'
