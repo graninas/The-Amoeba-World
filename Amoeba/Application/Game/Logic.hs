@@ -17,6 +17,7 @@ import qualified Data.Map as M
 
 type GameWire a b = GWire GameStateTIO a b
 
+
 -- TODO
 scale = 10
 cellSide = 5
@@ -31,7 +32,6 @@ getColorByPlayer pl | pl == player2 = blue
 
 renderCell surf (p, Object _ _ pl _ _ _) = do
     let sdlRect = toSdlRect p
-    Log.error $ show sdlRect
     SDL.box surf sdlRect (getColorByPlayer pl)
 
 renderWorldMap surf w h wm = mapM_ (renderCell surf) (M.toList wm)
@@ -48,10 +48,9 @@ render = mkGen_ $ \_ -> do
     surf <- getSurface
     withLogError (clearScreen surf) "clearScreen: fillRect failed."
     (World wm _ w h _) <- getWorld
-    liftIO $ Log.notice $ "Rendering. Items in map: " ++ (show $ M.size wm)
-    liftIO $ renderWorldMap surf w h wm
-    liftIO $ SDL.flip surf
-    return $ Left "Done."
+    withIO $ renderWorldMap surf w h wm
+    withIO $ SDL.flip surf
+    
 
 {-
 baseFill w@(World (WorldMap wm b) _ _)

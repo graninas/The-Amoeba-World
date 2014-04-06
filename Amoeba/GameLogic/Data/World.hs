@@ -28,6 +28,8 @@ emptyWorld = World M.empty M.empty 0 0 Nothing
 
 insertObject point object w@(World wm _ _ _ _) = w { worldMap = M.insert point object wm }
 
+worldMapSize (World wm _ _ _ _) = M.size wm
+
 {-
 fromList :: [(Point, Object)] -> World
 fromList list = World wm b
