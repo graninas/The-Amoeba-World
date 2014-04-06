@@ -1,29 +1,57 @@
 module Application.Game.Logic where
 
 import Application.Game.Engine.Types
+import Application.Game.Engine.Core
 import Application.Game.Runtime
-import GameLogic.Data.Facade
 import View.Color
 import View.View
+import GameLogic.Facade
 
 import Middleware.FRP.NetwireFacade
 import Middleware.Tracing.ErrorHandling
+import qualified Middleware.Tracing.Log as Log
+import qualified Middleware.SDL.SDLFacade as SDL
 
 import Control.Monad.State
-import qualified Middleware.SDL.SDLFacade as SDL
+import qualified Data.Map as M
 
 type GameWire a b = GWire GameStateTIO a b
 
+-- TODO
+scale = 10
+cellSide = 5
+
 logic :: GameWire () ()
-logic = render <|> mkConst (Right ())
+logic = render
+
+
+getColorByPlayer pl | pl == dummyPlayer = white
+getColorByPlayer pl | pl == player1 = green
+getColorByPlayer pl | pl == player2 = blue
+
+renderCell surf (p, Object _ _ pl _ _ _) = do
+    let sdlRect = toSdlRect p
+    Log.error $ show sdlRect
+    SDL.box surf sdlRect (getColorByPlayer pl)
+
+renderWorldMap surf w h wm = mapM_ (renderCell surf) (M.toList wm)
+
+toSdlRect :: Point -> SDL.Rect
+toSdlRect p = SDL.Rect x y cellSide cellSide
+  where
+    x = scale * pointX p
+    y = scale * pointY p
 
 -- TODO: make it safe in a type-level. Either or Maybe is needed.
 render :: GameWire () ()
 render = mkGen_ $ \_ -> do
-    (World wm _ w h _) <- getWorld
     surf <- getSurface
-    liftIO $ withLogError (clearScreen surf) "clearScreen: fillRect failed."
-    return $ Right ()
+    withLogError (clearScreen surf) "clearScreen: fillRect failed."
+    (World wm _ w h _) <- getWorld
+    liftIO $ Log.notice $ "Rendering. Items in map: " ++ (show $ M.size wm)
+    liftIO $ renderWorldMap surf w h wm
+    liftIO $ SDL.flip surf
+    return $ Left "Done."
 
 {-
 baseFill w@(World (WorldMap wm b) _ _)

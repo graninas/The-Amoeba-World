@@ -6,7 +6,7 @@ import qualified Middleware.Config.Facade as Cfg
 import qualified Middleware.Tracing.Log as Log
 import Middleware.SDL.Environment
 
-import Application.Game.Engine.Core
+import Application.Game.Engine.MainLoop
 import Application.Game.Logic
 import Application.Game.Runtime
 import Application.Storage.GameLoader

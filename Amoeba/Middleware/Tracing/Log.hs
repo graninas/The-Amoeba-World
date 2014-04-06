@@ -4,7 +4,8 @@ module Middleware.Tracing.Log
     , info
     , warning
     , debug
-    , error ) where
+    , error
+    , notice ) where
 
 import System.Log.Logger
 import System.Log.Handler.Simple
@@ -30,3 +31,4 @@ info = infoM loggerName
 warning = warningM loggerName
 debug = debugM loggerName
 error = errorM loggerName
+notice = noticeM loggerName

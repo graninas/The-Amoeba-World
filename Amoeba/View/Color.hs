@@ -14,3 +14,7 @@ rgbColor r g b = SDL.Pixel (shiftL (fi r) 24 .|.
 
 
 black = rgbColor 0 0 0
+white = rgbColor 255 255 255
+red   = rgbColor 255 0 0
+green = rgbColor 0 255 0
+blue  = rgbColor 0 0 255

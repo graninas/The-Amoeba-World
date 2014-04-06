@@ -76,7 +76,9 @@ library
                    Middleware.FRP.NetwireFacade,
                    Middleware.SDL.SDLFacade,
                    Middleware.Tracing.ErrorHandling,
-                   Application.Game.Runtime
+                   Application.Game.Runtime,
+                   GameLogic.Facade,
+                   Application.Game.Engine.MainLoop
 
 executable Amoeba
   build-depends:   base >= 4
@@ -123,5 +125,7 @@ executable Amoeba
                    Middleware.FRP.NetwireFacade,
                    Middleware.SDL.SDLFacade,
                    Middleware.Tracing.ErrorHandling,
-                   Application.Game.Runtime
+                   Application.Game.Runtime,
+                   GameLogic.Facade,
+                   Application.Game.Engine.MainLoop
 sers.ItemParser

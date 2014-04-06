@@ -11,6 +11,10 @@ module Middleware.FRP.NetwireFacade
     , W.mkGen_
     , W.mkGen
     , (W.<|>)
+    , (W.-->)
+    , W.asSoonAs
+    , W.now
+    , W.at
     ) where
 
 import qualified Control.Wire as W

@@ -1,4 +1,3 @@
-{-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 module Middleware.Tracing.ErrorHandling where
 
@@ -13,7 +12,10 @@ class Checkable m a where
 instance Checkable IO Bool where
   check = id
 
-withLogError :: forall m. MonadIO m => Checkable m act => m act -> String -> m ()
-withLogError act msg = do
+--{-# LANGUAGE RankNTypes #-}
+--withLogError :: forall m. MonadIO m => Checkable m act => m act -> String -> m ()
+withLogErrorIO act msg = do
     res <- check act
     unless res $ liftIO $ Log.error msg >> error msg
+    
+withLogError act msg = liftIO $ withLogErrorIO act msg
