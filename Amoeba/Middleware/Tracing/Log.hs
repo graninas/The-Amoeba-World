@@ -1,9 +1,17 @@
-module Middleware.Tracing.Log (setupLogger, info, finish) where
+module Middleware.Tracing.Log
+    ( setupLogger
+    , finish
+    , info
+    , warning
+    , debug
+    , error ) where
 
 import System.Log.Logger
 import System.Log.Handler.Simple
 import System.Log.Handler (setFormatter)
 import System.Log.Formatter
+
+import Prelude hiding (error)
 
 logFormat = "$utcTime $prio $loggername: $msg"
 loggerName = "Amoeba.Application"
@@ -16,6 +24,9 @@ setupLogger logFileName = do
     updateGlobalLogger loggerName $ addHandler handler'
     updateGlobalLogger loggerName $ setLevel INFO
     
-info = infoM loggerName
-
 finish = removeAllHandlers
+
+info = infoM loggerName
+warning = warningM loggerName
+debug = debugM loggerName
+error = errorM loggerName

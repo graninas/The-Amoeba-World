@@ -1,13 +1,15 @@
 module View.View where
 
 import View.Language
+import View.Color
 
-import qualified View.SdlFacade as SDL
+import qualified Middleware.SDL.SDLFacade as SDL
 
-data View = View { viewSurface :: SDL.Surface
+type ViewSurface = SDL.Surface
+
+data View = View { viewSurface :: ViewSurface
                  , viewScreen :: Screen
                  , viewCaption :: String }
-
 
 setupView :: (Screen, String) -> IO View
 setupView (scr@(Screen w h bpp), caption) = do
@@ -15,3 +17,6 @@ setupView (scr@(Screen w h bpp), caption) = do
     SDL.setCaption caption []
     SDL.flip surface
     return $ View surface scr caption
+    
+    
+clearScreen surf = SDL.fillRect surf Nothing black

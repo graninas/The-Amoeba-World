@@ -4,8 +4,8 @@ import System.Random
 
 import GameLogic.Data.World
 
-data Game = Game { _world :: World
-                 , _rndGen :: StdGen }
+data Game = Game { gWorld :: World
+                 , gRndGen :: StdGen }
   deriving (Show)
 
 instance Eq Game where

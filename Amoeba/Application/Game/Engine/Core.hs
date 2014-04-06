@@ -6,7 +6,7 @@ import Application.Game.Runtime
 import Middleware.FRP.NetwireFacade
 import Control.Monad.State (runStateT)
 
-startMainLoop :: GWire GameRt () () -> GameRt -> IO (Inhibitor, GameRt)
+startMainLoop :: GWire GameStateTIO () () -> GameRt -> IO (Inhibitor, GameRt)
 startMainLoop wire = runStateT (startLoop wire)
 
 startLoop = loop' clockSession_ (Right ())

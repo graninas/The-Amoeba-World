@@ -50,7 +50,6 @@ library
                    View.View,
                    Main,
                    View.Language,
-                   View.SdlFacade,
                    GameLogic.Language.Parsers.WorldParser,
                    Middleware.Parsing.Facade,
                    Middleware.Parsing.Common,
@@ -68,14 +67,16 @@ library
                    Test.PatternGuardTest,
                    GameLogic.Assets.Players,
                    GameLogic.Scenario.Evaluation,
-                   Application.Game.Runtime,
                    Application.Storage.GameLoader,
                    Middleware.Tracing.Log,
                    Middleware.Config.Extra,
                    Middleware.SDL.Environment,
                    Test.WireTest,
                    Application.Game.Engine.Types,
-                   Middleware.FRP.NetwireFacade
+                   Middleware.FRP.NetwireFacade,
+                   Middleware.SDL.SDLFacade,
+                   Middleware.Tracing.ErrorHandling,
+                   Application.Game.Runtime
 
 executable Amoeba
   build-depends:   base >= 4
@@ -98,7 +99,6 @@ executable Amoeba
                    View.Config,
                    Main,
                    View.Language,
-                   View.SdlFacade,
                    GameLogic.Language.Parsers.WorldParser,
                    Middleware.Parsing.Facade,
                    Middleware.Parsing.Common,
@@ -114,12 +114,14 @@ executable Amoeba
                    Test.Utils.WorldArfData,
                    Test.PatternGuardTest,
                    GameLogic.Scenario.Evaluation,
-                   Application.Game.Runtime,
                    Application.Storage.GameLoader,
                    Middleware.Tracing.Log,
                    Middleware.Config.Extra,
                    Middleware.SDL.Environment,
                    Test.WireTest,
                    Application.Game.Engine.Types,
-                   Middleware.FRP.NetwireFacade
+                   Middleware.FRP.NetwireFacade,
+                   Middleware.SDL.SDLFacade,
+                   Middleware.Tracing.ErrorHandling,
+                   Application.Game.Runtime
 sers.ItemParser
