@@ -19,4 +19,6 @@ setupView (scr@(Screen w h bpp), caption) = do
     return $ View surface scr caption
     
     
-clearScreen surf = SDL.fillRect surf Nothing black
+clearScreen surf = do
+    p <- SDL.mapRGB (SDL.surfaceGetPixelFormat surf) 0 0 0
+    SDL.fillRect surf Nothing p

@@ -25,14 +25,17 @@ cellSide = 5
 logic :: GameWire () ()
 logic = render
 
+mkColor (r, g, b) surf = SDL.mapRGB (SDL.surfaceGetPixelFormat surf) r g b
 
-getColorByPlayer pl | pl == dummyPlayer = white
-getColorByPlayer pl | pl == player1 = green
-getColorByPlayer pl | pl == player2 = blue
+getColorByPlayer pl | pl == dummyPlayer = mkColor white
+getColorByPlayer pl | pl == player1     = mkColor green
+getColorByPlayer pl | pl == player2     = mkColor blue
 
 renderCell surf (p, Object _ _ pl _ _ _) = do
+    col <- getColorByPlayer pl surf
     let sdlRect = toSdlRect p
-    SDL.box surf sdlRect (getColorByPlayer pl)
+    withLogError (SDL.box surf sdlRect col) "renderCell: box failed."
+    return ()
 
 renderWorldMap surf w h wm = mapM_ (renderCell surf) (M.toList wm)
 

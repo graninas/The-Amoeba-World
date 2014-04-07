@@ -12,9 +12,9 @@ rgbColor r g b = SDL.Pixel (shiftL (fi r) 24 .|.
                             255)
   where fi = fromIntegral
 
-
-black = rgbColor 0 0 0
-white = rgbColor 255 255 255
-red   = rgbColor 255 0 0
-green = rgbColor 0 255 0
-blue  = rgbColor 0 0 255
+black, white, red, green, blue :: (Word8, Word8, Word8)
+black = (0, 0, 0)
+white = (255, 255, 255)
+red   = (255, 0, 0)
+green = (0, 255, 0)
+blue  = (0, 0, 255)

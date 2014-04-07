@@ -20,9 +20,8 @@ worldFileLoader = Cfg.filePathLoader Cfg.rawsPath "World.arf"
 boot cfg = do
     -- TODO: Improve simple logging.
     logFilePath <- Cfg.extract cfg logFileLoader
-    putStrLn $ logFilePath
     Log.setupLogger logFilePath
-    Log.info "Logger started."
+    Log.info $ "Logger started: " ++ logFilePath
     
     worldPath <- Cfg.extract cfg worldFileLoader
     game <- loadGame worldPath
