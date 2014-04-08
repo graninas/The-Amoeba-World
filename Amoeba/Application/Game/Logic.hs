@@ -20,30 +20,32 @@ type GameWire a b = GWire GameStateTIO a b
 
 -- TODO
 scale = 10
-cellSide = 5
+cellSide = 7
 
 logic :: GameWire () ()
 logic = render
 
-mkColor (r, g, b) surf = SDL.mapRGB (SDL.surfaceGetPixelFormat surf) r g b
+getColorByPlayer pl | pl == dummyPlayer = toSdlPixel white
+getColorByPlayer pl | pl == player1     = toSdlPixel red
+getColorByPlayer pl | pl == player2     = toSdlPixel blue
 
-getColorByPlayer pl | pl == dummyPlayer = mkColor white
-getColorByPlayer pl | pl == player1     = mkColor green
-getColorByPlayer pl | pl == player2     = mkColor blue
-
+toSdlRect :: Point -> SDL.Rect
+toSdlRect p = SDL.Rect x y (x + cellSide) (y + cellSide)
+  where
+    x = pointX p * scale
+    y = pointY p * scale
+    
 renderCell surf (p, Object _ _ pl _ _ _) = do
-    col <- getColorByPlayer pl surf
+    let col = getColorByPlayer pl
     let sdlRect = toSdlRect p
-    withLogError (SDL.box surf sdlRect col) "renderCell: box failed."
+    withLogError (SDL.rectangle surf sdlRect col) "renderCell: box failed."
     return ()
 
 renderWorldMap surf w h wm = mapM_ (renderCell surf) (M.toList wm)
 
-toSdlRect :: Point -> SDL.Rect
-toSdlRect p = SDL.Rect x y cellSide cellSide
-  where
-    x = scale * pointX p
-    y = scale * pointY p
+renderBorders surf = do
+    let rect = SDL.Rect 1 1 638 478
+    SDL.rectangle surf rect (toSdlPixel white)
 
 -- TODO: make it safe in a type-level. Either or Maybe is needed.
 render :: GameWire () ()
@@ -51,6 +53,7 @@ render = mkGen_ $ \_ -> do
     surf <- getSurface
     withLogError (clearScreen surf) "clearScreen: fillRect failed."
     (World wm _ w h _) <- getWorld
+    withIO $ renderBorders surf
     withIO $ renderWorldMap surf w h wm
     withIO $ SDL.flip surf
     

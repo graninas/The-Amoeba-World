@@ -20,5 +20,5 @@ setupView (scr@(Screen w h bpp), caption) = do
     
     
 clearScreen surf = do
-    p <- SDL.mapRGB (SDL.surfaceGetPixelFormat surf) 0 0 0
+    p <- SDL.mapRGB (SDL.surfaceGetPixelFormat surf) 0 100 0
     SDL.fillRect surf Nothing p
