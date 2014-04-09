@@ -40,14 +40,14 @@ loop' s (Right _) w = do
 pollEventWire :: MyWire () SDL.Event
 pollEventWire = mkGen_ $ \_ -> do
     e <- liftIO SDL.pollEvent
-    liftIO $ putStrLn $ show e
+    liftIO $ print e
     return $ Right e
 
 eventMapperWire :: MyWire SDL.Event ()
 eventMapperWire = mkPure_ $ \event -> case event of
     SDL.NoEvent -> Right ()
     SDL.Quit -> Left (QuitAction "Finished.")
-    _ -> Left (QuitAction "Event not supported.")
+    e -> Left . QuitAction ("Event not supported: " ++ show e)
 
 solverWire = eventMapperWire . pollEventWire
 pureWire = for 3 . pure 10
