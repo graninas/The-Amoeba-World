@@ -18,7 +18,9 @@ import Control.Monad.State
 type GameWire a b = GWire GameStateTIO a b
 
 logic :: GameWire () ()
-logic = eventMapperWire . pollEventWire
+logic = (for 2 . diagnose "1") --> for 3 . diagnose "2"
+
+diagnose m = mkGen_ $ \_ -> withIO $ putStrLn m
 
 
 pollEventWire :: GameWire () SDL.Event

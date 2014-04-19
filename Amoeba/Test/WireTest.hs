@@ -18,8 +18,8 @@ instance Monoid InhibitAction where
     mempty = QuitAction "Inhibited."
     (QuitAction s1) `mappend` (QuitAction s2) = QuitAction (s1 ++ s2)
     ContinueAction `mappend` ContinueAction = ContinueAction
-    (QuitAction s) `mappend` _ = (QuitAction s)
-    _ `mappend` (QuitAction s) = (QuitAction s)
+    (QuitAction s) `mappend` _ = QuitAction s
+    _ `mappend` (QuitAction s) = QuitAction s
 
 data WireOutput = Quit String
   deriving (Show, Eq)
