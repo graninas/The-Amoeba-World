@@ -18,10 +18,10 @@ import Control.Monad.State
 type GameWire a b = GWire GameStateTIO a b
 
 logic :: GameWire () ()
-logic = (for 2 . diagnose "1") --> for 3 . diagnose "2"
+--logic = (for 2 . diagnose "1") --> for 3 . diagnose "2" --> quit
+logic = holdFor 0.1 . periodic 1 . diagnose "1" --> for 3 . diagnose "2" --> logic
 
 diagnose m = mkGen_ $ \_ -> withIO $ putStrLn m
-
 
 pollEventWire :: GameWire () SDL.Event
 pollEventWire = mkGen_ $ \_ -> do
@@ -45,7 +45,6 @@ eventMapperWire = mkPure_ $ \event -> case event of
 render :: GameWire a ()
 render = mkGen_ $ \_ -> do
     surf <- getSurface
-    withIO $ Log.error "Render"
     withLogError (clearScreen surf) "clearScreen failed."
     w <- getWorld
     withIO $ renderWorld surf w
