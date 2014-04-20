@@ -3,7 +3,6 @@ module Application.Game.Logic where
 import Application.Game.Engine.Types
 import Application.Game.Engine.Core
 import Application.Game.Runtime
-import View.Color
 import View.View
 
 import Middleware.FRP.NetwireFacade
@@ -18,20 +17,33 @@ import Control.Monad.State
 type GameWire a b = GWire GameStateTIO a b
 
 logic :: GameWire () ()
---logic = (for 2 . diagnose "1") --> for 3 . diagnose "2" --> quit
-logic = holdFor 0.1 . periodic 1 . diagnose "1" --> for 3 . diagnose "2" --> logic
+logic = modes True selector . 
+    (
+        (diagnose "left" &&& for 2 . now . pure True)
+        --> (diagnose "right" &&& for 3 . now . pure False)
+    )
+
+selector True = diagnose "selector True"
+selector False = quit . diagnose "selector False"
+
+test = for 1 . diagnose "1" 
+        --> for 1 . processSdlEvent . pollSdlEvent
+        --> for 2 . diagnose "2"
+        --> logic
 
 diagnose m = mkGen_ $ \_ -> withIO $ putStrLn m
 
-pollEventWire :: GameWire () SDL.Event
-pollEventWire = mkGen_ $ \_ -> do
+
+pollSdlEvent :: GameWire () SDL.Event
+pollSdlEvent = mkGen_ $ \_ -> do
+    liftIO $ putStrLn "Polling..."
     e <- liftIO SDL.pollEvent
     return $ Right e
 
-eventMapperWire :: GameWire SDL.Event ()
-eventMapperWire = mkPure_ $ \event -> case event of
-    SDL.NoEvent -> Right ()
+processSdlEvent :: GameWire SDL.Event ()
+processSdlEvent = mkPure_ $ \event -> case event of
     SDL.Quit -> Left "Quit event: Finished."
+    SDL.NoEvent -> Right ()
     SDL.LostFocus _ -> Right ()
     SDL.GotFocus _ -> Right ()
     SDL.MouseMotion{} -> Right ()

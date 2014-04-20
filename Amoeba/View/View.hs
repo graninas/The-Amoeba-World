@@ -10,7 +10,6 @@ import Middleware.Tracing.ErrorHandling
 import qualified Data.Map as M
 
 type ViewSurface = SDL.Surface
-
 data View = View { viewSurface :: ViewSurface
                  , viewScreen :: Screen
                  , viewCaption :: String }

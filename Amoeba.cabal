@@ -78,7 +78,8 @@ library
                    Middleware.Tracing.ErrorHandling,
                    Application.Game.Runtime,
                    GameLogic.Facade,
-                   Application.Game.Engine.MainLoop
+                   Application.Game.Engine.MainLoop,
+                   Test.WireTest2
 
 executable Amoeba
   build-depends:   base >= 4
@@ -127,5 +128,6 @@ executable Amoeba
                    Middleware.Tracing.ErrorHandling,
                    Application.Game.Runtime,
                    GameLogic.Facade,
-                   Application.Game.Engine.MainLoop
+                   Application.Game.Engine.MainLoop,
+                   Test.WireTest2
 sers.ItemParser

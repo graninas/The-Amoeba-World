@@ -35,7 +35,7 @@ boot cfg = do
         Log.info "View prepared."
         let rt = runtime cfg view game
         (inhibitor, _) <- startMainLoop logic rt
-        Log.info $ "Inhibitor: " ++ inhibitor
+        Log.info $ "Inhibitor: " ++ if null inhibitor then "Unspecified." else inhibitor
     
     Log.info "Game unloaded."
     Log.finish
