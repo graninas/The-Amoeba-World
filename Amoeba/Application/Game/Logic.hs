@@ -5,7 +5,7 @@ import Application.Game.Engine.Core
 import Application.Game.Runtime
 import View.View
 
-import Middleware.FRP.NetwireFacade
+import Middleware.FRP.NetwireFacade as FRP
 import Prelude hiding (id, (.))
 
 import Middleware.Tracing.ErrorHandling
@@ -16,28 +16,42 @@ import Control.Monad.State
 
 type GameWire a b = GWire GameStateTIO a b
 
+data Modes = Mode1 | Mode2 | Mode3 | Finisher
+  deriving (Ord, Eq)
+
 logic :: GameWire () ()
-logic = modes True selector . 
+logic = modes Mode1 selector .
     (
-        (diagnose "left" &&& for 2 . now . pure True)
-        --> (diagnose "right" &&& for 3 . now . pure False)
+       diagnose "Some data" &&& (interpret . eSdlEvent --> now . pure Mode3)
     )
 
-selector True = diagnose "selector True"
-selector False = quit . diagnose "selector False"
+selector Mode1 = diagnose "Mode1"
+selector Mode2 = diagnose "Mode2"
+selector Mode3 = diagnose "Mode3"
+selector Finisher = quit
 
-test = for 1 . diagnose "1" 
-        --> for 1 . processSdlEvent . pollSdlEvent
-        --> for 2 . diagnose "2"
-        --> logic
+interpret :: GameWire (Event SDL.Event) (Event Modes)
+interpret = mkPure_ $ \event -> Right $ fmap interpreter event
+
+
+interpreter SDL.Quit = Finisher
+interpreter SDL.MouseButtonUp{} = Mode2
+interpreter SDL.MouseMotion{} = Mode2
+interpreter SDL.MouseButtonDown{} = Mode2
+interpreter _ = Mode1
+
+eSdlEvent :: GameWire () (Event SDL.Event)
+eSdlEvent = now . pollSdlEvent
+
+
+
 
 diagnose m = mkGen_ $ \_ -> withIO $ putStrLn m
 
-
 pollSdlEvent :: GameWire () SDL.Event
 pollSdlEvent = mkGen_ $ \_ -> do
-    liftIO $ putStrLn "Polling..."
     e <- liftIO SDL.pollEvent
+    liftIO $ print e 
     return $ Right e
 
 processSdlEvent :: GameWire SDL.Event ()

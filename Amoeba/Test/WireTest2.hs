@@ -1,4 +1,4 @@
-module Test.WireTest2 where
+module Main where
 
 import Application.Game.Engine.Types
 import Application.Game.Engine.Core
@@ -28,11 +28,20 @@ wire1 :: TestWire () ()
 wire1 = modes True selector . 
     (
         -- Internal wire:
-            (diagnose "left"  &&& for 2 . now . pure True)  -- Left wire,  returning ((), True)
-        --> (diagnose "right" &&& for 3 . now . pure False) -- Right wire, returning ((), False)
+            (diagnose "left"  &&& for 2 . now . pure True)  -- Left subwire,  returning ((), True)
+        --> (diagnose "right" &&& for 3 . now . pure False) -- Right subwire, returning ((), False)
     )
-    
 
+-- | The same as wire1, but always prints 'subwire' instead of 'left' and 'right'. 
+wire1' = modes True selector . 
+    (
+       diagnose "subwire" &&& (for 2 . now . pure True --> for 3 . now . pure False)
+    )
+
+-- | For the first second, prints "1".
+-- Then switches to processing FakeSdlEvent and processes it for the next 1 second.
+-- Then switches to the third subwire and prints "2".
+-- Then restarts the whole wire.
 wire2 = for 1 . diagnose "1" 
         --> for 1 . processFakeSdlEvent . pollFakeSdlEvent
         --> for 2 . diagnose "2"
@@ -42,8 +51,8 @@ pollFakeSdlEvent :: TestWire () FakeSdlEvent
 pollFakeSdlEvent = mkGen_ $ \_ -> do
     liftIO $ putStrLn "Polling..."
     g <- liftIO newStdGen
-    let r = randomR (1, 3) g
-    return $ Right r
+    let event = randomR (1, 3) g
+    return $ Right event
 
 processFakeSdlEvent :: TestWire FakeSdlEvent ()
 processFakeSdlEvent = mkPure_ $ \event -> case event of
@@ -55,7 +64,4 @@ processFakeSdlEvent = mkPure_ $ \event -> case event of
 
 render = diagnose "Rendering..."
 
-main = do
-
-
-    putStrLn "All Ok."
+main = putStrLn "All Ok."
