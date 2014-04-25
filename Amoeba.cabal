@@ -79,7 +79,8 @@ library
                    Application.Game.Runtime,
                    GameLogic.Facade,
                    Application.Game.Engine.MainLoop,
-                   Test.WireTest2
+                   Test.WireTest2,
+                   Test.StateInjectionTest2
 
 executable Amoeba
   build-depends:   base >= 4
@@ -129,5 +130,6 @@ executable Amoeba
                    Application.Game.Runtime,
                    GameLogic.Facade,
                    Application.Game.Engine.MainLoop,
-                   Test.WireTest2
+                   Test.WireTest2,
+                   Test.StateInjectionTest2
 sers.ItemParser

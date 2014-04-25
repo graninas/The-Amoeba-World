@@ -8,11 +8,16 @@ import qualified Middleware.Tracing.Log as Log
 import Middleware.Tracing.ErrorHandling
 
 import qualified Data.Map as M
+import Control.Concurrent.MVar
 
 type ViewSurface = SDL.Surface
+type EventStore = MVar SDL.Event
 data View = View { viewSurface :: ViewSurface
                  , viewScreen :: Screen
-                 , viewCaption :: String }
+                 , viewCaption :: String
+                 , viewEventStore :: EventStore }
+
+
 
 
 -- TODO
@@ -24,7 +29,8 @@ setupView (scr@(Screen w h bpp), caption) = do
     surface <- SDL.setVideoMode w h bpp [SDL.SWSurface]
     SDL.setCaption caption []
     SDL.flip surface
-    return $ View surface scr caption
+    m <- newEmptyMVar
+    return $ View surface scr caption m
     
 clearScreen surf = do
     p <- SDL.mapRGB (SDL.surfaceGetPixelFormat surf) 0 100 0
