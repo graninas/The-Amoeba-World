@@ -1,19 +1,15 @@
 module View.View where
 
-import View.Language
 import View.Color
+import View.Runtime
 import GameLogic.Facade
+
 import qualified Middleware.SDL.SDLFacade as SDL
 import qualified Middleware.Tracing.Log as Log
 import Middleware.Tracing.ErrorHandling
 
 import qualified Data.Map as M
 
-type ViewSurface = SDL.Surface
-data View = View { viewSurface :: ViewSurface
-                 , viewScreen :: Screen
-                 , viewCaption :: String
-                 }
 
 -- TODO
 scale = 10

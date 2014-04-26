@@ -1,9 +1,8 @@
-module Application.Game.Runtime where
+module Application.Game.Engine.Runtime where
 
-import View.View
+import View.Runtime
 import GameLogic.Data.Facade
 import Middleware.Config.Facade
-import qualified Middleware.SDL.SDLFacade as SDL
 
 import Control.Monad.State (get, StateT(..))
 import Control.Monad (liftM)

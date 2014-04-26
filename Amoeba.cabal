@@ -34,7 +34,6 @@ library
   other-modules:
                    Amoeba,
                    Application.Boot,
-                   Application.MainLoop,
                    GameLogic.AI.AI,
                    GameLogic.AI.GenericAI,
                    GameLogic.Assets.Objects,
@@ -72,15 +71,16 @@ library
                    Middleware.Config.Extra,
                    Middleware.SDL.Environment,
                    Test.WireTest,
-                   Application.Game.Engine.Types,
                    Middleware.FRP.NetwireFacade,
                    Middleware.SDL.SDLFacade,
                    Middleware.Tracing.ErrorHandling,
-                   Application.Game.Runtime,
                    GameLogic.Facade,
-                   Application.Game.Engine.MainLoop,
                    Test.WireTest2,
-                   Test.StateInjectionTest2
+                   Test.StateInjectionTest2,
+                   Application.Game.Engine.Runtime,
+                   Application.Game.Engine.GameWire,
+                   Application.Assets.GameFlow1,
+                   View.Runtime
 
 executable Amoeba
   build-depends:   base >= 4
@@ -89,7 +89,6 @@ executable Amoeba
   main-is:         Amoeba.hs
   other-modules:   
                    Application.Boot,
-                   Application.MainLoop,
                    GameLogic.AI.AI,
                    GameLogic.AI.GenericAI,
                    GameLogic.Assets.Scenarios,
@@ -123,13 +122,14 @@ executable Amoeba
                    Middleware.Config.Extra,
                    Middleware.SDL.Environment,
                    Test.WireTest,
-                   Application.Game.Engine.Types,
                    Middleware.FRP.NetwireFacade,
                    Middleware.SDL.SDLFacade,
                    Middleware.Tracing.ErrorHandling,
-                   Application.Game.Runtime,
                    GameLogic.Facade,
-                   Application.Game.Engine.MainLoop,
                    Test.WireTest2,
-                   Test.StateInjectionTest2
+                   Test.StateInjectionTest2,
+                   Application.Game.Engine.Runtime,
+                   Application.Game.Engine.GameWire,
+                   Application.Assets.GameFlow1,
+                   View.Runtime
 sers.ItemParser

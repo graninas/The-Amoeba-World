@@ -1,8 +1,10 @@
 module View.Language where
 
-data Screen = Screen { width :: Int
-                     , height :: Int
-                     , depth :: Int }
-    deriving (Show, Read, Eq)
 
+data GameNode = Screen1 | Screen2 | Screen3 | Screen4
+  deriving (Ord, Eq, Show, Enum)
 
+data Command = Finish
+             | Render
+             | SwitchNode GameNode
+  deriving (Ord, Eq, Show)

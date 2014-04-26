@@ -2,13 +2,14 @@ module Application.Boot where
 
 import View.Config
 import View.View
+
 import qualified Middleware.Config.Facade as Cfg
 import qualified Middleware.Tracing.Log as Log
 import Middleware.SDL.Environment
 
-import Application.Game.Engine.MainLoop
 import Application.Game.Logic
-import Application.Game.Runtime
+import Application.Game.Engine.Runtime
+import Application.Game.Engine.Core
 import Application.Storage.GameLoader
 
 logFileLoader = Cfg.filePathLoader Cfg.logPath "Amoeba.log"

@@ -2,7 +2,8 @@ module Application.Storage.GameLoader where
 
 import GameLogic.Data.Facade
 import GameLogic.Language.Translation.Translator
-import Application.Game.Runtime
+
+import Application.Game.Engine.Runtime
 import qualified Middleware.Tracing.Log as Log
 import Middleware.Tracing.ErrorHandling
 
