@@ -15,86 +15,48 @@ import qualified Middleware.SDL.SDLFacade as SDL
 
 import Control.Monad.State
 import qualified Control.Monad as M (when)
-import Control.Concurrent.MVar
 import Data.Maybe (fromMaybe)
 
 type GameWire a b = GWire GameStateTIO a b
 
-data Modes = Mode1 | Mode2 | Mode3 | Mode4
-  deriving (Ord, Eq, Show)
+data Screen = Screen1 | Screen2 | Screen3 | Screen4
+  deriving (Ord, Eq, Show, Enum)
 
-data Command = Continue | Finish
+data Command = Finish
+             | Render
+             | SwitchScreen Screen
   deriving (Ord, Eq, Show)
-
+  
 logic :: GameWire () ()
-logic = pollSdlEvent --> modes Mode1 selector . 
+logic = screen Screen1
+
+screen :: Screen -> GameWire () ()
+screen scr = modes Render (selector scr) .
             (
-                pure () &&& interpret . eSdlEvent
+                pure () &&& now . interpreter scr . pollSdlEvent
             )
 
-selector Mode1 = logic . diagnose "Mode1"
-selector Mode2 = logic . diagnose "Mode2"
-selector Mode3 = logic . diagnose "Mode3"
-selector Mode4 = quit . diagnose "Mode3"
+selector scr Finish = quit . diagnose "Finish"
+selector scr Render = mkEmpty . render . diagnose "Render" --> screen scr
+selector scr (SwitchScreen swScr) = mkEmpty . (diagnose $ "Switching to: " ++ show swScr) --> screen swScr
 
-interpret :: GameWire (Event SDL.Event) (Event Modes)
-interpret = mkPure_ $ \event -> Right $ fmap interpreter event
+interpreter :: Screen -> GameWire SDL.Event Command
+interpreter scr = mkSF_ $ \e -> case e of
+    SDL.Quit -> Finish
+    SDL.MouseButtonDown{} -> SwitchScreen (next scr)
+    _ -> Render
 
-interpreter SDL.Quit = Mode4
-interpreter SDL.NoEvent = Mode1
-interpreter (SDL.LostFocus _) = Mode2
-interpreter (SDL.GotFocus _) = Mode2
-interpreter SDL.MouseMotion{} = Mode2
-interpreter SDL.MouseButtonDown{} = Mode4
-interpreter SDL.MouseButtonUp{} = Mode4
-interpreter (SDL.KeyDown _) = Mode2
-interpreter (SDL.KeyUp _) = Mode2
-
-eSdlEvent :: GameWire () (Event SDL.Event)
-eSdlEvent = now . sdlEvent
-
-sdlEvent :: GameWire () SDL.Event
-sdlEvent = mkGen_ $ \_ -> do
---    liftIO $ putStrLn "Trying to get event..."
-    mbEvent <- tryGetEventFromStore
-    -- liftIO $ putStrLn $ "Event got: " ++ show mbEvent
-    return $ Right $ fromMaybe SDL.NoEvent mbEvent
-
-trace :: GameWire (Event Modes) (Event Modes)
-trace = mkGen_ $ \event -> case event of
-    E.NoEvent -> return . Left $ "No netwire event"
-    E.Event e -> do
-        liftIO $ putStrLn $ "Event: " ++ show e
-        return . Right . E.Event $ e
-
+next Screen4 = Screen1
+next scr = succ scr
+    
 diagnose m = mkGen_ $ \_ -> withIO $ putStrLn m
 
-pollSdlEvent :: GameWire () ()
+pollSdlEvent :: GameWire () SDL.Event
 pollSdlEvent = mkGen_ $ \_ -> do
---    liftIO $ putStrLn "Trying to check if event store is empty..."
-    isEmpty <- isEmptyEventStore
---    liftIO $ putStrLn $ "Event store is: " ++ show isEmpty
-    if isEmpty
-        then do e <- liftIO SDL.pollEvent
-                liftIO $ putStrLn $ "SDL event got: " ++ show e
-                if (e /= SDL.NoEvent) then (putEventToStore e) >> (return $ Right ())
-                                      else return $ Left "SDL event is 'NoEvent' - skipped."
-        else return $ Left "Is not ready to take a new event yet." -- TODO: need to store a bunch of events at one time.
+        e <- liftIO SDL.pollEvent
+        return $ Right e
 
-processSdlEvent :: GameWire SDL.Event ()
-processSdlEvent = mkPure_ $ \event -> case event of
-    SDL.Quit -> Left "Quit event: Finished."
-    SDL.NoEvent -> Right ()
-    SDL.LostFocus _ -> Right ()
-    SDL.GotFocus _ -> Right ()
-    SDL.MouseMotion{} -> Right ()
-    SDL.MouseButtonDown{} -> Right ()
-    SDL.MouseButtonUp{} -> Right ()
-    SDL.KeyDown _ -> Right ()
-    SDL.KeyUp _ -> Right ()
-    e -> Left $ "Event not supported: " ++ show e
-
--- TODO: make it safe in a type-level. Either or Maybe is needed.
+-- TODO: make it safe on a type-level. Either or Maybe is needed.
 render :: GameWire a ()
 render = mkGen_ $ \_ -> do
     surf <- getSurface
