@@ -22,6 +22,7 @@ loop' _ (Left res) _ = return res
 loop' s input w = do
     (delta, s') <- stepSession s
     (eitherResult, w') <- stepWire w delta input
+    liftIO $ Log.info $ show delta
     loop' s' eitherResult w'
 
 -- Combinator wires
@@ -30,7 +31,17 @@ quit = inhibit "Finished."
 
 withIO ioAct = liftIO ioAct >> return (Right ())
 
-diagnose m = mkGen_ $ \_ -> withIO $ putStrLn m
+diagnose :: Show a => a -> GameWire () ()
+diagnose a = mkGen_ $ \_ -> withIO . print $ a
+
+trace :: Show a => a -> GameWire () ()
+trace a = mkGen_ $ \_ -> withIO . Log.info . show $ a
+
+forget = mkConst (Right ())
+
+timeD :: (HasTime t s, Monad m) => Wire s e m a Double
+timeD = fmap realToFrac time
+
 
 -- Work wires
 pollSdlEvent :: GameWire () SDL.Event

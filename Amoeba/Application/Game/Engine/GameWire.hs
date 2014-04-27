@@ -4,5 +4,6 @@ import Middleware.FRP.NetwireFacade
 import Application.Game.Engine.Runtime
 
 type Inhibitor = String
-type GWire state a b = Wire (Timed NominalDiffTime ()) Inhibitor state a b
+type GTime = Timed NominalDiffTime ()
+type GWire state a b = Wire GTime Inhibitor state a b
 type GameWire a b = GWire GameStateTIO a b

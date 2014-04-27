@@ -80,7 +80,8 @@ library
                    Application.Game.Engine.Runtime,
                    Application.Game.Engine.GameWire,
                    Application.Assets.GameFlow1,
-                   View.Runtime
+                   View.Runtime,
+                   Application.Assets.GameFlow2
 
 executable Amoeba
   build-depends:   base >= 4
@@ -131,5 +132,6 @@ executable Amoeba
                    Application.Game.Engine.Runtime,
                    Application.Game.Engine.GameWire,
                    Application.Assets.GameFlow1,
-                   View.Runtime
+                   View.Runtime,
+                   Application.Assets.GameFlow2
 sers.ItemParser
