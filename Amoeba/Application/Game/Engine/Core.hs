@@ -22,14 +22,14 @@ loop' _ (Left res) _ = return res
 loop' s input w = do
     (delta, s') <- stepSession s
     (eitherResult, w') <- stepWire w delta input
-    liftIO $ Log.info $ show delta
     loop' s' eitherResult w'
 
 -- Combinator wires
 quitWith = inhibit
 quit = inhibit "Finished."
 
-withIO ioAct = liftIO ioAct >> return (Right ())
+retR = return . Right
+withIO ioAct = liftIO ioAct >> retR ()
 
 diagnose :: Show a => a -> GameWire () ()
 diagnose a = mkGen_ $ \_ -> withIO . print $ a
@@ -47,7 +47,7 @@ timeD = fmap realToFrac time
 pollSdlEvent :: GameWire () SDL.Event
 pollSdlEvent = mkGen_ $ \_ -> do
         e <- liftIO SDL.pollEvent
-        return $ Right e
+        retR e
 
 -- TODO: make it safe on a type-level. Either or Maybe is needed.
 render :: GameWire a ()

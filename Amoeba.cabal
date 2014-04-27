@@ -70,7 +70,6 @@ library
                    Middleware.Tracing.Log,
                    Middleware.Config.Extra,
                    Middleware.SDL.Environment,
-                   Test.WireTest,
                    Middleware.FRP.NetwireFacade,
                    Middleware.SDL.SDLFacade,
                    Middleware.Tracing.ErrorHandling,
@@ -81,7 +80,9 @@ library
                    Application.Game.Engine.GameWire,
                    Application.Assets.GameFlow1,
                    View.Runtime,
-                   Application.Assets.GameFlow2
+                   Application.Assets.GameFlow2,
+                   Test.WireTest1,
+                   Test.WireTest3
 
 executable Amoeba
   build-depends:   base >= 4
@@ -122,7 +123,6 @@ executable Amoeba
                    Middleware.Tracing.Log,
                    Middleware.Config.Extra,
                    Middleware.SDL.Environment,
-                   Test.WireTest,
                    Middleware.FRP.NetwireFacade,
                    Middleware.SDL.SDLFacade,
                    Middleware.Tracing.ErrorHandling,
@@ -133,5 +133,7 @@ executable Amoeba
                    Application.Game.Engine.GameWire,
                    Application.Assets.GameFlow1,
                    View.Runtime,
-                   Application.Assets.GameFlow2
+                   Application.Assets.GameFlow2,
+                   Test.WireTest1,
+                   Test.WireTest3
 sers.ItemParser

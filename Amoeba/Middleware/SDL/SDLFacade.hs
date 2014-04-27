@@ -7,3 +7,4 @@ import Graphics.UI.SDL.Types as SDL
 import Graphics.UI.SDL.Primitives as SDL
 import Graphics.UI.SDL.WindowManagement as SDL
 import Graphics.UI.SDL.Events as SDL
+import Graphics.UI.SDL.Keysym as SDL

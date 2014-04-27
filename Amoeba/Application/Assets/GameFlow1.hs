@@ -9,6 +9,9 @@ import Middleware.FRP.NetwireFacade as FRP
 import Middleware.SDL.SDLFacade as SDL
 import Prelude hiding (id, (.))
 
+-- This workflow just switches modes by mouse click.
+-- To finish the application, close it in a usual way.
+
 gameNode :: GameNode -> GameWire () ()
 gameNode node = modes Render (selector node) .
             (
