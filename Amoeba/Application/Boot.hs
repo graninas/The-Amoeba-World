@@ -18,8 +18,8 @@ logFileLoader = Cfg.filePathLoader Cfg.logPath "Amoeba.log"
 worldFileLoader = Cfg.filePathLoader Cfg.rawsPath "World.arf"
 
 -- TOOD: this function should be in Either monad.
+-- TODO: Improve simple logging.
 boot cfg = do
-    -- TODO: Improve simple logging.
     logFilePath <- Cfg.extract cfg logFileLoader
     Log.setupLogger logFilePath
     Log.info $ "Logger started: " ++ logFilePath

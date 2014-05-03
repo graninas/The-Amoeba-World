@@ -82,7 +82,12 @@ library
                    View.Runtime,
                    Application.Assets.GameFlow2,
                    Test.WireTest1,
-                   Test.WireTest3
+                   Test.WireTest3,
+                   Test.ModuleAbstraction.PathFind,
+                   Test.ModuleAbstraction.PathFind.Dijkstra,
+                   Test.MonadAbstraction.StateMonad,
+                   Test.ModuleAbstraction.Main,
+                   Test.MonadAbstraction.Language
 
 executable Amoeba
   build-depends:   base >= 4
@@ -135,5 +140,12 @@ executable Amoeba
                    View.Runtime,
                    Application.Assets.GameFlow2,
                    Test.WireTest1,
-                   Test.WireTest3
+                   Test.WireTest3,
+                   Test.ModuleAbstraction.PathFind,
+                   Test.ModuleAbstraction.PathFind.Dijkstra,
+                   Test.MonadAbstraction.StateMonad,
+                   Test.ModuleAbstraction.Main,
+                   Test.MonadAbstraction.Language
+sers.ItemParser
+r
 sers.ItemParser
