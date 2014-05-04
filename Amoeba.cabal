@@ -87,7 +87,10 @@ library
                    Test.ModuleAbstraction.PathFind.Dijkstra,
                    Test.MonadAbstraction.StateMonad,
                    Test.ModuleAbstraction.Main,
-                   Test.MonadAbstraction.Language
+                   Test.MonadAbstraction.Language,
+                   Application.Storage.CellularNetLoader,
+                   CellularNet.Net,
+                   CellularNet.Geometry
 
 executable Amoeba
   build-depends:   base >= 4
@@ -145,7 +148,10 @@ executable Amoeba
                    Test.ModuleAbstraction.PathFind.Dijkstra,
                    Test.MonadAbstraction.StateMonad,
                    Test.ModuleAbstraction.Main,
-                   Test.MonadAbstraction.Language
+                   Test.MonadAbstraction.Language,
+                   Application.Storage.CellularNetLoader,
+                   CellularNet.Net,
+                   CellularNet.Geometry
 sers.ItemParser
 r
 sers.ItemParser

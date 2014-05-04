@@ -10,7 +10,8 @@ import Middleware.SDL.Environment
 import Application.Game.Logic
 import Application.Game.Engine.Runtime
 import Application.Game.Engine.Core
-import Application.Storage.GameLoader
+
+import Application.CellularNetLoader
 
 logFileLoader = Cfg.filePathLoader Cfg.logPath "Amoeba.log"
 
