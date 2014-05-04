@@ -70,7 +70,7 @@ emitter iMap p@(x, y) c@(Neuron e) | e < netRank = (iMap, c)
                                    | otherwise = (newIMap, Neuron restOfEnergy)
   where
     signal = e `div` netRank
-    restOfEnergy = e - signal
+    restOfEnergy = e - (netRank*signal)
     neighbourModulators = [ ((x-1, y), (0, signal)), ((x+1, y), (signal, 0))
                           , ((x, y-1), (0, signal)), ((x, y+1), (signal, 0))]
     newIMap = foldr updateIncome iMap neighbourModulators
@@ -111,9 +111,7 @@ remodulate p@(x, y) (s1, s2) d@(iMap, net) = case M.lookup p net of
                        | (v < maxModValue) && (s1 < s2)  -> increaseAndForward  v (s2 - s1)
                        | (v < maxModValue) && (s1 == s2) -> increase v
                        | s1 > s2  -> income targetBackwardNeuronIncome p (s1 - s2) v iMap net
-                                     --backward p (s1 - s2) d
                        | s1 < s2  -> income targetForwardNeuronIncome  p (s2 - s1) v iMap net
-                                     --forward  p (s2 - s1) d
                        | s1 == s2 -> d
   where
   -- Use old value of modulator!!
@@ -128,6 +126,22 @@ conductor p c@(s, 0) a = forward    p s a
 conductor p c@(0, s) a = backward   p s a
 conductor p c        a = remodulate p c a
 
+merger :: Pos -> NeuronIncome -> Net -> Net
+merger p i = M.adjust (neuronAdjuster i) p
+  where
+    neuronAdjuster (s1, s2, s3, s4) (Modulator _) = error $ "Unexpected modulator in NeuronIncomeMap at " ++ show p
+    neuronAdjuster (s1, s2, s3, s4) (Neuron e)    = Neuron $ e + s1 + s2 + s3 + s4
+
+mergeNeuronSignals :: NeuronIncomeMap -> Net -> Net
+mergeNeuronSignals nIMap net = M.foldrWithKey merger net nIMap
+
+decreaseInactiveModulators :: ModulatorIncomeMap -> Net -> Net
+decreaseInactiveModulators mIMap = M.mapWithKey deactivator
+  where
+    deactivator p c@(Neuron _) = c
+    deactivator p c@(Modulator v) | p `M.member` mIMap = c
+                                  | otherwise = Modulator (max (v-1) minModValue)
+  
 -- Can be optimized: remember what neurons can emit.
 emitSignals :: Net -> (ModulatorIncomeMap, Net)
 emitSignals = M.mapAccumWithKey emitter M.empty
@@ -135,6 +149,7 @@ emitSignals = M.mapAccumWithKey emitter M.empty
 conductSignals :: (ModulatorIncomeMap, Net) -> (ModulatorIncomeMap, (NeuronIncomeMap, Net))
 conductSignals (iMap, net) = (iMap, M.foldrWithKey conductor (M.empty, net) iMap)
 
-consumeSignals = undefined
+consumeSignals :: (ModulatorIncomeMap, (NeuronIncomeMap, Net)) -> Net
+consumeSignals (mIMap, (nIMap, net)) = decreaseInactiveModulators mIMap . mergeNeuronSignals nIMap $ net
 
-stepNet = conductSignals . emitSignals
+stepNet = consumeSignals . conductSignals . emitSignals
