@@ -1,10 +1,9 @@
 module CellularNet.Net where
 
-import qualified Data.Map as M
 import Data.Maybe (fromJust)
 import Data.Monoid
-import qualified Data.Foldable as F
-import qualified Data.Traversable as T
+import qualified Data.Map as M
+import qualified Data.Set as S
 import System.Random
 
 type Energy = Int 
@@ -23,6 +22,12 @@ maxNeuronEnergy = 19
 
 fieldMaxX = 10
 fieldMaxY = 10
+
+-- Modifications
+
+neuronSaturation e = min e maxNeuronEnergy
+
+-- Net structure
 
 makeNullCell (x, y) (g, net) | even $ x + y = (g, M.insert (x, y) (Neuron    0) net)
                              | otherwise    = (g, M.insert (x, y) (Modulator 0) net)
@@ -47,9 +52,11 @@ makeRandomNet (xSize, ySize) ((actX1, actY1), (actX2, actY2)) seed
         actX2Net = actX2 * 2 + 1
         actY1Net = actY1 * 2 - 1
         actY2Net = actY2 * 2 + 1
-        mapPoints = [(a, b) | a <- [1..xNetSize], b <- [1..yNetSize]]
+        mapPoints = [(a, b) | a <- [1..xNetSize], b <- [1..yNetSize] ]
         g = mkStdGen seed
         in foldr (makeCell (actX1Net, actY1Net) (actX2Net, actY2Net)) (g, M.empty) mapPoints
+
+-- Operations
 
 type Signal = Int
 instance Monoid Int where
@@ -59,21 +66,10 @@ instance Monoid Int where
 -- (LeftSignal, RightSignal) or (UpSignal, DownSignal)
 type ModulatorIncome = (Signal, Signal)
 type ModulatorIncomeMap = M.Map Pos ModulatorIncome
-  
+
 netRank = 4
 
 updateIncome (p, i) = M.insertWith' (<>) p i
-
-emitter :: ModulatorIncomeMap -> Pos -> Cell -> (ModulatorIncomeMap, Cell)
-emitter iMap p@(x, y) c@(Modulator _) = (iMap, c)
-emitter iMap p@(x, y) c@(Neuron e) | e < netRank = (iMap, c)
-                                   | otherwise = (newIMap, Neuron restOfEnergy)
-  where
-    signal = e `div` netRank
-    restOfEnergy = e - (netRank*signal)
-    neighbourModulators = [ ((x-1, y), (0, signal)), ((x+1, y), (signal, 0))
-                          , ((x, y-1), (0, signal)), ((x, y+1), (signal, 0))]
-    newIMap = foldr updateIncome iMap neighbourModulators
 
 -- (LeftSignal, UpSignal, RightSignal, DownSignal)
 type NeuronIncome = (Signal, Signal, Signal, Signal)
@@ -130,7 +126,7 @@ merger :: Pos -> NeuronIncome -> Net -> Net
 merger p i = M.adjust (neuronAdjuster i) p
   where
     neuronAdjuster (s1, s2, s3, s4) (Modulator _) = error $ "Unexpected modulator in NeuronIncomeMap at " ++ show p
-    neuronAdjuster (s1, s2, s3, s4) (Neuron e)    = Neuron $ e + s1 + s2 + s3 + s4
+    neuronAdjuster (s1, s2, s3, s4) (Neuron e)    = Neuron $ neuronSaturation $ e + s1 + s2 + s3 + s4
 
 mergeNeuronSignals :: NeuronIncomeMap -> Net -> Net
 mergeNeuronSignals nIMap net = M.foldrWithKey merger net nIMap
@@ -141,7 +137,18 @@ decreaseInactiveModulators mIMap = M.mapWithKey deactivator
     deactivator p c@(Neuron _) = c
     deactivator p c@(Modulator v) | p `M.member` mIMap = c
                                   | otherwise = Modulator (max (v-1) minModValue)
-  
+
+emitter :: ModulatorIncomeMap -> Pos -> Cell -> (ModulatorIncomeMap, Cell)
+emitter iMap p@(x, y) c@(Modulator _) = (iMap, c)
+emitter iMap p@(x, y) c@(Neuron e) | e < netRank = (iMap, c)
+                                   | otherwise = (newIMap, Neuron restOfEnergy)
+  where
+    signal = e `div` netRank
+    restOfEnergy = e - (netRank*signal)
+    neighbourModulators = [ ((x-1, y), (0, signal)), ((x+1, y), (signal, 0))
+                          , ((x, y-1), (0, signal)), ((x, y+1), (signal, 0))]
+    newIMap = foldr updateIncome iMap neighbourModulators
+
 -- Can be optimized: remember what neurons can emit.
 emitSignals :: Net -> (ModulatorIncomeMap, Net)
 emitSignals = M.mapAccumWithKey emitter M.empty
@@ -153,3 +160,69 @@ consumeSignals :: (ModulatorIncomeMap, (NeuronIncomeMap, Net)) -> Net
 consumeSignals (mIMap, (nIMap, net)) = decreaseInactiveModulators mIMap . mergeNeuronSignals nIMap $ net
 
 stepNet = consumeSignals . conductSignals . emitSignals
+
+
+type PosSet = S.Set Pos
+data EmitableNeurons = TryAll
+                     | Emitable PosSet
+
+selectiveEmitter :: Pos -> (ModulatorIncomeMap, Net) -> (ModulatorIncomeMap, Net)
+selectiveEmitter p (mIMap, net) = case M.lookup p net of
+    Nothing     -> (mIMap, net)
+    Just neuron -> let (newIMap, newNeuron) = emitter mIMap p neuron
+                   in  (newIMap, M.insert p newNeuron net)
+
+merger' :: Pos -> NeuronIncome -> (PosSet, Net) -> (PosSet, Net)
+merger' p i@(s1, s2, s3, s4) (posSet, net) = result
+  where
+    result = case M.lookup p net of
+        Nothing -> (posSet, net)
+        Just (Modulator _) -> error $ "Unexpected modulator in NeuronIncomeMap at " ++ show p
+        Just (Neuron e) | e + s1 + s2 + s3 + s4 >= netRank -> (S.insert p posSet, adjustedNeuron)
+                        | otherwise                        -> (posSet,            adjustedNeuron)
+    adjustedNeuron = M.adjust neuronAdjuster p net
+    neuronAdjuster (Modulator _) = error $ "Unexpected modulator in NeuronIncomeMap at " ++ show p
+    neuronAdjuster (Neuron e)    = Neuron $ neuronSaturation $ e + s1 + s2 + s3 + s4
+
+mergeNeuronSignals' :: NeuronIncomeMap -> Net -> (PosSet, Net)
+mergeNeuronSignals' nIMap net = M.foldrWithKey merger' (S.empty, net) nIMap
+
+consumeSignals' :: (ModulatorIncomeMap, (NeuronIncomeMap, Net)) -> (EmitableNeurons, Net)
+consumeSignals' (mIMap, (nIMap, net)) = let
+    (emitablePosSet, net') = mergeNeuronSignals' nIMap net
+    in (Emitable emitablePosSet, decreaseInactiveModulators mIMap net')
+
+emitSignals' :: PosSet -> Net -> (ModulatorIncomeMap, Net)
+emitSignals' pSet net = S.foldr' selectiveEmitter (M.empty, net) pSet
+
+stepNet' (TryAll, net)           = consumeSignals' . conductSignals . emitSignals $ net
+stepNet' (Emitable neurons, net) = consumeSignals' . conductSignals . emitSignals' neurons $ net
+
+
+-- Tests
+
+testNet = makeRandomNet (20, 20) ((1,1), (20,20)) 100
+steppedTestNet = iterate stepNet (snd testNet)
+viewNet n = head . drop n $ steppedTestNet 
+
+viewMaxFrom n f = M.fold maxNeuron (Neuron 0) (f n)
+  where
+    maxNeuron (Modulator _) n = n
+    maxNeuron (Neuron e1) (Neuron e2) = Neuron (max e1 e2)
+
+viewMax n = viewMaxFrom n viewNet
+
+steppedTestNet' = let
+    res1 = (TryAll, snd testNet)
+    res2 = stepNet' (TryAll, snd testNet)
+    in res1 : iterate stepNet' res2 
+
+viewNet' n = snd $ head . drop n $ steppedTestNet'
+viewMax' n = viewMaxFrom n viewNet'
+
+testEquality n = viewNet' n == viewNet n
+
+
+
+
+

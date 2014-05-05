@@ -89,8 +89,7 @@ library
                    Test.ModuleAbstraction.Main,
                    Test.MonadAbstraction.Language,
                    Application.Storage.CellularNetLoader,
-                   CellularNet.Net,
-                   CellularNet.Geometry
+                   CellularNet.Net
 
 executable Amoeba
   build-depends:   base >= 4
@@ -150,8 +149,7 @@ executable Amoeba
                    Test.ModuleAbstraction.Main,
                    Test.MonadAbstraction.Language,
                    Application.Storage.CellularNetLoader,
-                   CellularNet.Net,
-                   CellularNet.Geometry
+                   CellularNet.Net
 sers.ItemParser
 r
 sers.ItemParser
