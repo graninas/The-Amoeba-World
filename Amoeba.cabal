@@ -25,7 +25,6 @@ library
                    old-locale,
                    containers,
                    transformers,
-                   BigSpaceLibrary,
                    linear,
                    ConfigFile
   ghc-options:     -O1
