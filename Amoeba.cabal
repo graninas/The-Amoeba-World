@@ -146,6 +146,3 @@ executable Amoeba
                    Test.MonadAbstraction.StateMonad,
                    Test.ModuleAbstraction.Main,
                    Test.MonadAbstraction.Language
-sers.ItemParser
-r
-sers.ItemParser
