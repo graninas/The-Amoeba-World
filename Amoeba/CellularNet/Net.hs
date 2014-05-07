@@ -168,7 +168,7 @@ data EmitableNeurons = TryAll
 
 selectiveEmitter :: Pos -> (ModulatorIncomeMap, Net) -> (ModulatorIncomeMap, Net)
 selectiveEmitter p (mIMap, net) = case M.lookup p net of
-    Nothing     -> (mIMap, net)
+    Nothing     -> error $ "Unexpected pos in emitableNeurons at " ++ show p
     Just neuron -> let (newIMap, newNeuron) = emitter mIMap p neuron
                    in  (newIMap, M.insert p newNeuron net)
 
@@ -178,11 +178,9 @@ merger' p i@(s1, s2, s3, s4) (posSet, net) = result
     result = case M.lookup p net of
         Nothing -> (posSet, net)
         Just (Modulator _) -> error $ "Unexpected modulator in NeuronIncomeMap at " ++ show p
-        Just (Neuron e) | e + s1 + s2 + s3 + s4 >= netRank -> (S.insert p posSet, adjustedNeuron)
-                        | otherwise                        -> (posSet,            adjustedNeuron)
-    adjustedNeuron = M.adjust neuronAdjuster p net
-    neuronAdjuster (Modulator _) = error $ "Unexpected modulator in NeuronIncomeMap at " ++ show p
-    neuronAdjuster (Neuron e)    = Neuron $ neuronSaturation $ e + s1 + s2 + s3 + s4
+        Just (Neuron e) | e + s1 + s2 + s3 + s4 >= netRank -> (S.insert p posSet, adjustedNeuron e)
+                        | otherwise                        -> (posSet,            adjustedNeuron e)
+    adjustedNeuron e = M.insert p (Neuron (neuronSaturation $ e + s1 + s2 + s3 + s4)) net
 
 mergeNeuronSignals' :: NeuronIncomeMap -> Net -> (PosSet, Net)
 mergeNeuronSignals' nIMap net = M.foldrWithKey merger' (S.empty, net) nIMap
@@ -202,7 +200,8 @@ stepNet' (Emitable neurons, net) = consumeSignals' . conductSignals . emitSignal
 -- Tests
 
 testNet = makeRandomNet (20, 20) ((1,1), (20,20)) 100
-steppedTestNet = iterate stepNet (snd testNet)
+testNet2 = makeRandomNet (100, 100) ((40,40), (60,60)) 100
+steppedTestNet = iterate stepNet (snd testNet2)
 viewNet n = head . drop n $ steppedTestNet 
 
 viewMaxFrom n f = M.fold maxNeuron (Neuron 0) (f n)
@@ -213,12 +212,13 @@ viewMaxFrom n f = M.fold maxNeuron (Neuron 0) (f n)
 viewMax n = viewMaxFrom n viewNet
 
 steppedTestNet' = let
-    res1 = (TryAll, snd testNet)
-    res2 = stepNet' (TryAll, snd testNet)
+    res1 = (TryAll, snd testNet2)
+    res2 = stepNet' (TryAll, snd testNet2)
     in res1 : iterate stepNet' res2 
 
 viewNet' n = snd $ head . drop n $ steppedTestNet'
 viewMax' n = viewMaxFrom n viewNet'
+
 
 testEquality n = viewNet' n == viewNet n
 
