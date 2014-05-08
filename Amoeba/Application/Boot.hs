@@ -10,7 +10,8 @@ import Middleware.SDL.Environment
 import Application.Game.Logic
 import Application.Game.Engine.Runtime
 import Application.Game.Engine.Core
-import Application.Storage.GameLoader
+
+loadGame = undefined
 
 logFileLoader = Cfg.filePathLoader Cfg.logPath "Amoeba.log"
 
@@ -30,14 +31,14 @@ boot cfg = do
     
     viewSettings <- loadViewSettings cfg
     Log.info "View settings loaded."
-    
+    {-
     withEnvironment $ do
         view <- setupView viewSettings
         Log.info "View prepared."
         let rt = runtime cfg view game
         (inhibitor, _) <- startMainLoop logic rt
         Log.info $ "Inhibitor: " ++ if null inhibitor then "Unspecified." else inhibitor
-    
+    -}
     Log.info "Game unloaded."
     Log.finish
     
