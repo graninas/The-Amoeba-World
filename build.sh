@@ -1,5 +1,7 @@
 #!/bin/bash
 
+mkdir ./.bin
+mkdir ./.bin/Amoeba
 set -e
 
 ./scripts/build.sh

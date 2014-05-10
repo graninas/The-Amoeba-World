@@ -16,6 +16,7 @@ import Control.Monad.Trans.State (runStateT)
 startMainLoop :: GameWire () () -> GameRt -> IO (Inhibitor, GameRt)
 startMainLoop wire = runStateT (startLoop wire)
 
+startLoop :: GameWire () () -> GameStateTIO Inhibitor
 startLoop = loop' clockSession_ (Right ())
 
 loop' _ (Left res) _ = return res
