@@ -6,4 +6,4 @@ import Application.Game.Engine.Runtime
 import qualified Middleware.Tracing.Log as Log
 import Middleware.Tracing.ErrorHandling
 
-loadNet = viewFastNet 10
+loadNet = viewFastNet 0

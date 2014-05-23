@@ -10,7 +10,7 @@ import Middleware.SDL.SDLFacade as SDL
 import Prelude hiding (id, (.))
 
 -- This workflow just switches modes by mouse click.
--- To finish the application, close it in a usual way.
+-- To finish the application, close it as usual.
 
 gameNode :: GameNode -> GameWire () ()
 gameNode node = modes Render (selector node) .
@@ -21,10 +21,12 @@ gameNode node = modes Render (selector node) .
 selector _    Finish = quit . diagnose "Finish"
 selector node Render = mkEmpty . render --> gameNode node
 selector _   (SwitchNode swNode) = mkEmpty --> gameNode swNode
+selector node Update = render . update --> gameNode Screen1
 
 interpreter :: GameNode -> GameWire SDL.Event Command
 interpreter node = mkSF_ $ \e -> case e of
     SDL.Quit -> Finish
+    (SDL.KeyDown _) -> Update
     SDL.MouseButtonDown{} -> SwitchNode (next node)
     _ -> Render
 

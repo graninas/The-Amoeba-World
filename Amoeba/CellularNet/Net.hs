@@ -225,16 +225,12 @@ viewMaxFrom n f = M.fold maxNeuron (Neuron 0) (f n)
 viewMax n = viewMaxFrom n viewNet
 
 steppedFastTestNet = let
-    net1 = FastNet 1 TryAll (snd testNet2)
-    in iterate stepFastNet net1
+    net0 = FastNet 0 TryAll (snd testNet2)
+    in iterate stepFastNet net0
 
 viewFastNet n = head . drop n $ steppedFastTestNet
 viewFastNetMax n = viewMaxFrom n (fromFastNet . viewFastNet)
 
 
 testEquality n = fromFastNet (viewFastNet n) == viewNet n
-
-
-
-
 

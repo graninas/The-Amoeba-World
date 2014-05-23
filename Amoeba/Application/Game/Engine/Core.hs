@@ -56,3 +56,10 @@ render = mkGen_ $ \_ -> do
     view <- getView
     net <- getNet
     withIO $ renderNet view net
+    
+update :: GameWire a ()
+update = mkGen_ $ \_ -> do
+    net <- getNet
+    let net' = stepNet net
+    putNet net'
+    retR ()

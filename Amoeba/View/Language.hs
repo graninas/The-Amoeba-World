@@ -5,5 +5,6 @@ data GameNode = Screen1 | Screen2 | Screen3 | Screen4
 
 data Command = Finish
              | Render
+             | Update
              | SwitchNode GameNode
  deriving (Ord, Eq, Show)

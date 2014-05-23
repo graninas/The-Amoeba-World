@@ -2,7 +2,7 @@ module View.NetView where
 
 import View.Color
 import View.Runtime
-import CellularNet.Net
+import CellularNet.Net hiding (stepNet)
 
 import qualified Middleware.SDL.SDLFacade as SDL
 import qualified Middleware.SDL.Render as SDL
@@ -54,3 +54,7 @@ renderNet (View surf screen _) (FastNet _ _ net) = do
     renderBorders surf
     renderNetMap surf net
     SDL.flip surf
+
+-- TODO: this is logic function. Should be somewhere in entry module of Net.
+stepNet = stepFastNet
+    
