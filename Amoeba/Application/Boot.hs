@@ -10,7 +10,7 @@ import Middleware.SDL.Environment
 import Application.Game.Logic
 import Application.Game.Engine.Runtime
 import Application.Game.Engine.Core
-import Application.Storage.GameLoader
+import Application.Storage.CellularNetLoader
 
 logFileLoader = Cfg.filePathLoader Cfg.logPath "Amoeba.log"
 
@@ -25,8 +25,8 @@ boot cfg = do
     Log.info $ "Logger started: " ++ logFilePath
     
     worldPath <- Cfg.extract cfg worldFileLoader
-    game <- loadGame worldPath
-    Log.info "Game loaded."
+    let net = loadNet
+    Log.info "Net loaded."
     
     viewSettings <- loadViewSettings cfg
     Log.info "View settings loaded."
@@ -34,7 +34,7 @@ boot cfg = do
     withEnvironment $ do
         view <- setupView viewSettings
         Log.info "View prepared."
-        let rt = runtime cfg view game
+        let rt = runtime cfg view net
         (inhibitor, _) <- startMainLoop logic rt
         Log.info $ "Inhibitor: " ++ if null inhibitor then "Unspecified." else inhibitor
     

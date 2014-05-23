@@ -2,7 +2,7 @@ module Application.Game.Engine.Core where
 
 import Application.Game.Engine.Runtime
 import Application.Game.Engine.GameWire
-import View.View
+import View.NetView
 
 import Middleware.FRP.NetwireFacade hiding ((.))
 import Middleware.SDL.SDLFacade as SDL
@@ -53,8 +53,6 @@ pollSdlEvent = mkGen_ $ \_ -> do
 -- TODO: make it safe on a type-level. Either or Maybe is needed.
 render :: GameWire a ()
 render = mkGen_ $ \_ -> do
-    surf <- getSurface
-    withLogError (clearScreen surf) "clearScreen failed."
-    w <- getWorld
-    withIO $ renderWorld surf w
-    withIO $ SDL.flip surf
+    view <- getView
+    net <- getNet
+    withIO $ renderNet view net

@@ -5,6 +5,7 @@ import View.Runtime
 import GameLogic.Facade
 
 import qualified Middleware.SDL.SDLFacade as SDL
+import qualified Middleware.SDL.Render as SDL
 import qualified Middleware.Tracing.Log as Log
 import Middleware.Tracing.ErrorHandling
 
@@ -22,10 +23,6 @@ setupView (scr@(Screen w h bpp), caption) = do
     SDL.flip surface
     return $ View surface scr caption
     
-clearScreen surf = do
-    p <- SDL.mapRGB (SDL.surfaceGetPixelFormat surf) 0 100 0
-    SDL.fillRect surf Nothing p
-
 --------------------------------------------------------------------
 -- Temp functions, for visual debug only.
 -- TODO: do it right.

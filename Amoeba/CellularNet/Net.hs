@@ -165,6 +165,11 @@ stepNet = consumeSignals . conductSignals . emitSignals
 type PosSet = S.Set Pos
 data EmitableNeurons = TryAll
                      | Emitable PosSet
+  deriving (Show, Read, Eq)
+
+type NetAge = Int
+data FastNet = FastNet NetAge EmitableNeurons Net
+  deriving (Show, Read, Eq)
 
 selectiveEmitter :: Pos -> (ModulatorIncomeMap, Net) -> (ModulatorIncomeMap, Net)
 selectiveEmitter p (mIMap, net) = case M.lookup p net of
@@ -193,9 +198,17 @@ consumeSignals' (mIMap, (nIMap, net)) = let
 emitSignals' :: PosSet -> Net -> (ModulatorIncomeMap, Net)
 emitSignals' pSet net = S.foldr' selectiveEmitter (M.empty, net) pSet
 
-stepNet' (TryAll, net)           = consumeSignals' . conductSignals . emitSignals $ net
-stepNet' (Emitable neurons, net) = consumeSignals' . conductSignals . emitSignals' neurons $ net
+stepFastNet :: FastNet -> FastNet
+stepFastNet fastNet = toFastNet fastNet (f fastNet)
+  where
+    f (FastNet _ TryAll net)             = consumeSignals' . conductSignals . emitSignals $ net
+    f (FastNet _ (Emitable neurons) net) = consumeSignals' . conductSignals . emitSignals' neurons $ net
+    toFastNet (FastNet n _ _) (emitable, net) = makeFastNet (n + 1) emitable net
 
+
+makeFastNet = FastNet
+makeStartingFastNet = makeFastNet 0 TryAll
+fromFastNet (FastNet _ _ net) = net
 
 -- Tests
 
@@ -211,16 +224,15 @@ viewMaxFrom n f = M.fold maxNeuron (Neuron 0) (f n)
 
 viewMax n = viewMaxFrom n viewNet
 
-steppedTestNet' = let
-    res1 = (TryAll, snd testNet2)
-    res2 = stepNet' (TryAll, snd testNet2)
-    in res1 : iterate stepNet' res2 
+steppedFastTestNet = let
+    net1 = FastNet 1 TryAll (snd testNet2)
+    in iterate stepFastNet net1
 
-viewNet' n = snd $ head . drop n $ steppedTestNet'
-viewMax' n = viewMaxFrom n viewNet'
+viewFastNet n = fromFastNet $ head . drop n $ steppedFastTestNet
+viewFastNetMax n = viewMaxFrom n viewFastNet
 
 
-testEquality n = viewNet' n == viewNet n
+testEquality n = viewFastNet n == viewNet n
 
 
 

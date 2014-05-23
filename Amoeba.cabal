@@ -79,6 +79,8 @@ executable Amoeba
                    View.Config,
                    View.Language,
                    View.Runtime,
-                   View.View
+                   View.View,
+                   View.NetView,
+                   Middleware.SDL.Render
   main-is:         Main.hs
 
