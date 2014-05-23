@@ -6,4 +6,4 @@ import Application.Game.Engine.Runtime
 import qualified Middleware.Tracing.Log as Log
 import Middleware.Tracing.ErrorHandling
 
-loadNet = makeStartingFastNet $ snd testNet2
+loadNet = viewFastNet 10

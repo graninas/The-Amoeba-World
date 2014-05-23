@@ -228,11 +228,11 @@ steppedFastTestNet = let
     net1 = FastNet 1 TryAll (snd testNet2)
     in iterate stepFastNet net1
 
-viewFastNet n = fromFastNet $ head . drop n $ steppedFastTestNet
-viewFastNetMax n = viewMaxFrom n viewFastNet
+viewFastNet n = head . drop n $ steppedFastTestNet
+viewFastNetMax n = viewMaxFrom n (fromFastNet . viewFastNet)
 
 
-testEquality n = viewFastNet n == viewNet n
+testEquality n = fromFastNet (viewFastNet n) == viewNet n
 
 
 

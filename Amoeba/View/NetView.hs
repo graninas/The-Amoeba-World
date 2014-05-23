@@ -14,17 +14,22 @@ import qualified Data.Map as M
 scale = 10
 cellSide = 7
 
+shiftX = -70
+shiftY = -70
+
 toSdlRect :: Pos -> SDL.Rect
 toSdlRect (x, y) = SDL.Rect x' y' (x' + cellSide) (y' + cellSide)
   where
-    x' = x * scale
-    y' = y * scale
+    x' = (x + shiftX) * scale
+    y' = (y + shiftY) * scale
 
 toWord8Pixel (r, g, b) = toSdlPixel (fi r, fi g, fi b)
   where fi = fromIntegral
 
 getNeuronColor e    = toWord8Pixel (0, e * 10 + 100, 0)
-getModulatorColor i = toWord8Pixel (0, 0, i * 10 + 100)
+getModulatorColor i | i == 0 = toWord8Pixel (0, 0, 0)
+                    | i < 0  = toWord8Pixel (0, 0, i * 10 + 200)
+                    | i > 0  = toWord8Pixel (i * 10 + 200, 0, 0)
 
 renderCell surf (pos, Neuron e) = do
     let col = getNeuronColor e
