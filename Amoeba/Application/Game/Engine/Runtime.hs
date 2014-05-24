@@ -26,3 +26,8 @@ putNet :: FastNet -> GameStateTIO ()
 putNet net = do
     rt <- get
     put $ rt { grtNet = net }
+    
+putView :: View -> GameStateTIO ()
+putView view = do
+    rt <- get
+    put $ rt { grtView = view }

@@ -16,12 +16,12 @@ import qualified Data.Map as M
 scale = 10
 cellSide = 7
 
-setupView :: (Screen, String) -> IO View
-setupView (scr@(Screen w h bpp), caption) = do
+setupView :: (Screen, String, ViewPoint) -> IO View
+setupView (scr@(Screen w h bpp), caption, virtualPlane) = do
     surface <- SDL.setVideoMode w h bpp [SDL.SWSurface]
     SDL.setCaption caption []
     SDL.flip surface
-    return $ View surface scr caption
+    return $ View surface scr caption virtualPlane Nothing
     
 --------------------------------------------------------------------
 -- Temp functions, for visual debug only.

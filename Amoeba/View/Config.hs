@@ -11,7 +11,13 @@ screenInfo = do
 
 captionInfo = strOption appName
 
+virtualPlainInfo = do
+    virtX <- intOption virtualPlaneX
+    virtY <- intOption virtualPlaneY
+    return (virtX, virtY)
+
 loadViewSettings cfg = do
-    screen <- extract cfg screenInfo
-    caption <- extract cfg captionInfo
-    return (screen, caption)
+    screen       <- extract cfg screenInfo
+    caption      <- extract cfg captionInfo
+    virtualPlain <- extract cfg virtualPlainInfo
+    return (screen, caption, virtualPlain)
