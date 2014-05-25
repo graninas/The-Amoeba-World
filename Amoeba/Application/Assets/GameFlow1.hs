@@ -26,7 +26,7 @@ selector node Update = mkEmpty . render . update --> gameNode node
 selector node (StartViewPointMoving x y) = mkEmpty . render . 
     startViewPointMoving . pure (x, y) . diagnose "Start view point moving." --> gameNode node
 selector node (ViewPointMoving x y) = mkEmpty . render . 
-    viewPointMoving . pure (x, y) . diagnose "View point moving." --> gameNode node
+    viewPointMoving . pure (x, y) --> gameNode node
 selector node (StopViewPointMoving x y) = mkEmpty . render . 
     stopViewPointMoving . pure (x, y) . diagnose "Stop view point moving" --> gameNode node
 

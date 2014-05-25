@@ -90,17 +90,13 @@ viewPointMoving = mkGen_ $ \point -> do
             putView view'
             retR ()
         Nothing -> retR ()
-    
+
 -- TODO: use not a mkGen_.
 stopViewPointMoving :: GameWire ScreenPoint ()
 stopViewPointMoving = mkGen_ $ \point -> do
-    view <- getView
-    let mbShift = viewVirtualPlainShift view
+    view@(View a b c vPlane mbShift) <- getView
     case mbShift of
-        Just (shiftStart, _) -> do
-            let virtPlain = viewVirtualPlain view
-            let shift = toViewPoint point -! shiftStart
-            let view' = view {viewVirtualPlainShift = Nothing, viewVirtualPlain = shift}
-            putView view'
+        Just (p1, p2) -> do
+            putView $ View a b c (vPlane +! p2 -! p1) Nothing
             retR ()
         Nothing -> retR ()
