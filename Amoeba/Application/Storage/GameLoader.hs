@@ -10,7 +10,6 @@ import Middleware.Tracing.ErrorHandling
 -- TODO: get seed from timer
 getSeed = return 100
 
--- TODO: this function should be in Either monad.
 loadGame worldPath = do
     worldContents <- readFile worldPath
     withLogError (return . not . null $ worldContents) $ "No data in data file " ++ worldPath

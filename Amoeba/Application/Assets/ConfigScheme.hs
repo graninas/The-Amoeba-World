@@ -1,4 +1,4 @@
-module Middleware.Config.Scheme where
+module Application.Assets.ConfigScheme where
 
 import Middleware.Config.Config
 

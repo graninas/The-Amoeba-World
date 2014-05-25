@@ -34,7 +34,6 @@ executable Amoeba
   other-modules:   
                    Amoeba,
                    Application.Assets.GameFlow1,
-                   Application.Assets.GameFlow2,
                    Application.Boot,
                    Application.Game.Engine.Core,
                    Application.Game.Engine.GameWire,
@@ -66,7 +65,6 @@ executable Amoeba
                    Middleware.Config.Config,
                    Middleware.Config.Extra,
                    Middleware.Config.Facade,
-                   Middleware.Config.Scheme,
                    Middleware.FRP.NetwireFacade,
                    Middleware.Parsing.Common,
                    Middleware.Parsing.Facade,
@@ -79,6 +77,8 @@ executable Amoeba
                    View.Config,
                    View.Language,
                    View.Runtime,
-                   View.View
+                   View.View,
+                   Application.Assets.ConfigScheme,
+                   Application.Config
   main-is:         Main.hs
 

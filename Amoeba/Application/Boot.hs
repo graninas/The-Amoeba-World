@@ -10,23 +10,17 @@ import Middleware.SDL.Environment
 import Application.Game.Logic
 import Application.Game.Engine.Runtime
 import Application.Game.Engine.Core
+import Application.Config
 import Application.Storage.GameLoader
 
-logFileLoader = Cfg.filePathLoader Cfg.logPath "Amoeba.log"
-
--- TODO: move it in config file?
-worldFileLoader = Cfg.filePathLoader Cfg.rawsPath "World.arf"
-
--- TOOD: this function should be in Either monad.
--- TODO: Improve simple logging.
 boot cfg = do
     logFilePath <- Cfg.extract cfg logFileLoader
+    worldPath <- Cfg.extract cfg worldFileLoader
+    
     Log.setupLogger logFilePath
     Log.info $ "Logger started: " ++ logFilePath
-    
-    worldPath <- Cfg.extract cfg worldFileLoader
     game <- loadGame worldPath
-    Log.info "Game loaded."
+    Log.info $ "Game loaded from: " ++ worldPath
     
     viewSettings <- loadViewSettings cfg
     Log.info "View settings loaded."

@@ -1,6 +1,7 @@
 module View.Config where
 
 import View.Runtime
+import Application.Assets.ConfigScheme
 import Middleware.Config.Facade
 
 screenInfo = do
