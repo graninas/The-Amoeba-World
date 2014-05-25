@@ -7,25 +7,19 @@ import qualified Middleware.Config.Facade as Cfg
 import qualified Middleware.Tracing.Log as Log
 import Middleware.SDL.Environment
 
-import Application.Game.Logic
 import Application.Game.Engine.Runtime
 import Application.Game.Engine.Core
-import Application.Storage.CellularNetLoader
 
-logFileLoader = Cfg.filePathLoader Cfg.logPath "Amoeba.log"
+import qualified CellularNet.Facade as Net
 
--- TODO: move it in config file?
-worldFileLoader = Cfg.filePathLoader Cfg.rawsPath "World.arf"
+logFileLoader = Cfg.filePathLoader Cfg.logPath "Endo.log"
 
--- TOOD: this function should be in Either monad.
--- TODO: Improve simple logging.
 boot cfg = do
     logFilePath <- Cfg.extract cfg logFileLoader
     Log.setupLogger logFilePath
     Log.info $ "Logger started: " ++ logFilePath
     
-    worldPath <- Cfg.extract cfg worldFileLoader
-    let net = loadNet
+    dat <- Net.load cfg
     Log.info "Net loaded."
     
     viewSettings <- loadViewSettings cfg
@@ -34,8 +28,8 @@ boot cfg = do
     withEnvironment $ do
         view <- setupView viewSettings
         Log.info "View prepared."
-        let rt = runtime cfg view net
-        (inhibitor, _) <- startMainLoop logic rt
+        let rt = runtime cfg view dat
+        (inhibitor, _) <- startMainLoop Net.logic rt
         Log.info $ "Inhibitor: " ++ if null inhibitor then "Unspecified." else inhibitor
     
     Log.info "Game unloaded."

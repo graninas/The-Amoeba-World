@@ -1,4 +1,4 @@
-module View.NetView where
+module CellularNet.View where
 
 import View.Color
 import View.Runtime
@@ -61,8 +61,3 @@ renderNet (View surf _ _ vPlane mbShift) (FastNet _ _ net) = renderNet' (shiftPl
         SDL.flip surf
     shiftPlane Nothing = vPlane
     shiftPlane (Just (p1, p2)) = vPlane +! p2 -! p1
-        
-
--- TODO: move to entry module.
-stepNet = stepFastNet
-    

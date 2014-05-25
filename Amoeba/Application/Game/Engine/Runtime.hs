@@ -1,33 +1,36 @@
 module Application.Game.Engine.Runtime where
 
+import Application.Game.GameState
 import View.Runtime
-import CellularNet.Net
 import Middleware.Config.Facade
 
 import Control.Monad.State (get, put, StateT(..))
+import Control.Monad.State.Class
 import Control.Monad (liftM)
 
 data GameRt = GameRt { grtConfiguration :: Configuration
                      , grtView :: View
-                     , grtNet :: FastNet
+                     , grtData :: GameState
                      }
 
 type GameStateTIO = StateT GameRt IO
 
 runtime = GameRt
 
-getNet :: GameStateTIO FastNet
-getNet = liftM grtNet get
+getConfiguration :: GameStateTIO Configuration
+getConfiguration = liftM grtConfiguration get
+
+putConfiguration :: Configuration -> GameStateTIO ()
+putConfiguration cfg = modify (\rt -> rt { grtConfiguration = cfg })
 
 getView :: GameStateTIO View
 getView = liftM grtView get
 
-putNet :: FastNet -> GameStateTIO ()
-putNet net = do
-    rt <- get
-    put $ rt { grtNet = net }
-    
 putView :: View -> GameStateTIO ()
-putView view = do
-    rt <- get
-    put $ rt { grtView = view }
+putView view = modify (\rt -> rt { grtView = view })
+
+getData :: GameStateTIO GameState
+getData = liftM grtData get
+
+putData :: GameState -> GameStateTIO ()
+putData dat = modify (\rt -> rt { grtData = dat })

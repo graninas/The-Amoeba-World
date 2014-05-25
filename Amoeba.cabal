@@ -33,13 +33,10 @@ executable Amoeba
   ghc-options:     -O1 -threaded -outputdir ./.bin
   other-modules:   
                    Amoeba,
-                   Application.Assets.GameFlow1,
-                   Application.Assets.GameFlow2,
                    Application.Boot,
                    Application.Game.Engine.Core,
                    Application.Game.Engine.GameWire,
                    Application.Game.Engine.Runtime,
-                   Application.Game.Logic,
                    Application.Storage.GameLoader,
                    GameLogic.Assets.Objects,
                    GameLogic.Assets.Players,
@@ -77,10 +74,13 @@ executable Amoeba
                    Middleware.Tracing.Log,
                    View.Color,
                    View.Config,
-                   View.Language,
                    View.Runtime,
                    View.View,
-                   View.NetView,
-                   Middleware.SDL.Render
+                   Middleware.SDL.Render,
+                   Application.Game.GameState,
+                   CellularNet.Wire,
+                   CellularNet.RuntimeSt,
+                   CellularNet.View,
+                   CellularNet.Facade
   main-is:         Main.hs
 
