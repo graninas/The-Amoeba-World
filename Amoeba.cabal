@@ -9,6 +9,11 @@ license:        GPL-3
 category:       Game
 maintainer:     Alexander Granin <graninas@gmail.com>
 stability:      experimental
+data-files:     
+                Game/Data/Raws/Items.arf, 
+                Game/Data/Raws/World.arf, 
+                Game/Data/Options.cfg, 
+                Game/Logs/Amoeba.log
 
 executable Amoeba
   build-depends:   
@@ -27,14 +32,18 @@ executable Amoeba
                    ConfigFile >=1.1.1 && <1.2,
                    SDL-ttf >=0.6.2 && <0.7,
                    either >=4.1.1 && <4.2,
-                   parsec >=3.1.5 && <3.2
+                   parsec >=3.1.5,
+                   directory,
+                   filepath
   default-language: Haskell2010
   hs-source-dirs:  Amoeba
   ghc-options:     -O1 -threaded -outputdir ./.bin
   other-modules:   
                    Amoeba,
+                   Application.Assets.ConfigScheme,
                    Application.Assets.GameFlow1,
                    Application.Boot,
+                   Application.Config,
                    Application.Game.Engine.Core,
                    Application.Game.Engine.GameWire,
                    Application.Game.Engine.Runtime,
@@ -77,8 +86,6 @@ executable Amoeba
                    View.Config,
                    View.Language,
                    View.Runtime,
-                   View.View,
-                   Application.Assets.ConfigScheme,
-                   Application.Config
+                   View.View
   main-is:         Main.hs
 

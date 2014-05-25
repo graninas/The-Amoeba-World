@@ -11,8 +11,9 @@ import System.Log.Logger
 import System.Log.Handler.Simple
 import System.Log.Handler (setFormatter)
 import System.Log.Formatter
-
 import Prelude hiding (error)
+
+import Paths_The_Amoeba_World as P
 
 logFormat = "$utcTime $prio $loggername: $msg"
 loggerName = "Amoeba.Application"
@@ -20,7 +21,8 @@ loggerName = "Amoeba.Application"
 defaultFormatter = simpleLogFormatter logFormat
 
 setupLogger logFileName = do
-    handler <- fileHandler logFileName INFO
+    logFileRealName <- P.getDataFileName logFileName
+    handler <- fileHandler logFileRealName INFO
     let handler' = setFormatter handler defaultFormatter
     updateGlobalLogger loggerName $ addHandler handler'
     updateGlobalLogger loggerName $ setLevel INFO

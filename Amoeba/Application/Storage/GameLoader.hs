@@ -7,11 +7,13 @@ import Application.Game.Engine.Runtime
 import qualified Middleware.Tracing.Log as Log
 import Middleware.Tracing.ErrorHandling
 
+import Paths_The_Amoeba_World as P
 -- TODO: get seed from timer
 getSeed = return 100
 
 loadGame worldPath = do
-    worldContents <- readFile worldPath
+    worldFileRealName <- P.getDataFileName worldPath
+    worldContents <- readFile worldFileRealName
     withLogError (return . not . null $ worldContents) $ "No data in data file " ++ worldPath
     case toWorld worldContents of
         Left err -> do
