@@ -9,7 +9,7 @@ import Middleware.SDL.SDLFacade as SDL
 import Middleware.Tracing.ErrorHandling
 import qualified Middleware.Tracing.Log as Log
 
-import Control.Monad.IO.Class (liftIO)
+import Control.Monad.IO.Class (liftIO, MonadIO)
 import Control.Monad.Trans.State (runStateT)
 
 -- Main loop
@@ -19,6 +19,7 @@ startMainLoop wire = runStateT (startLoop wire)
 startLoop :: GameWire () () -> GameStateTIO Inhibitor
 startLoop = loop' clockSession_ (Right ())
 
+loop' :: Session GameStateTIO (Timed NominalDiffTime ()) -> Either Inhibitor () -> GameWire () () -> GameStateTIO Inhibitor
 loop' _ (Left res) _ = return res
 loop' s input w = do
     (delta, s') <- stepSession s
