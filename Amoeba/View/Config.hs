@@ -2,6 +2,7 @@ module View.Config where
 
 import View.Runtime
 import Middleware.Config.Facade
+import Application.Assets.ConfigScheme
 
 screenInfo = do
     sw <- intOption screenWidth

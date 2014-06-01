@@ -1,18 +1,18 @@
 module Application.Boot where
 
-import View.Config
-import View.View
-
 import qualified Middleware.Config.Facade as Cfg
 import qualified Middleware.Tracing.Log as Log
 import Middleware.SDL.Environment
 
+import View.Config
+import View.View
+
 import Application.Game.Engine.Runtime
 import Application.Game.Engine.Core
+import Application.Assets.ConfigScheme
+import Application.Config
 
 import qualified CellularNet.Facade as Net
-
-logFileLoader = Cfg.filePathLoader Cfg.logPath "Endo.log"
 
 boot cfg = do
     logFilePath <- Cfg.extract cfg logFileLoader

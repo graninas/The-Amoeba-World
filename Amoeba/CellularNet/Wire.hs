@@ -22,7 +22,7 @@ instance RuntimeSt Rt.GameStateTIO where
   getData = Rt.getData
   putData = Rt.putData
 
-data GameNode = Screen1 | Screen2 | Screen3 | Screen4
+data GameNode = Single | Periodic
   deriving (Ord, Eq, Show, Enum)
 
 data Command = Finish
@@ -35,36 +35,36 @@ data Command = Finish
   deriving (Ord, Eq, Show)
 
 logic :: GameWire () ()
-logic = gameNode Screen1
+logic = gameNode Single
 
 gameNode :: GameNode -> GameWire () ()
 gameNode node = modes Render (selector node) .
             (
-                pure () &&& now . interpreter node . pollSdlEvent
+                pure () &&& metainterpreter node
             )
 
-selector _    Finish = quit . diagnose "Finish"
-selector node Render = mkEmpty . render --> gameNode node
-selector _   (SwitchNode swNode) = mkEmpty --> gameNode swNode
-selector node Update = mkEmpty . render . update --> gameNode node
-selector node (StartViewPointMoving x y) = mkEmpty . render . 
-    startViewPointMoving . pure (x, y) --> gameNode node
-selector node (ViewPointMoving x y) = mkEmpty . render . 
-    viewPointMoving . pure (x, y) --> gameNode node
-selector node (StopViewPointMoving x y) = mkEmpty . render . 
-    stopViewPointMoving . pure (x, y) --> gameNode node
+switcher node w1 = mkEmpty . w1 --> gameNode node
+
+selector _     Finish                    = quit . diagnose "Finish"
+selector _    (SwitchNode swNode)        = switcher swNode mkEmpty
+selector node  Render                    = switcher node render
+selector node  Update                    = switcher node (render . update)
+selector node (StartViewPointMoving x y) = switcher node (render . startViewPointMoving . pure (x, y))
+selector node (ViewPointMoving x y)      = switcher node (render . viewPointMoving      . pure (x, y))
+selector node (StopViewPointMoving x y)  = switcher node (render . stopViewPointMoving  . pure (x, y))
+
+metainterpreter Single   = now        . interpreter Single   . pollSdlEvent
+metainterpreter Periodic = periodic 1 . interpreter Periodic . pollSdlEvent
 
 interpreter :: GameNode -> GameWire SDL.Event Command
 interpreter node = mkSF_ $ \e -> case e of
-    SDL.Quit -> Finish
-    (SDL.KeyDown _) -> Update
-    SDL.MouseButtonDown x y SDL.ButtonLeft -> StartViewPointMoving x y
-    SDL.MouseMotion x y _ _ -> ViewPointMoving x y
-    SDL.MouseButtonUp   x y SDL.ButtonLeft -> StopViewPointMoving x y
-    _ -> Render
-
-next Screen4 = Screen1
-next node = succ node
+    SDL.Quit                                       -> Finish
+    (SDL.KeyDown (SDL.Keysym SDL.SDLK_ESCAPE _ _)) -> Finish
+    (SDL.KeyDown (SDL.Keysym SDL.SDLK_SPACE _ _))  -> SwitchNode Periodic
+    SDL.MouseButtonDown x y SDL.ButtonLeft         -> StartViewPointMoving x y
+    SDL.MouseMotion x y _ _                        -> ViewPointMoving x y
+    SDL.MouseButtonUp   x y SDL.ButtonLeft         -> StopViewPointMoving x y
+    _                                              -> Render
 
 render = mkGen_ $ const $ do
     view <- Rt.getView

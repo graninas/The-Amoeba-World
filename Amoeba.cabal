@@ -9,6 +9,9 @@ license:        GPL-3
 category:       Game
 maintainer:     Alexander Granin <graninas@gmail.com>
 stability:      experimental
+data-files:     
+                Game/Data/Options.cfg, 
+                Game/Logs/Amoeba.log
 
 executable Amoeba
   build-depends:   
@@ -27,7 +30,9 @@ executable Amoeba
                    ConfigFile >=1.1.1 && <1.2,
                    SDL-ttf >=0.6.2 && <0.7,
                    either >=4.1.1 && <4.2,
-                   parsec >=3.1.5 && <3.2
+                   parsec >=3.1.5 && <3.2,
+                   directory >=1.2.0,
+                   filepath >=1.3.0
   default-language: Haskell2010
   hs-source-dirs:  Amoeba
   ghc-options:     -O1 -threaded -outputdir ./.bin
@@ -63,7 +68,6 @@ executable Amoeba
                    Middleware.Config.Config,
                    Middleware.Config.Extra,
                    Middleware.Config.Facade,
-                   Middleware.Config.Scheme,
                    Middleware.FRP.NetwireFacade,
                    Middleware.Parsing.Common,
                    Middleware.Parsing.Facade,
@@ -81,6 +85,8 @@ executable Amoeba
                    CellularNet.Wire,
                    CellularNet.RuntimeSt,
                    CellularNet.View,
-                   CellularNet.Facade
+                   CellularNet.Facade,
+                   Application.Config,
+                   Application.Assets.ConfigScheme
   main-is:         Main.hs
 
