@@ -15,12 +15,12 @@ import qualified Data.Map as M
 scale = 10
 cellSide = 7
 
-setupView :: (Screen, String) -> IO View
-setupView (scr@(Screen w h bpp), caption) = do
+setupView :: (Screen, String, ViewPoint) -> IO View
+setupView (scr@(Screen w h bpp), caption, virtualPlane) = do
     surface <- SDL.setVideoMode w h bpp [SDL.SWSurface]
     SDL.setCaption caption []
     SDL.flip surface
-    return $ View surface scr caption
+    return $ View surface scr caption virtualPlane Nothing
     
 clearScreen surf = do
     p <- SDL.mapRGB (SDL.surfaceGetPixelFormat surf) 0 100 0
@@ -34,24 +34,33 @@ getColorByPlayer pl | pl == dummyPlayer = toSdlPixel white
 getColorByPlayer pl | pl == player1     = toSdlPixel red
 getColorByPlayer pl | pl == player2     = toSdlPixel blue
 
-toSdlRect :: Point -> SDL.Rect
-toSdlRect p = SDL.Rect x y (x + cellSide) (y + cellSide)
+toSdlRect :: ViewPoint -> Point -> SDL.Rect
+toSdlRect (planeX, planeY) point = SDL.Rect x' y' (x' + cellSide) (y' + cellSide)
   where
-    x = pointX p * scale
-    y = pointY p * scale
-    
-renderCell surf (p, Object _ _ pl _ _ _) = do
+    x = pointX point
+    y = pointY point
+    x' = x * scale + planeX
+    y' = y * scale + planeY
+
+renderCell surf plane (p, Object _ _ pl _ _ _) = do
     let col = getColorByPlayer pl
-    let sdlRect = toSdlRect p
+    let sdlRect = toSdlRect plane p
     withLogError (SDL.rectangle surf sdlRect col) "renderCell: box failed."
     return ()
 
-renderWorldMap surf w h wm = mapM_ (renderCell surf) (M.toList wm)
+renderWorldMap surf plane wm = mapM_ (renderCell surf plane) (M.toList wm)
 
 renderBorders surf = do
     let rect = SDL.Rect 1 1 638 478
     SDL.rectangle surf rect (toSdlPixel white)
 
-renderWorld surf (World wm _ w h _) = do
-    renderBorders surf
-    renderWorldMap surf w h wm
+renderGame (View surf _ _ vPlane mbShift) (Game (World wm _ _ _ _) _) = renderGame' (shiftPlane mbShift)
+  where
+    renderGame' plane = do
+        clearScreen surf
+        renderBorders surf
+        renderWorldMap surf plane wm
+        SDL.flip surf
+    shiftPlane Nothing = vPlane
+    shiftPlane (Just (p1, p2)) = vPlane +! p2 -! p1
+    

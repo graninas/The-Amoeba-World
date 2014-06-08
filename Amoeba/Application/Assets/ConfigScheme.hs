@@ -11,6 +11,8 @@ rawsPath = defaultSection <| opt "rawsPath"
 
 
 videoSection = sect "VIDEO"
-screenWidth  = videoSection <| opt "screenWidth"
+screenWidth = videoSection <| opt "screenWidth"
 screenHeight = videoSection <| opt "screenHeight"
-colorDepth   = videoSection <| opt "colorDepth"
+colorDepth = videoSection <| opt "colorDepth"
+virtualPlaneX = videoSection <| opt "virtualPlaneX"
+virtualPlaneY = videoSection <| opt "virtualPlaneY"

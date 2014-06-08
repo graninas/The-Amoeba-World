@@ -86,6 +86,8 @@ executable Amoeba
                    View.Config,
                    View.Language,
                    View.Runtime,
-                   View.View
+                   View.View,
+                   Application.Game.RuntimeSt,
+                   Application.Game.GameState
   main-is:         Main.hs
 

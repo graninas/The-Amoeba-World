@@ -50,12 +50,3 @@ pollSdlEvent :: GameWire () SDL.Event
 pollSdlEvent = mkGen_ $ \_ -> do
         e <- liftIO SDL.pollEvent
         retR e
-
--- TODO: make it safe on a type-level. Either or Maybe is needed.
-render :: GameWire a ()
-render = mkGen_ $ \_ -> do
-    surf <- getSurface
-    withLogError (clearScreen surf) "clearScreen failed."
-    w <- getWorld
-    withIO $ renderWorld surf w
-    withIO $ SDL.flip surf
