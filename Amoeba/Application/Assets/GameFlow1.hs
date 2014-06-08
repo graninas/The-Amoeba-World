@@ -21,8 +21,9 @@ instance RuntimeSt Rt.GameStateTIO where
   putData = Rt.putData
 
 
--- This workflow just switches modes by mouse click.
--- To finish the application, close it in a usual way.
+-- This workflow just switches modes by Space.
+-- It allows to move viewpoint by mouse.
+-- To finish the application, close it in a usual way or press 'Esc'.
 
 gameNode :: GameNode -> GameWire () ()
 gameNode node = modes Render (selector node) .
