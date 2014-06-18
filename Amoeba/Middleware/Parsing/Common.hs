@@ -47,3 +47,13 @@ intTuple2 = do
     v2 <- integerConstant
     char ')'
     return (v1, v2)
+    
+listOf :: GenParser Char st a -> GenParser Char st [a]
+listOf itemParser = between (char '[') (char ']') $ item `sepBy` char ','
+  where
+    item = do
+        trueSpaces
+        p <- itemParser
+        trueSpaces
+        return p
+
