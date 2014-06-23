@@ -4,14 +4,18 @@ import GameLogic.Data.Facade
 import GameLogic.Language.Translation.Translator
 
 import Application.Game.Engine.Runtime
+import Application.Assets.TestWorld
+
 import qualified Middleware.Tracing.Log as Log
 import Middleware.Tracing.ErrorHandling
-
 import Paths_The_Amoeba_World as P
+
 -- TODO: get seed from timer
 getSeed = return 100
 
-loadGame worldPath = do
+loadGame _ = return $ mkGame testWorld 100
+
+loadGame' worldPath = do
     worldFileRealName <- P.getDataFileName worldPath
     worldContents <- readFile worldFileRealName
     withLogError (return . not . null $ worldContents) $ "No data in data file " ++ worldPath

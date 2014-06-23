@@ -1,5 +1,6 @@
 module GameLogic.Assets.Objects where
 
+{-
 import Control.Monad.State
 import Data.Default
 import Control.Lens
@@ -64,3 +65,5 @@ influencer pl dir p = makeObject $ do
     durabilityA  |= (30, Just 30)
     ownershipA   |= pl
     fabricA      |= soundWaveFabric pl dir p
+
+-}

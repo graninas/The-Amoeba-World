@@ -1,24 +1,14 @@
-
-; General items
+; World definition file
 
 Item "Karyon"
     lifebound = (0, 5000)
     durability = (100, 100)
     energy = (300, 2000)
 
-; Conductor
-Item "Conductor"
-    lifebound = (0, 1000)
-    durability = (100, 100)
-    energy = (0, 100)
-
-; Plasma
 Item "Plasma"
     lifebound = (0, 1000)
     durability = (100, 100)
     energy = (0, 100)
-
-; World definition file
 
 World "Pandora"
     width = 20

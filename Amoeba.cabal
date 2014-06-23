@@ -52,7 +52,6 @@ executable Amoeba
                    GameLogic.Assets.Objects,
                    GameLogic.Assets.Players,
                    GameLogic.Assets.Scenarios,
-                   GameLogic.Base.Geometry,
                    GameLogic.Data.Facade,
                    GameLogic.Data.Game,
                    GameLogic.Data.Object,
@@ -88,6 +87,9 @@ executable Amoeba
                    View.Runtime,
                    View.View,
                    Application.Game.RuntimeSt,
-                   Application.Game.GameState
+                   Application.Game.GameState,
+                   Application.Assets.TestWorld,
+                   GameLogic.Data.Task,
+                   Middleware.Math.Geometry
   main-is:         Main.hs
 

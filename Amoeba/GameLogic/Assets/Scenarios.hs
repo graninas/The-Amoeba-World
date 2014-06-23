@@ -1,7 +1,5 @@
-{-# LANGUAGE NoMonomorphismRestriction #-}
-{-# LANGUAGE Rank2Types #-}
-
 module GameLogic.Assets.Scenarios where
+{-
 
 import Control.Lens
 import Control.Monad
@@ -73,3 +71,4 @@ mainScenario = do
     forProperty moving movingScenario
     return ()
 
+-}

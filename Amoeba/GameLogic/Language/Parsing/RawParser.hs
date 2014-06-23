@@ -12,7 +12,7 @@ rawTokens :: GenParser Char st [RawToken]
 rawTokens = many rawToken
 
 rawToken :: GenParser Char st RawToken
-rawToken = emptyToken <|> comment <|> item <|> world <?> "rawToken"
+rawToken = try emptyToken <|> try comment <|> try item <|> try world <?> "rawToken"
 
 parseRawTokens :: String -> Either String [RawToken]
 parseRawTokens input = case P.parse rawTokens [] input of

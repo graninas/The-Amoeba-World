@@ -4,31 +4,35 @@ import qualified Control.Lens as L
 import qualified Data.Map as M
 import Prelude hiding (null, lookup)
 
-import GameLogic.Base.Geometry
+import GameLogic.Data.Types
 import GameLogic.Data.Object
+import GameLogic.Data.Task
+import Middleware.Math.Geometry
 
 data Effect = Effect
   deriving (Show, Read, Eq)
 type Effects = [Effect]
-type EffectMap = M.Map Int Effects
+type EffectMap = M.Map ObjectId Effects
 
-data Action = Action
-  deriving (Show, Read, Eq)
 
 type WorldMap = M.Map Point Object
 data World = World { worldMap :: WorldMap
-                   , effectMap :: EffectMap
+                   , worldEffects :: EffectMap
+                   , worldTasks :: TaskMap
                    , width :: Int
                    , height :: Int
                    , defaultCell :: Maybe Object
                    }
   deriving (Show, Read, Eq)
 
-emptyWorld = World M.empty M.empty 0 0 Nothing
+emptyWorld = World M.empty M.empty M.empty 0 0 Nothing
 
-insertObject point object w@(World wm _ _ _ _) = w { worldMap = M.insert point object wm }
+insertObject point object w@(World wm _ _ _ _ _) = w { worldMap = M.insert point object wm }
 
-worldMapSize (World wm _ _ _ _) = M.size wm
+worldMapSize (World wm _ _ _ _ _) = M.size wm
+
+
+
 
 {-
 fromList :: [(Point, Object)] -> World

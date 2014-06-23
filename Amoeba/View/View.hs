@@ -47,19 +47,23 @@ renderCell surf plane (p, Object _ _ pl _ _ _) = do
     let sdlRect = toSdlRect plane p
     withLogError (SDL.rectangle surf sdlRect col) "renderCell: box failed."
     return ()
+    
 
 renderWorldMap surf plane wm = mapM_ (renderCell surf plane) (M.toList wm)
+renderTasksMap surf plane tm = return ()
+
 
 renderBorders surf = do
     let rect = SDL.Rect 1 1 638 478
     SDL.rectangle surf rect (toSdlPixel white)
 
-renderGame (View surf _ _ vPlane mbShift) (Game (World wm _ _ _ _) _) = renderGame' (shiftPlane mbShift)
+renderGame (View surf _ _ vPlane mbShift) (Game (World wm _ tm _ _ _) _) = renderGame' (shiftPlane mbShift)
   where
     renderGame' plane = do
         clearScreen surf
         renderBorders surf
         renderWorldMap surf plane wm
+        renderTasksMap surf plane tm
         SDL.flip surf
     shiftPlane Nothing = vPlane
     shiftPlane (Just (p1, p2)) = vPlane +! p2 -! p1

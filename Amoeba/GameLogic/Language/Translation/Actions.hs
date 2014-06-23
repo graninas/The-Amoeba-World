@@ -6,7 +6,7 @@ import GameLogic.Language.Translation.Runtime
 import GameLogic.Data.World
 import GameLogic.Data.Object
 import GameLogic.Data.Types
-import GameLogic.Base.Geometry (point)
+import Middleware.Math.Geometry (point)
 
 import Prelude hiding (log)
 import Control.Monad.Trans.Either (left)
