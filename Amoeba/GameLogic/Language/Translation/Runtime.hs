@@ -7,7 +7,6 @@ import Data.Maybe (catMaybes)
 import qualified Data.Map as M
 import Prelude hiding (log)
 
-import GameLogic.Data.Types
 import GameLogic.Data.World
 import GameLogic.Data.Object
 import GameLogic.Language.RawToken

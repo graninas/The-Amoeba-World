@@ -50,12 +50,10 @@ executable Amoeba
                    Application.Game.Logic,
                    Application.Storage.GameLoader,
                    GameLogic.Assets.Objects,
-                   GameLogic.Assets.Players,
                    GameLogic.Assets.Scenarios,
                    GameLogic.Data.Facade,
                    GameLogic.Data.Game,
                    GameLogic.Data.Object,
-                   GameLogic.Data.Types,
                    GameLogic.Data.World,
                    GameLogic.Facade,
                    GameLogic.Language.Parsing.Common,
@@ -89,7 +87,8 @@ executable Amoeba
                    Application.Game.RuntimeSt,
                    Application.Game.GameState,
                    Application.Assets.TestWorld,
-                   GameLogic.Data.Task,
-                   Middleware.Math.Geometry
+                   Middleware.Math.Geometry,
+                   GameLogic.Data.Player,
+                   GameLogic.Data.Strategy
   main-is:         Main.hs
 

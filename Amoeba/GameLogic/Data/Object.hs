@@ -2,8 +2,10 @@
 module GameLogic.Data.Object where
 
 import Control.Lens
+import GameLogic.Data.Player
 
-import GameLogic.Data.Types
+type ObjectType = Int
+type ObjectId = Int
 
 data Resource a = Resource { _stock :: a
                            , _capacity :: a }
@@ -22,9 +24,6 @@ data Object = Object {
                        , _lifebound  :: IntResource    -- runtime property
                        , _durability :: IntResource    -- runtime property
                        , _energy     :: IntResource    -- runtime property
-
-                       -- , __effects :: Effects'
-                       -- , __actions :: Actions' 
                        }
   deriving (Show, Read, Eq)
 

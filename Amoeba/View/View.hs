@@ -30,9 +30,9 @@ clearScreen surf = do
 -- Temp functions, for visual debug only.
 -- TODO: do it right.
 
-getColorByPlayer pl | pl == dummyPlayer = toSdlPixel white
-getColorByPlayer pl | pl == player1     = toSdlPixel red
-getColorByPlayer pl | pl == player2     = toSdlPixel blue
+getColorByPlayer pl | pl == humanPlayer = toSdlPixel white
+getColorByPlayer pl | pl == ai1Player   = toSdlPixel red
+getColorByPlayer pl | otherwise         = toSdlPixel blue
 
 toSdlRect :: ViewPoint -> Point -> SDL.Rect
 toSdlRect (planeX, planeY) point = SDL.Rect x' y' (x' + cellSide) (y' + cellSide)
@@ -57,7 +57,7 @@ renderBorders surf = do
     let rect = SDL.Rect 1 1 638 478
     SDL.rectangle surf rect (toSdlPixel white)
 
-renderGame (View surf _ _ vPlane mbShift) (Game (World wm _ tm _ _ _) _) = renderGame' (shiftPlane mbShift)
+renderGame (View surf _ _ vPlane mbShift) (Game (World wm _ tm _ _) _) = renderGame' (shiftPlane mbShift)
   where
     renderGame' plane = do
         clearScreen surf

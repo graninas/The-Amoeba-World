@@ -5,7 +5,7 @@ import GameLogic.Language.Translation.Runtime
 
 import GameLogic.Data.World
 import GameLogic.Data.Object
-import GameLogic.Data.Types
+import GameLogic.Data.Player
 import Middleware.Math.Geometry (point)
 
 import Prelude hiding (log)
@@ -15,7 +15,6 @@ import qualified Data.Map as M
 
 -- This imports are for hacks.
 import qualified GameLogic.Language.Scheme as Scheme
-import qualified GameLogic.Assets.Players as Players
 
 -- Binds the trigger to the action
 (/>) :: Show a => (a -> Bool) -> (a -> Trans ()) -> a -> Trans ()
@@ -89,9 +88,8 @@ getObjectTemplate name = do
 -- TODO: too special and too unobvious functions. Maybe I can better?
 -- TODO: hacks. I'd like to finish it right now.
 
-playersMap = M.fromList [ (Scheme.player0, Players.dummyPlayer)
-                        , (Scheme.player1, Players.player1)
-                        , (Scheme.player2, Players.player2) ]
+playersMap = M.fromList [ (Scheme.player0, humanPlayer)
+                        , (Scheme.player1, ai1Player) ]
 
 toWordlPoint (x, y) = point x y 0
 

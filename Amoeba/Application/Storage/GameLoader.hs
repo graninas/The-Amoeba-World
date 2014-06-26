@@ -10,10 +10,8 @@ import qualified Middleware.Tracing.Log as Log
 import Middleware.Tracing.ErrorHandling
 import Paths_The_Amoeba_World as P
 
--- TODO: get seed from timer
-getSeed = return 100
 
-loadGame _ = return $ mkGame testWorld 100
+loadGame _ = return $ mkGame testWorld
 
 loadGame' worldPath = do
     worldFileRealName <- P.getDataFileName worldPath
@@ -25,5 +23,4 @@ loadGame' worldPath = do
             fail $ "Error of loading world: " ++ err
         Right w -> do
             Log.info $ "World loaded. Items in map: " ++ show (worldMapSize w)
-            seed <- getSeed
-            return $ mkGame w seed
+            return $ mkGame w
