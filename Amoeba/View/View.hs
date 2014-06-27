@@ -32,7 +32,7 @@ clearScreen surf = do
 
 getColorByPlayer pl | pl == humanPlayer = toSdlPixel white
 getColorByPlayer pl | pl == ai1Player   = toSdlPixel red
-getColorByPlayer pl | otherwise         = toSdlPixel blue
+getColorByPlayer pl = toSdlPixel blue
 
 toSdlRect :: ViewPoint -> Point -> SDL.Rect
 toSdlRect (planeX, planeY) point = SDL.Rect x' y' (x' + cellSide) (y' + cellSide)

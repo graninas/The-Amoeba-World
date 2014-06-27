@@ -89,6 +89,8 @@ executable Amoeba
                    Application.Assets.TestWorld,
                    Middleware.Math.Geometry,
                    GameLogic.Data.Player,
-                   GameLogic.Data.Strategy
+                   GameLogic.Data.Strategy,
+                   GameLogic.Interpreter.Language,
+                   Application.Assets.GameFlow2
   main-is:         Main.hs
 

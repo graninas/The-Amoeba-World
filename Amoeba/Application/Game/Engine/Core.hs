@@ -24,6 +24,7 @@ loop' _ (Left res) _ = return res
 loop' s input w = do
     (delta, s') <- stepSession s
     (eitherResult, w') <- stepWire w delta input
+    liftIO $ print "!"
     loop' s' eitherResult w'
 
 -- Combinator wires
@@ -38,6 +39,9 @@ diagnose a = mkGen_ $ \_ -> withIO . print $ a
 
 trace :: Show a => a -> GameWire () ()
 trace a = mkGen_ $ \_ -> withIO . Log.info . show $ a
+
+printVal :: Show a => GameWire a ()
+printVal = mkGen_ $ \a -> withIO . print $ a
 
 forget = mkConst (Right ())
 

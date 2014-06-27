@@ -12,8 +12,10 @@ p1 = point 10 10 0
 p2 = point 20 20 0
 
 objectId1 = 1
+objectId2 = 2
 
-testWorldMap = M.fromList [(p1, Object objectId1 1 humanPlayer res1 res2 res3)]
+testWorldMap = M.fromList [ (p1, Object objectId1 1 humanPlayer res1 res2 res3)
+                          , (p2, Object objectId2 1 ai1Player   res1 res2 res3)]
 testEffectMap = M.empty
 
 
