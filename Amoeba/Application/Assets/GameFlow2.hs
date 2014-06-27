@@ -25,7 +25,13 @@ instance RuntimeSt Rt.GameStateTIO where
   putData = Rt.putData
 
 gameFlow2 :: GameWire () ()
-gameFlow2 = printVal . switch w3
+gameFlow2 = printVal . switch w5
+
+w5 :: GameWire () (SDL.Event, FRP.Event (GameWire () SDL.Event))
+w5 = pure SDL.NoEvent &&& now . w6
+
+w6 :: GameWire () (GameWire () SDL.Event)
+w6 = mkPure_ $ \_ -> Right pollSdlEvent'
 
 -- Event occures imideately:
 w1 :: GameWire () Int
