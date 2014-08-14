@@ -91,6 +91,7 @@ executable Amoeba
                    GameLogic.Data.Player,
                    GameLogic.Data.Strategy,
                    GameLogic.Interpreter.Language,
-                   Application.Assets.GameFlow2
+                   Application.Assets.GameFlow2,
+                   Application.Assets.Wires
   main-is:         Main.hs
 

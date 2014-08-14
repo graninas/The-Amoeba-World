@@ -54,8 +54,7 @@ pollSdlEvent :: GameWire () SDL.Event
 pollSdlEvent = mkGen_ $ \_ -> do
         e <- liftIO SDL.pollEvent
         retR e
-        
--- Work wires
+
 pollSdlEvent' :: GameWire () SDL.Event
 pollSdlEvent' = mkGen_ $ \_ -> do
         e <- liftIO SDL.pollEvent
