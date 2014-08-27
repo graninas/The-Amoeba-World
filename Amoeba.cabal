@@ -14,10 +14,11 @@ data-files:
                 Game/Data/Raws/World.arf, 
                 Game/Data/Options.cfg, 
                 Game/Logs/Amoeba.log
+license-file:   LICENSE
 
 executable Amoeba
   build-depends:   
-                   base >= 4,
+                   base >= 4 && <5,
                    transformers,
                    containers,
                    hslogger >=1.2.3 && <1.2.4,
@@ -34,64 +35,12 @@ executable Amoeba
                    either >=4.1.1 && <4.2,
                    parsec >=3.1.5,
                    directory,
-                   filepath
+                   filepath,
+                   The-Amoeba-World-GameLogic >=0.1.1,
+                   The-Amoeba-World-Middleware >=0.1,
+                   The-Amoeba-World-View >=0.1
   default-language: Haskell2010
-  hs-source-dirs:  Amoeba
-  ghc-options:     -O1 -threaded -outputdir ./.bin
-  other-modules:   
-                   Amoeba,
-                   Application.Assets.ConfigScheme,
-                   Application.Assets.GameFlow1,
-                   Application.Boot,
-                   Application.Config,
-                   Application.Game.Engine.Core,
-                   Application.Game.Engine.GameWire,
-                   Application.Game.Engine.Runtime,
-                   Application.Game.Logic,
-                   Application.Storage.GameLoader,
-                   GameLogic.Assets.Objects,
-                   GameLogic.Assets.Scenarios,
-                   GameLogic.Data.Facade,
-                   GameLogic.Data.Game,
-                   GameLogic.Data.Object,
-                   GameLogic.Data.World,
-                   GameLogic.Facade,
-                   GameLogic.Language.Parsing.Common,
-                   GameLogic.Language.Parsing.ItemParser,
-                   GameLogic.Language.Parsing.RawParser,
-                   GameLogic.Language.Parsing.WorldParser,
-                   GameLogic.Language.RawToken,
-                   GameLogic.Language.Scheme,
-                   GameLogic.Language.Translation.Actions,
-                   GameLogic.Language.Translation.Rules,
-                   GameLogic.Language.Translation.Runtime,
-                   GameLogic.Language.Translation.Translator,
-                   GameLogic.Language.Translation.Triggers,
-                   GameLogic.Scenario.Evaluation,
-                   Middleware.Config.Config,
-                   Middleware.Config.Extra,
-                   Middleware.Config.Facade,
-                   Middleware.FRP.NetwireFacade,
-                   Middleware.Parsing.Common,
-                   Middleware.Parsing.Facade,
-                   Middleware.Parsing.ParsecFacade,
-                   Middleware.SDL.Environment,
-                   Middleware.SDL.SDLFacade,
-                   Middleware.Tracing.ErrorHandling,
-                   Middleware.Tracing.Log,
-                   View.Color,
-                   View.Config,
-                   View.Language,
-                   View.Runtime,
-                   View.View,
-                   Application.Game.RuntimeSt,
-                   Application.Game.GameState,
-                   Application.Assets.TestWorld,
-                   Middleware.Math.Geometry,
-                   GameLogic.Data.Player,
-                   GameLogic.Data.Strategy,
-                   GameLogic.Interpreter.Language,
-                   Application.Assets.GameFlow2,
-                   Application.Assets.Wires
+  hs-source-dirs:  ./src
+  ghc-options:     -threaded -outputdir ./.bin
   main-is:         Main.hs
 
