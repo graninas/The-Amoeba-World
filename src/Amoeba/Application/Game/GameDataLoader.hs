@@ -1,4 +1,4 @@
-module Amoeba.Application.Storage.GameLoader where
+module Amoeba.Application.Game.GameDataLoader where
 
 import Amoeba.GameLogic.Facade as GL
 
