@@ -47,3 +47,6 @@ putData dat = modify (\rt -> rt { grtData = dat })
 -- Will do it later. Now, this is a HACK.
 type GameStorageRt = STM.TVar GameState
 type GameStorageTIO = StateT GameStorageRt IO
+
+getStorage :: GameStorageTIO GameStorageRt
+getStorage = get
