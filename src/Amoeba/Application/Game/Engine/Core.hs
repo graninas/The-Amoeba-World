@@ -1,6 +1,7 @@
 module Amoeba.Application.Game.Engine.Core where
 
 -- TODO: remove bad dependency from View
+-- Needs generalization.
 import Amoeba.Application.Game.Engine.Runtime
 import Amoeba.Application.Game.Engine.GameWire
 import Amoeba.View.View
@@ -15,42 +16,60 @@ import Control.Monad.State (get, put, StateT(..))
 import Control.Monad.State.Class
 import Control.Monad.Trans.State (runStateT)
 
--- Main loop
-startMainLoop :: GameWire () () -> GameRt -> IO (Inhibitor, GameRt)
-startMainLoop wire = runStateT (startLoop wire)
+-- TODO: HACK: FIXME: needs deep generalization of looping and wires mechanism.
+-- Will do it later. Now, this is a HACK and copy-paste.
 
-startLoop :: GameWire () () -> GameStateTIO Inhibitor
-startLoop = loop' clockSession_ (Right ())
+-- View Wire loop.
+startMainLoopView :: ViewWire () () -> ViewRt -> IO (Inhibitor, ViewRt)
+startMainLoopView wire = runStateT (startLoopView wire)
 
-loop' :: Session GameStateTIO (Timed NominalDiffTime ())
+startLoopView :: ViewWire () () -> ViewTIO Inhibitor
+startLoopView = loopView' clockSession_ (Right ())
+
+loopView' :: Session ViewTIO (Timed NominalDiffTime ())
       -> Either Inhibitor ()
-      -> GameWire () ()
-      -> GameStateTIO Inhibitor
-loop' _ (Left res) _ = return res
-loop' s input w = do
+      -> ViewWire () ()
+      -> ViewTIO Inhibitor
+loopView' _ (Left res) _ = return res
+loopView' s input w = do
     (delta, s') <- stepSession s
     (eitherResult, w') <- stepWire w delta input
-    loop' s' eitherResult w'
+    loopView' s' eitherResult w'
 
--- TODO: HACK: FIXME: needs deep generalization of looping mechanism.
--- Will do it later. Now, this is a HACK.
-type GameStorageWire a b = GWire GameStorageTIO a b
 
-startMainLoop2 :: GameStorageWire () () -> GameStorageRt -> IO (Inhibitor, GameStorageRt)
-startMainLoop2 wire = runStateT (startLoop2 wire)
+-- GameStorage Wire loop
+startMainLoopGS :: GameStorageWire () () -> GameStorageRt -> IO (Inhibitor, GameStorageRt)
+startMainLoopGS wire = runStateT (startLoopGS wire)
 
-startLoop2 :: GameStorageWire () () -> GameStorageTIO Inhibitor
-startLoop2 = loop2' clockSession_ (Right ())
+startLoopGS :: GameStorageWire () () -> GameStorageTIO Inhibitor
+startLoopGS = loopGS' clockSession_ (Right ())
 
-loop2' :: Session GameStorageTIO (Timed NominalDiffTime ())
+loopGS' :: Session GameStorageTIO (Timed NominalDiffTime ())
       -> Either Inhibitor ()
       -> GameStorageWire () ()
       -> GameStorageTIO Inhibitor
-loop2' _ (Left res) _ = return res
-loop2' s input w = do
+loopGS' _ (Left res) _ = return res
+loopGS' s input w = do
     (delta, s') <- stepSession s
     (eitherResult, w') <- stepWire w delta input
-    loop2' s' eitherResult w'
+    loopGS' s' eitherResult w'
+
+-- AI Player Wire loop
+startMainLoopAI :: AIPlayerWire () () -> AIPlayerRt -> IO (Inhibitor, AIPlayerRt)
+startMainLoopAI wire = runStateT (startLoopGS wire)
+
+startLoopAI :: AIPlayerWire () () -> AIPlayerTIO Inhibitor
+startLoopAI = loopAI' clockSession_ (Right ())
+
+loopAI' :: Session AIPlayerTIO (Timed NominalDiffTime ())
+      -> Either Inhibitor ()
+      -> AIPlayerWire () ()
+      -> AIPlayerTIO Inhibitor
+loopAI' _ (Left res) _ = return res
+loopAI' s input w = do
+    (delta, s') <- stepSession s
+    (eitherResult, w') <- stepWire w delta input
+    loopAI' s' eitherResult w'
 
 --End of HACK
 
@@ -61,13 +80,13 @@ quit = inhibit "Finished."
 retR = return . Right
 withIO ioAct = liftIO ioAct >> retR ()
 
-diagnose :: Show a => a -> GameWire () ()
+diagnose :: Show a => a -> ViewWire () ()
 diagnose a = mkGen_ $ \_ -> withIO . print $ a
 
-trace :: Show a => a -> GameWire () ()
+trace :: Show a => a -> ViewWire () ()
 trace a = mkGen_ $ \_ -> withIO . Log.info . show $ a
 
-printVal :: Show a => GameWire a ()
+printVal :: Show a => ViewWire a ()
 printVal = mkGen_ $ \a -> withIO . print $ a
 
 forget = mkConst (Right ())
@@ -78,12 +97,12 @@ timeD = fmap realToFrac time
 
 -- Work wires
 -- TODO: remove it from here.
-pollSdlEvent :: GameWire () SDL.Event
+pollSdlEvent :: ViewWire () SDL.Event
 pollSdlEvent = mkGen_ $ \_ -> do
         e <- liftIO SDL.pollEvent
         retR e
 
-pollSdlEvent' :: GameWire () SDL.Event
+pollSdlEvent' :: ViewWire () SDL.Event
 pollSdlEvent' = mkGen_ $ \_ -> do
         e <- liftIO SDL.pollEvent
         liftIO pumpEvents

@@ -1,5 +1,5 @@
 name:           The-Amoeba-World
-version:        0.1
+version:        0.2.0.0
 cabal-version:  >= 1.10
 build-type:     Simple
 author:         Alexander Granin
@@ -37,12 +37,12 @@ executable Amoeba
                    parsec >=3.1.5,
                    directory,
                    filepath,
-                   The-Amoeba-World-GameLogic >=0.1.2,
-                   The-Amoeba-World-Middleware >=0.1,
-                   The-Amoeba-World-View >=0.1,
+                   The-Amoeba-World-GameLogic >=0.2.0.0,
+                   The-Amoeba-World-Middleware >=0.2.0.0,
+                   The-Amoeba-World-View >=0.2.0.0,
                    stm >=2.4 && <2.5,
-                   The-Amoeba-World-GameStorage >=0.1.2,
-                   The-Amoeba-World-AI >=0.1.2
+                   The-Amoeba-World-GameStorage >=0.2.0.0,
+                   The-Amoeba-World-AI >=0.2.0.0
   hs-source-dirs:  ./src
   ghc-options:     -threaded -outputdir ./.bin
   main-is:         Main.hs

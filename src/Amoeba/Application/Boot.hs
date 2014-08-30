@@ -1,33 +1,22 @@
 module Amoeba.Application.Boot where
 
-import Amoeba.View.Config
-import Amoeba.View.View
-
 import qualified Amoeba.Middleware.Config.Facade as Cfg
 import qualified Amoeba.Middleware.Tracing.Log as Log
 import qualified Amoeba.Middleware.SDL.Environment as Env
 import qualified Amoeba.Middleware.FRP.NetwireFacade as FRP
 
-import Amoeba.Application.Game.Engine.Runtime
-import Amoeba.Application.Game.Engine.Core
+import Amoeba.Application.Game.Engine.Runtime as Rt
+import Amoeba.Application.Game.Engine.Core as Core
 import Amoeba.Application.Game.Engine.GameWire
 import Amoeba.Application.Game.GameDataLoader
---import Amoeba.GameStorage.GameStorage
---import Amoeba.AI.Facade as AI
-
--- Temp from GameStorage 
-import Amoeba.GameLogic.Facade as GL
-import qualified Control.Concurrent.STM.TVar as STM
-import qualified Control.Concurrent.STM as STM
-------------------------
-
 import Amoeba.Application.Config
-import Amoeba.Application.Assets.GSStorageFlow
+import Amoeba.GameLogic.GameLogicAccessor as GLAcc
+import Amoeba.GameStorage.Facade as GS
 import Amoeba.View.Language
+import Amoeba.View.Config
+import Amoeba.View.View
 
-import qualified Amoeba.Application.Assets.GameFlow1 as GF1
-import qualified Amoeba.Application.Assets.GameFlow2 as GF2
---import qualified Amoeba.Application.Assets.GSStorageFlow as GSF1
+import qualified Amoeba.Application.Assets.ViewFlow as VF
 
 import Paths_The_Amoeba_World as P
 
@@ -36,62 +25,59 @@ import Control.Concurrent as C
 import Control.Monad.IO.Class (liftIO)
 
 
-viewLogic :: GameWire () ()
-viewLogic = GF1.gameNode TitleScreen
+-- This is temorary functions.
+aiPlayerFlow :: AIPlayerWire () ()
+aiPlayerFlow = FRP.mkConst $ Right ()
 
-gameStorageLogic :: GameStorageWire () ()
-gameStorageLogic = FRP.mkGen_ $ const $ do
-    gsStorage <- getStorage
-    liftIO (STM.atomically $ STM.modifyTVar gsStorage setEndOfGame)
-        >> (return $ Right ())
-  where
-      setEndOfGame (Game w s _) = Game w s False
-      
-      
--- TODO: cfg duplicates viewSettings.
--- TODO: needs deep generalization of looping mechanism.
--- 'game' is a rudiment. There is a game storage now. Remove 'game'
-startAIViewFlow cfg game view = Env.withEnvironment $ do
-    let rt = runtime cfg view game
-    (inhibitor, _) <- startMainLoop viewLogic rt
-    Log.info $ "[AI Flow] Inhibitor: " ++ if null inhibitor then "Unspecified." else inhibitor
+gameStorageFlow :: GameStorageWire () ()
+gameStorageFlow = FRP.mkGen_ $ const $ do
+    gsAccessor <- getStorageAccessor
+    liftIO $ GLAcc.holdGame gsAccessor
+    return $ Right () -- TODO: replace by retR() after generalization. Or replace liftIO by withIO.
 
-startGSFlow gsStorage = do
-    (inhibitor, _) <- startMainLoop2 gameStorageLogic gsStorage
+viewFlow :: ViewWire () ()
+viewFlow = VF.viewFlow TitleScreen
+
+-- TODO: needs deep generalization of looping and wire mechanism.
+
+startGameStorageFlow gsAccessor = do
+    (inhibitor, _) <- Core.startMainLoopGS gameStorageFlow gsAccessor
     Log.info $ "[GameStorage] Inhibitor: " ++ if null inhibitor then "Unspecified." else inhibitor
 
-data AI = AI
-loadAI = return AI
+startAIPlayerFlow gsAccessor = do
+    (inhibitor, _) <- Core.startMainLoopAI aiPlayerFlow gsAccessor
+    Log.info $ "[AI Player] Inhibitor: " ++ if null inhibitor then "Unspecified." else inhibitor
 
--- TODO: add specific AI player settings
--- 'game' is a rudiment. There is a game storage now. Remove 'game'!
-forkAIPlayer cfg game = do
-    ai <- loadAI
+startViewFlow gsAccessor view = Env.withEnvironment $ do
+    let rt = Rt.viewRuntime view gsAccessor
+    (inhibitor, _) <- Core.startMainLoopView viewFlow rt
+    Log.info $ "[View] Inhibitor: " ++ if null inhibitor then "Unspecified." else inhibitor
+
+-- Forkers for workers
+
+forkGameStorageWorker game = do
+    gsAccessor <- initGameStorage game
+    Log.info "Game Storage initialized."
+    gsThreadId <- C.forkFinally (startGameStorageFlow gsAccessor) (\_ -> Log.info "Game Storage thread finished.")
+    Log.info $ "Game Storage thread started: " ++ show gsThreadId
+    return (gsAccessor, gsThreadId)
+
+-- Instead GameStorageAccessor it could be GameLogicAccessor in the future. 
+forkAIPlayerWorker gsAccessor = do
+    aiPlayerAccessor <- return "This is fake AI Player." -- TODO: make non-fake AI player.
     Log.info "AI loaded."
-    aiPlayerViewSettings <- loadViewSettings cfg
-    Log.info "AI view settings loaded."
-    aiView <- setupView aiPlayerViewSettings
-    Log.info "AI view prepared."
-    aiViewThreadId <- C.forkFinally (startAIViewFlow cfg game aiView) (\_ -> Log.info "AI view thread finished.")
-    Log.info $ "AI player thread started: " ++ show aiViewThreadId
-    return (ai, aiViewThreadId)
+    aiPlayerThreadId <- C.forkFinally (startAIPlayerFlow gsAccessor) (\_ -> Log.info "AI thread finished.")
+    Log.info $ "AI player thread started: " ++ show aiPlayerThreadId
+    return (aiPlayerAccessor, aiPlayerThreadId)
 
-forkGameStateStorageWorker game = do
-    gsStorage <- initGameStateStorage game
-    Log.info "Game State Storage initialized."
-    gssThreadId <- C.forkFinally (startGSFlow gsStorage) (\_ -> Log.info "Game State Storage thread finished.")
-    Log.info $ "Game State Storage thread started: " ++ show gssThreadId
-    return (gsStorage, gssThreadId)
-
--- TODO
-initGameStateStorage = STM.newTVarIO
-
-waitForEndOfGame gsStorage = STM.atomically $
-    STM.readTVar gsStorage >>= \result ->
-        if GL.isEndOfGame result
-        then return ()
-        else STM.retry
-
+forkViewWorker cfg gsAccessor = do
+    viewSettings <- loadViewSettings cfg
+    Log.info "View settings loaded."
+    viewAccessor <- initView viewSettings
+    Log.info "View prepared."
+    viewThreadId <- C.forkFinally (startViewFlow gsAccessor viewAccessor) (\_ -> Log.info "View thread finished.")
+    Log.info $ "View thread started: " ++ show viewThreadId
+    return (viewAccessor, viewThreadId)
 
 boot cfg = do
     logFilePath <- Cfg.extract cfg logFileLoader   >>= P.getDataFileName
@@ -103,17 +89,12 @@ boot cfg = do
     game <- loadGame worldPath
     Log.info $ "Game loaded from: " ++ worldPath
 
-    (ai, aiPlayerThreadId) <- forkAIPlayer cfg game
-    (gsStorage, gssThreadId) <- forkGameStateStorageWorker game
+    (gsAccessor,  gsThreadId)    <- forkGameStorageWorker game
+    (aipAccessor, aipThreadId)   <- forkAIPlayerWorker gsAccessor
+    (viewAccessor, viewThreadId) <- forkViewWorker cfg gsAccessor
     
     Log.info "Running...."
-    waitForEndOfGame gsStorage
-    
-    -- TODO: correct program termination, wait for threads?
-    
+    GLAcc.runGame gsAccessor
+
     Log.info "Game unloaded."
     Log.finish
-    
-
-
- 
