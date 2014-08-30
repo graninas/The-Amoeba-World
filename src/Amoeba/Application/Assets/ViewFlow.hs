@@ -17,12 +17,7 @@ viewFlow node = modes Render (selector node) .
 
 switcher node w1 = mkEmpty . w1 --> viewFlow node
 
-selector node Finish                     = quit . finishGame . diagnose "Finish"
-selector node Render                     = switcher node   render
-{-
-selector node (StartViewPointMoving x y) = switcher node (render . startViewPointMoving . pure (x, y))
-selector node (ViewPointMoving x y)      = switcher node (render . viewPointMoving . pure (x, y))
-selector node (StopViewPointMoving x y)  = switcher node (render . stopViewPointMoving . pure (x, y))
-selector node Update                     = switcher node (render . update)
--}
+selector node Finish      = quit . finishGame . diagnose "Manually finished."
+selector node Render      = switcher node  render
+selector node viewCommand = switcher node (render . (evalViewCommand viewCommand))
 

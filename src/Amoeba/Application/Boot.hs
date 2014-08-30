@@ -12,6 +12,7 @@ import Amoeba.Application.Game.GameDataLoader
 import Amoeba.Application.Config
 import Amoeba.GameLogic.GameLogicAccessor as GLAcc
 import Amoeba.GameStorage.Facade as GS
+import Amoeba.View.ViewAccessor as ViewAcc
 import Amoeba.View.Language
 import Amoeba.View.Config
 import Amoeba.View.View
@@ -31,8 +32,8 @@ aiPlayerFlow = FRP.mkConst $ Right ()
 
 gameStorageFlow :: GameStorageWire () ()
 gameStorageFlow = FRP.mkGen_ $ const $ do
-    gsAccessor <- getStorageAccessor
-    liftIO $ GLAcc.holdGame gsAccessor
+    glAccessor <- getStorageGameLogicAccessor
+    liftIO $ GLAcc.holdGame glAccessor
     return $ Right () -- TODO: replace by retR() after generalization. Or replace liftIO by withIO.
 
 viewFlow :: ViewWire () ()
@@ -40,42 +41,41 @@ viewFlow = VF.viewFlow TitleScreen
 
 -- TODO: needs deep generalization of looping and wire mechanism.
 
-startGameStorageFlow gsAccessor = do
-    (inhibitor, _) <- Core.startMainLoopGS gameStorageFlow gsAccessor
+startGameStorageFlow glAccessor = do
+    (inhibitor, _) <- Core.startMainLoopGS gameStorageFlow glAccessor
     Log.info $ "[GameStorage] Inhibitor: " ++ if null inhibitor then "Unspecified." else inhibitor
 
-startAIPlayerFlow gsAccessor = do
-    (inhibitor, _) <- Core.startMainLoopAI aiPlayerFlow gsAccessor
+startAIPlayerFlow glAccessor = do
+    (inhibitor, _) <- Core.startMainLoopAI aiPlayerFlow glAccessor
     Log.info $ "[AI Player] Inhibitor: " ++ if null inhibitor then "Unspecified." else inhibitor
 
-startViewFlow gsAccessor view = Env.withEnvironment $ do
-    let rt = Rt.viewRuntime view gsAccessor
+startViewFlow glAccessor view = Env.withEnvironment $ do
+    let rt = Rt.viewRuntime view glAccessor
     (inhibitor, _) <- Core.startMainLoopView viewFlow rt
     Log.info $ "[View] Inhibitor: " ++ if null inhibitor then "Unspecified." else inhibitor
 
 -- Forkers for workers
 
 forkGameStorageWorker game = do
-    gsAccessor <- initGameStorage game
+    glAccessor <- initGameStorage game
     Log.info "Game Storage initialized."
-    gsThreadId <- C.forkFinally (startGameStorageFlow gsAccessor) (\_ -> Log.info "Game Storage thread finished.")
+    gsThreadId <- C.forkFinally (startGameStorageFlow glAccessor) (\_ -> Log.info "Game Storage thread finished.")
     Log.info $ "Game Storage thread started: " ++ show gsThreadId
-    return (gsAccessor, gsThreadId)
+    return (glAccessor, gsThreadId)
 
--- Instead GameStorageAccessor it could be GameLogicAccessor in the future. 
-forkAIPlayerWorker gsAccessor = do
+forkAIPlayerWorker glAccessor = do
     aiPlayerAccessor <- return "This is fake AI Player." -- TODO: make non-fake AI player.
     Log.info "AI loaded."
-    aiPlayerThreadId <- C.forkFinally (startAIPlayerFlow gsAccessor) (\_ -> Log.info "AI thread finished.")
+    aiPlayerThreadId <- C.forkFinally (startAIPlayerFlow glAccessor) (\_ -> Log.info "AI thread finished.")
     Log.info $ "AI player thread started: " ++ show aiPlayerThreadId
     return (aiPlayerAccessor, aiPlayerThreadId)
 
-forkViewWorker cfg gsAccessor = do
+forkViewWorker cfg glAccessor = do
     viewSettings <- loadViewSettings cfg
     Log.info "View settings loaded."
-    viewAccessor <- initView viewSettings
+    viewAccessor <- ViewAcc.initView viewSettings
     Log.info "View prepared."
-    viewThreadId <- C.forkFinally (startViewFlow gsAccessor viewAccessor) (\_ -> Log.info "View thread finished.")
+    viewThreadId <- C.forkFinally (startViewFlow glAccessor viewAccessor) (\_ -> Log.info "View thread finished.")
     Log.info $ "View thread started: " ++ show viewThreadId
     return (viewAccessor, viewThreadId)
 
@@ -89,12 +89,12 @@ boot cfg = do
     game <- loadGame worldPath
     Log.info $ "Game loaded from: " ++ worldPath
 
-    (gsAccessor,  gsThreadId)    <- forkGameStorageWorker game
-    (aipAccessor, aipThreadId)   <- forkAIPlayerWorker gsAccessor
-    (viewAccessor, viewThreadId) <- forkViewWorker cfg gsAccessor
+    (glAccessor,  gsThreadId)    <- forkGameStorageWorker game
+    (aipAccessor, aipThreadId)   <- forkAIPlayerWorker glAccessor
+    (viewAccessor, viewThreadId) <- forkViewWorker cfg glAccessor
     
     Log.info "Running...."
-    GLAcc.runGame gsAccessor
+    GLAcc.runGame glAccessor
 
     Log.info "Game unloaded."
     Log.finish
