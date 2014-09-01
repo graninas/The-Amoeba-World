@@ -4,16 +4,8 @@ module Amoeba.Application.Game.Engine.Core where
 -- Needs generalization.
 import Amoeba.Application.Game.Engine.Runtime
 import Amoeba.Application.Game.Engine.GameWire
-import Amoeba.View.View
 
 import Amoeba.Middleware.FRP.NetwireFacade hiding ((.))
-import Amoeba.Middleware.SDL.SDLFacade as SDL
-import Amoeba.Middleware.Tracing.ErrorHandling
-import qualified Amoeba.Middleware.Tracing.Log as Log
-
-import Control.Monad.IO.Class (liftIO, MonadIO)
-import Control.Monad.State (get, put, StateT(..))
-import Control.Monad.State.Class
 import Control.Monad.Trans.State (runStateT)
 
 -- TODO: HACK: FIXME: needs deep generalization of looping and wires mechanism.
@@ -72,38 +64,3 @@ loopAI' s input w = do
     loopAI' s' eitherResult w'
 
 --End of HACK
-
--- Combinator wires
-quitWith = inhibit
-quit = inhibit "Finished."
-
-retR = return . Right
-withIO ioAct = liftIO ioAct >> retR ()
-
-diagnose :: Show a => a -> ViewWire () ()
-diagnose a = mkGen_ $ \_ -> withIO . print $ a
-
-trace :: Show a => a -> ViewWire () ()
-trace a = mkGen_ $ \_ -> withIO . Log.info . show $ a
-
-printVal :: Show a => ViewWire a ()
-printVal = mkGen_ $ \a -> withIO . print $ a
-
-forget = mkConst (Right ())
-
-timeD :: (HasTime t s, Monad m) => Wire s e m a Double
-timeD = fmap realToFrac time
-
-
--- Work wires
--- TODO: remove it from here.
-pollSdlEvent :: ViewWire () SDL.Event
-pollSdlEvent = mkGen_ $ \_ -> do
-        e <- liftIO SDL.pollEvent
-        retR e
-
-pollSdlEvent' :: ViewWire () SDL.Event
-pollSdlEvent' = mkGen_ $ \_ -> do
-        e <- liftIO SDL.pollEvent
-        liftIO pumpEvents
-        retR e

@@ -3,41 +3,23 @@ module Amoeba.Application.Boot where
 import qualified Amoeba.Middleware.Config.Facade as Cfg
 import qualified Amoeba.Middleware.Tracing.Log as Log
 import qualified Amoeba.Middleware.SDL.Environment as Env
-import qualified Amoeba.Middleware.FRP.NetwireFacade as FRP
 
 import Amoeba.Application.Game.Engine.Runtime as Rt
 import Amoeba.Application.Game.Engine.Core as Core
-import Amoeba.Application.Game.Engine.GameWire
 import Amoeba.Application.Game.GameDataLoader
 import Amoeba.Application.Config
 import Amoeba.GameLogic.GameLogicAccessor as GLAcc
 import Amoeba.GameStorage.Facade as GS
 import Amoeba.View.ViewAccessor as ViewAcc
-import Amoeba.View.Language
 import Amoeba.View.Config
-import Amoeba.View.View
 
-import qualified Amoeba.Application.Assets.ViewFlow as VF
+import Amoeba.Application.Assets.ViewFlow
+import Amoeba.Application.Assets.GameStorageFlow
+import Amoeba.Application.Assets.AIPlayerFlow
 
 import Paths_The_Amoeba_World as P
 
 import Control.Concurrent as C
--- Temp.
-import Control.Monad.IO.Class (liftIO)
-
-
--- This is temorary functions.
-aiPlayerFlow :: AIPlayerWire () ()
-aiPlayerFlow = FRP.mkConst $ Right ()
-
-gameStorageFlow :: GameStorageWire () ()
-gameStorageFlow = FRP.mkGen_ $ const $ do
-    glAccessor <- getStorageGameLogicAccessor
-    liftIO $ GLAcc.holdGame glAccessor
-    return $ Right () -- TODO: replace by retR() after generalization. Or replace liftIO by withIO.
-
-viewFlow :: ViewWire () ()
-viewFlow = VF.viewFlow TitleScreen
 
 -- TODO: needs deep generalization of looping and wire mechanism.
 
@@ -95,6 +77,8 @@ boot cfg = do
     
     Log.info "Running...."
     GLAcc.runGame glAccessor
+
+    -- TODO: Terminate threads!
 
     Log.info "Game unloaded."
     Log.finish

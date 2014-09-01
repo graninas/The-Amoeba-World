@@ -1,6 +1,3 @@
-{-# LANGUAGE TypeSynonymInstances #-}
-{-# LANGUAGE FlexibleInstances #-}
-
 module Amoeba.Application.Assets.Wires where
 
 
