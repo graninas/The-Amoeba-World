@@ -76,7 +76,7 @@ boot cfg = do
     (viewAccessor, viewThreadId) <- forkViewWorker cfg glAccessor
     
     Log.info "Running...."
-    GLAcc.runGame glAccessor
+    GLAcc.runGame [gsThreadId, aipThreadId, viewThreadId] glAccessor
 
     -- TODO: Terminate threads!
 

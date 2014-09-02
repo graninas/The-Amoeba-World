@@ -1,6 +1,5 @@
 module Amoeba.Application.Game.Engine.Core where
 
--- TODO: remove bad dependency from View
 -- Needs generalization.
 import Amoeba.Application.Game.Engine.Runtime
 import Amoeba.Application.Game.Engine.GameWire

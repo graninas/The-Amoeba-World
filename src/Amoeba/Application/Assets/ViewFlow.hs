@@ -12,6 +12,7 @@ import Prelude hiding (id, (.))
 import Control.Monad.IO.Class (liftIO)
 
 -- TODO: start screen should be defined correctly.
+viewFlow :: ViewWire () ()
 viewFlow = viewFlow' TitleScreen
 
 viewFlow' :: GameNode -> ViewWire () ()
@@ -20,9 +21,11 @@ viewFlow' node = modes Render (selector node) .
                 pure () &&& now . commandInterpreter node . pollSdlEvent
             )
 
+switcher :: GameNode -> ViewWire () () -> ViewWire () ()
 switcher node w1 = mkEmpty . w1 --> viewFlow' node
 
-selector node Finish      = quit . finishGame . diagnose "Manually finished."
+selector :: GameNode -> Command -> ViewWire () ()
+selector _    Finish      = quit . finishGame . diagnose "Manually finished."
 selector node Render      = switcher node  render
 selector node viewCommand = switcher node (render . evalViewCommand viewCommand)
 
