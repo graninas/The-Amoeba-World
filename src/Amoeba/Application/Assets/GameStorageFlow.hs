@@ -9,6 +9,4 @@ import qualified Amoeba.Middleware.FRP.NetwireFacade as FRP
 
 
 gameStorageFlow :: W.GameStorageWire () ()
-gameStorageFlow = FRP.mkGen_ $ const $ do
-    glAccessor <- Rt.getStorageGameLogicAccessor
-    withIO $ GLAcc.holdGame glAccessor
+gameStorageFlow = FRP.mkConst . Right $ ()
