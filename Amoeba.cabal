@@ -24,7 +24,7 @@ executable Amoeba
                    containers,
                    hslogger >=1.2.3 && <1.2.4,
                    SDL-gfx >=0.6.0,
-                   SDL >=0.6.5,
+                   SDL >=0.6.6,
                    netwire >=5.0.0 && <5.1,
                    lens >=4.0.7 && <4.1,
                    linear >=1.9.1 && <1.10,
