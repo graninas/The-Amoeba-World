@@ -1,16 +1,32 @@
 module Main where
 
 import Amoeba.Application.Boot
-import Amoeba.Middleware.Config.Facade
+import Amoeba.Application.Game.GameDataLoader
+import Amoeba.Assets.ConfigScheme as Scheme
+import qualified Amoeba.Middleware.Config.Facade as Cfg
+import qualified Amoeba.Middleware.Tracing.Log as Log
+
 import Paths_The_Amoeba_World as P
 
-optionsFile = "./Game/Data/Options.cfg"
+optionsPath = "./Game/Data/Options.cfg"
+logFileLoader   = Cfg.filePathLoader Scheme.logPath "Amoeba.log"
+worldFileLoader = Cfg.filePathLoader Scheme.rawsPath "World.arf"
 
 main :: IO ()
 main = do
 
-    realOptionsFileName <- P.getDataFileName optionsFile
-    cfg <- loadConfiguration realOptionsFileName
-    boot cfg
+    cfg <- P.getDataFileName optionsPath >>= Cfg.loadConfiguration
     
-    putStrLn "All Ok."
+    logFilePath <- Cfg.extract cfg logFileLoader   >>= P.getDataFileName
+    worldPath   <- Cfg.extract cfg worldFileLoader >>= P.getDataFileName
+    
+    Log.setupLogger logFilePath
+    Log.info $ "Logger started: " ++ logFilePath
+    
+    game <- loadGame worldPath
+    Log.info $ "Game loaded from: " ++ worldPath
+    
+    boot cfg game
+    
+    Log.info "Game unloaded."
+    Log.finish

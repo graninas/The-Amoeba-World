@@ -2,12 +2,10 @@ module Amoeba.Application.Boot where
 
 import qualified Amoeba.Middleware.Config.Facade as Cfg
 import qualified Amoeba.Middleware.Tracing.Log as Log
-import qualified Amoeba.Middleware.SDL.Environment as Env
+import qualified Amoeba.Middleware.GLFW.Facade as GLFW
 
 import Amoeba.Application.Game.Engine.Runtime as Rt
 import Amoeba.Application.Game.Engine.Core as Core
-import Amoeba.Application.Game.GameDataLoader
-import Amoeba.Application.Config
 import Amoeba.GameLogic.GameLogicAccessor as GLAcc
 import Amoeba.GameLogic.Facade as GL (Game)
 import Amoeba.GameStorage.Facade as GS
@@ -17,8 +15,6 @@ import Amoeba.View.Config
 import Amoeba.Application.Assets.ViewFlow
 import Amoeba.Application.Assets.GameStorageFlow
 import Amoeba.Application.Assets.AIPlayerFlow
-
-import Paths_The_Amoeba_World as P
 
 import Control.Concurrent as C
 
@@ -35,7 +31,7 @@ startAIPlayerFlow glAccessor = do
     Log.info $ "[AI Player] Inhibitor: " ++ if null inhibitor then "Unspecified." else inhibitor
 
 startViewFlow :: GameLogicAccessor -> ViewAccessor -> IO ()
-startViewFlow glAccessor viewAccessor = Env.withEnvironment $ do
+startViewFlow glAccessor viewAccessor = do
     let rt = Rt.viewRuntime viewAccessor glAccessor
     (inhibitor, _) <- Core.startMainLoopView viewFlow rt
     Log.info $ "[View] Inhibitor: " ++ if null inhibitor then "Unspecified." else inhibitor
@@ -58,35 +54,32 @@ forkAIPlayerWorker glAccessor = do
     Log.info $ "AI player thread started: " ++ show aiPlayerThreadId
     return (aiPlayerAccessor, aiPlayerThreadId)
 
+-- TODO: refactor it. Possibly, introduce the Accessor type class. 
 forkViewWorker :: Cfg.Configuration -> GameLogicAccessor -> IO (ViewAccessor, C.ThreadId)
 forkViewWorker cfg glAccessor = do
     viewSettings <- loadViewSettings cfg
     Log.info "View settings loaded."
     viewAccessor <- ViewAcc.initView viewSettings
     Log.info "View prepared."
-    viewThreadId <- C.forkFinally (startViewFlow glAccessor viewAccessor) (\_ -> Log.info "View thread finished.")
+    viewThreadId <- C.forkFinally (startViewFlow glAccessor viewAccessor)
+                                  (\_ -> do
+                                        ViewAcc.deinitView viewAccessor
+                                        Log.info "View thread finished.")
     Log.info $ "View thread started: " ++ show viewThreadId
     return (viewAccessor, viewThreadId)
-
-boot :: Cfg.Configuration -> IO ()
-boot cfg = do
-    logFilePath <- Cfg.extract cfg logFileLoader   >>= P.getDataFileName
-    worldPath   <- Cfg.extract cfg worldFileLoader >>= P.getDataFileName
     
-    Log.setupLogger logFilePath
-    Log.info $ "Logger started: " ++ logFilePath
+boot :: Cfg.Configuration ->  GL.Game -> IO ()
+boot cfg game = GLFW.withEnvironment $ do
+    Log.info "Forking work threads...."
 
-    game <- loadGame worldPath
-    Log.info $ "Game loaded from: " ++ worldPath
-
-    (glAccessor,  gsThreadId)    <- forkGameStorageWorker game
-    (_, aipThreadId)   <- forkAIPlayerWorker glAccessor
-    (_, viewThreadId) <- forkViewWorker cfg glAccessor
+    (glAccessor,   gsThreadId)   <- forkGameStorageWorker game
+    (aiAccessor,   aipThreadId)  <- forkAIPlayerWorker glAccessor
+    (viewAccessor, viewThreadId) <- forkViewWorker cfg glAccessor
+    let threads = [gsThreadId, aipThreadId, viewThreadId]
     
     Log.info "Running...."
-    GLAcc.runGame [gsThreadId, aipThreadId, viewThreadId] glAccessor
+    
+    GLAcc.runGame threads glAccessor
 
     -- TODO: Terminate threads!
 
-    Log.info "Game unloaded."
-    Log.finish
