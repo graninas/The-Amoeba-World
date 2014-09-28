@@ -40,9 +40,7 @@ executable Amoeba
                    stm >=2.4,
                    The-Amoeba-World-GameLogic >=0.2.0.2,
                    The-Amoeba-World-Middleware >=0.2.0.2,
-                   The-Amoeba-World-View >=0.2.0.2,
-                   The-Amoeba-World-GameStorage >=0.2.0.2,
-                   The-Amoeba-World-AI >=0.2.0.2
+                   The-Amoeba-World-View >=0.2.0.2
   hs-source-dirs:  ./src
   ghc-options:     -threaded -outputdir ./.bin -Wall -W
   main-is:         Main.hs

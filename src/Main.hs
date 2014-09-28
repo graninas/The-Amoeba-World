@@ -2,7 +2,7 @@ module Main where
 
 import Amoeba.Application.Boot
 import Amoeba.Application.Game.GameDataLoader
-import Amoeba.Assets.ConfigScheme as Scheme
+import Amoeba.Application.Assets.ConfigScheme as Scheme
 import qualified Amoeba.Middleware.Config.Facade as Cfg
 import qualified Amoeba.Middleware.Tracing.Log as Log
 

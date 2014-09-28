@@ -1,3 +1,4 @@
+{-# LANGUAGE LambdaCase #-}
 module Amoeba.Application.Assets.ViewFlow where
 
 import Amoeba.View.Facade as V
@@ -8,7 +9,8 @@ import Amoeba.View.ViewAccessor as ViewAcc
 import Amoeba.GameLogic.Facade as GL
 
 import Amoeba.Middleware.FRP.NetwireFacade as FRP
-import Amoeba.Middleware.GLFW.Facade as GLFW
+--import Amoeba.Middleware.GLFW.Facade as GLFW
+
 import qualified Amoeba.Middleware.Tracing.Log as Log
 
 import Prelude hiding (id, (.))
@@ -20,54 +22,45 @@ viewFlow = viewFlow' TitleScreen
 
 viewFlow' :: GameNode -> ViewWire () ()
 viewFlow' node = modes Render (selector node) .
-            (
-                pure () &&& now . commandInterpreter node . pollGlfwEvent
-            )
+    (
+        pure () &&& now . commandInterpreter node . event
+    )
 
 switcher :: GameNode -> ViewWire () () -> ViewWire () ()
 switcher node w1 = mkEmpty . w1 --> viewFlow' node
 
 selector :: GameNode -> V.Command -> ViewWire () ()
-selector _    Finish      = quit . finishGame . diagnose "Manually finished."
-selector node Render      = switcher node  render
-selector node viewCommand = switcher node (render . evalViewCommand viewCommand)
+selector _    V.Finish    = quit . finishGame . diagnose "Manually finished."
+selector node V.Render    = switcher node render
+selector node viewCommand = switcher node (render . evalViewCommand' viewCommand)
 
 finishGame = mkGen_ $ const $ do
     glAccessor <- Rt.getViewGameLogicAccessor
     withIO $ GLAcc.eval glAccessor GL.FinishGame
 
-evalViewCommand command = mkGen_ $ const $ do
-    viewAccessor <- Rt.getViewAccessor
-    glAccessor   <- Rt.getViewGameLogicAccessor
-    withIO $ ViewAcc.eval (glAccessor, viewAccessor) command
+evalViewCommand' command = mkGen_ $ const $ do
+    accessors <- Rt.getAccessors
+    withIO $ ViewAcc.evalViewCommand accessors command
 
-render = evalViewCommand V.Render
+render = evalViewCommand' V.Render
 
-commandInterpreter = undefined
-{-
-
-commandInterpreter :: GameNode -> ViewWire SDL.Event V.Command
-commandInterpreter node = mkSF_ $ \e -> case e of
-    SDL.Quit -> Finish
-    (SDL.KeyDown (SDL.Keysym SDL.SDLK_ESCAPE _ _)) -> Finish
+commandInterpreter :: GameNode -> ViewWire ViewAcc.Event V.Command
+commandInterpreter node = mkSF_ $ \case
+    ViewAcc.EventWindowClose _ -> V.Finish
+{-    (SDL.KeyDown (SDL.Keysym SDL.SDLK_ESCAPE _ _)) -> Finish
     SDL.MouseButtonDown x y SDL.ButtonLeft         -> StartViewPointMoving (x, y)
     SDL.MouseMotion x y _ _                        -> ViewPointMoving (x, y)
     SDL.MouseButtonUp x y SDL.ButtonLeft           -> StopViewPointMoving (x, y)
-    _ -> Render
-    
-pollSdlEvent :: ViewWire () SDL.Event
-pollSdlEvent = mkGen_ $ \_ -> do
-        e <- liftIO SDL.pollEvent
-        retR e
-
-pollSdlEvent' :: ViewWire () SDL.Event
-pollSdlEvent' = mkGen_ $ \_ -> do
-        e <- liftIO SDL.pollEvent
-        liftIO pumpEvents
-        retR e
 -}
+    _ -> V.Render
 
-pollGlfwEvent = undefined
+mkViewAccessorWire act = mkGen_ $ const $ do
+    viewAccessor <- Rt.getViewAccessor
+    v <- liftIO $ act viewAccessor
+    retR v
+
+event :: ViewWire () ViewAcc.Event
+event = mkViewAccessorWire ViewAcc.getEvent
 
 -- debug
 diagnose :: Show a => a -> ViewWire () ()
@@ -78,4 +71,3 @@ trace a = mkGen_ $ \_ -> withIO . Log.info . show $ a
 
 printVal :: Show a => ViewWire a ()
 printVal = mkGen_ $ \a -> withIO . print $ a
-

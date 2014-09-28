@@ -7,16 +7,20 @@ import qualified Amoeba.Middleware.GLFW.Facade as GLFW
 import Amoeba.Application.Game.Engine.Runtime as Rt
 import Amoeba.Application.Game.Engine.Core as Core
 import Amoeba.GameLogic.GameLogicAccessor as GLAcc
-import Amoeba.GameLogic.Facade as GL (Game)
-import Amoeba.GameStorage.Facade as GS
+import Amoeba.GameLogic.Facade as GL
+--import Amoeba.GameStorage.Facade as GS
 import Amoeba.View.ViewAccessor as ViewAcc
-import Amoeba.View.Config
 
 import Amoeba.Application.Assets.ViewFlow
 import Amoeba.Application.Assets.GameStorageFlow
 import Amoeba.Application.Assets.AIPlayerFlow
+import Amoeba.Application.Assets.ViewConfig
 
 import Control.Concurrent as C
+
+-- TODO: investigate this function. It seems wrong.
+initGameStorage :: GL.Game -> IO GLAcc.GameLogicAccessor
+initGameStorage = GLAcc.createGameLogicAccessor
 
 -- TODO: needs deep generalization of looping and wire mechanism.
 
@@ -32,7 +36,7 @@ startAIPlayerFlow glAccessor = do
 
 startViewFlow :: GameLogicAccessor -> ViewAccessor -> IO ()
 startViewFlow glAccessor viewAccessor = do
-    let rt = Rt.viewRuntime viewAccessor glAccessor
+    let rt = Rt.mkViewRuntime viewAccessor glAccessor
     (inhibitor, _) <- Core.startMainLoopView viewFlow rt
     Log.info $ "[View] Inhibitor: " ++ if null inhibitor then "Unspecified." else inhibitor
 

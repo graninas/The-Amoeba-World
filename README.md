@@ -24,4 +24,3 @@ The-Amoeba-World-GameStorage
 The-Amoeba-World-View
 The-Amoeba-World-AI
 
-SDL-0.6.6 (compatibility fixed)
