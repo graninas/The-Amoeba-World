@@ -16,11 +16,3 @@ This project is also a source material of the articles about large-scale design 
 
 [Arhitecture and design in FP (Rus)](http://habrahabr.ru/post/211871/)
 
-Requirements
-
-The-Amoeba-World-Middleware
-The-Amoeba-World-GameLogic
-The-Amoeba-World-GameStorage
-The-Amoeba-World-View
-The-Amoeba-World-AI
-

@@ -23,7 +23,7 @@ viewFlow = viewFlow' TitleScreen
 viewFlow' :: GameNode -> ViewWire () ()
 viewFlow' node = modes Render (selector node) .
     (
-        pure () &&& now . commandInterpreter node . inlinePrint . event
+        pure () &&& now . commandInterpreter node . event
     )
 
 switcher :: GameNode -> ViewWire () () -> ViewWire () ()
@@ -69,8 +69,5 @@ diagnose a = mkGen_ $ \_ -> withIO . print $ a
 trace :: Show a => a -> ViewWire () ()
 trace a = mkGen_ $ \_ -> withIO . Log.info . show $ a
 
-printVal :: Show a => ViewWire a ()
-printVal = mkGen_ $ \a -> withIO . print $ a
-
-inlinePrint :: Show a => ViewWire a a
-inlinePrint = mkGen_ $ \a -> (liftIO $ print a) >> (liftIO $ Log.info $ show a)  >> retR a 
+printVal :: Show a => ViewWire a a
+printVal = mkGen_ $ \a -> (liftIO $ print a) >> (liftIO $ Log.info $ show a)  >> retR a 

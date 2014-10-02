@@ -1,8 +1,0 @@
-
-./
-../hssdl-0.6.6
-../The-Amoeba-World-Middleware
-../The-Amoeba-World-GameLogic
-../The-Amoeba-World-GameStorage
-../The-Amoeba-World-AI
-../The-Amoeba-World-View
