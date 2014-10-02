@@ -2,7 +2,7 @@
 
 echo 'Clear once...'
 
-PACKAGES=`ghc-pkg list | grep "Amoeba"`
+PACKAGES=`ghc-pkg list | grep "Amoeba"` # | grep -v 'Logic' | grep -v 'Middleware'
 
 for f in $PACKAGES
 do
@@ -14,7 +14,7 @@ done
 
 echo 'Clear again...'
 
-PACKAGES=`ghc-pkg list | grep "Amoeba"`
+PACKAGES=`ghc-pkg list | grep "Amoeba"` # | grep -v 'Logic' | grep -v 'Middleware'
 
 for f in $PACKAGES
 do

@@ -23,7 +23,7 @@ viewFlow = viewFlow' TitleScreen
 viewFlow' :: GameNode -> ViewWire () ()
 viewFlow' node = modes Render (selector node) .
     (
-        pure () &&& now . commandInterpreter node . event
+        pure () &&& now . commandInterpreter node . inlinePrint . event
     )
 
 switcher :: GameNode -> ViewWire () () -> ViewWire () ()
@@ -46,7 +46,7 @@ render = evalViewCommand' V.Render
 
 commandInterpreter :: GameNode -> ViewWire ViewAcc.Event V.Command
 commandInterpreter node = mkSF_ $ \case
-    ViewAcc.EventWindowClose _ -> V.Finish
+    ViewAcc.EventClose -> V.Finish
 {-    (SDL.KeyDown (SDL.Keysym SDL.SDLK_ESCAPE _ _)) -> Finish
     SDL.MouseButtonDown x y SDL.ButtonLeft         -> StartViewPointMoving (x, y)
     SDL.MouseMotion x y _ _                        -> ViewPointMoving (x, y)
@@ -71,3 +71,6 @@ trace a = mkGen_ $ \_ -> withIO . Log.info . show $ a
 
 printVal :: Show a => ViewWire a ()
 printVal = mkGen_ $ \a -> withIO . print $ a
+
+inlinePrint :: Show a => ViewWire a a
+inlinePrint = mkGen_ $ \a -> (liftIO $ print a) >> (liftIO $ Log.info $ show a)  >> retR a 

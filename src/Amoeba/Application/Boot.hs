@@ -10,6 +10,7 @@ import Amoeba.GameLogic.GameLogicAccessor as GLAcc
 import Amoeba.GameLogic.Facade as GL
 --import Amoeba.GameStorage.Facade as GS
 import Amoeba.View.ViewAccessor as ViewAcc
+import Amoeba.View.Facade as V
 
 import Amoeba.Application.Assets.ViewFlow
 import Amoeba.Application.Assets.GameStorageFlow
@@ -18,6 +19,15 @@ import Amoeba.Application.Assets.ViewConfig
 
 import Control.Concurrent as C
 
+
+import System.Exit
+import Control.Monad (when, unless)
+import Control.Concurrent.STM.TVar as STM
+import Control.Concurrent.STM as STM
+import Control.Concurrent.STM as STM (atomically)
+
+
+{-
 -- TODO: investigate this function. It seems wrong.
 initGameStorage :: GL.Game -> IO GLAcc.GameLogicAccessor
 initGameStorage = GLAcc.createGameLogicAccessor
@@ -33,6 +43,7 @@ startAIPlayerFlow :: GameLogicAccessor -> IO ()
 startAIPlayerFlow glAccessor = do
     (inhibitor, _) <- Core.startMainLoopAI aiPlayerFlow glAccessor
     Log.info $ "[AI Player] Inhibitor: " ++ if null inhibitor then "Unspecified." else inhibitor
+-}
 
 startViewFlow :: GameLogicAccessor -> ViewAccessor -> IO ()
 startViewFlow glAccessor viewAccessor = do
@@ -40,8 +51,8 @@ startViewFlow glAccessor viewAccessor = do
     (inhibitor, _) <- Core.startMainLoopView viewFlow rt
     Log.info $ "[View] Inhibitor: " ++ if null inhibitor then "Unspecified." else inhibitor
 
+{-
 -- Forkers for workers
-
 forkGameStorageWorker :: GL.Game -> IO (GameLogicAccessor, C.ThreadId)
 forkGameStorageWorker game = do
     glAccessor <- initGameStorage game
@@ -71,19 +82,34 @@ forkViewWorker cfg glAccessor = do
                                         Log.info "View thread finished.")
     Log.info $ "View thread started: " ++ show viewThreadId
     return (viewAccessor, viewThreadId)
-    
+-}
+
 boot :: Cfg.Configuration ->  GL.Game -> IO ()
 boot cfg game = GLFW.withEnvironment $ do
-    Log.info "Forking work threads...."
+    --Log.info "Forking work threads...."
 
-    (glAccessor,   gsThreadId)   <- forkGameStorageWorker game
-    (aiAccessor,   aipThreadId)  <- forkAIPlayerWorker glAccessor
-    (viewAccessor, viewThreadId) <- forkViewWorker cfg glAccessor
-    let threads = [gsThreadId, aipThreadId, viewThreadId]
-    
-    Log.info "Running...."
-    
-    GLAcc.runGame threads glAccessor
-
+    --(glAccessor,   gsThreadId)   <- forkGameStorageWorker game
+    --(aiAccessor,   aipThreadId)  <- forkAIPlayerWorker glAccessor
+    --(viewAccessor, viewThreadId) <- forkViewWorker cfg glAccessor
+    --let threads = [gsThreadId, aipThreadId, viewThreadId]
     -- TODO: Terminate threads!
+    --GLAcc.runGame threads glAccessor
+    
+    glAccessor <- GLAcc.createGameLogicAccessor game
+    
+    viewSettings <- loadViewSettings cfg
+    Log.info "View settings loaded."
+    viewAccessor <- ViewAcc.initView viewSettings
+    Log.info "View prepared."
 
+    Log.info "Polling events..."
+    GLFW.pollEvents
+    
+    Log.info "Starting flow..."
+    startViewFlow glAccessor viewAccessor
+
+    Log.info "Deinitializing View..."
+    ViewAcc.deinitView viewAccessor
+    
+    
+    
