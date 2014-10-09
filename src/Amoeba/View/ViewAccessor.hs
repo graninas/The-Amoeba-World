@@ -10,7 +10,9 @@ module Amoeba.View.ViewAccessor (
 import Amoeba.View.Language
 import Amoeba.View.Input.InputAccessor as Accessor
 import Amoeba.View.Output.OutputAccessor as Accessor
+import Amoeba.View.Output.Render
 import Amoeba.View.Output.Types
+import Amoeba.View.Output.Runtime
 import qualified Amoeba.GameLogic.GameLogicAccessor as GL
 
 import qualified Amoeba.Middleware.OpenGL.Facade as OGL
@@ -28,6 +30,9 @@ mkViewAccessor = ViewAccessor
 getInputAccessor  (ViewAccessor ia _) = ia
 getOutputAccessor (ViewAccessor _ oa) = oa
 
+readRuntime :: ViewAccessor -> IO Runtime
+readRuntime (ViewAccessor _ oa) = STM.atomically $ STM.readTVar oa
+
 initView :: (Screen, String, UserViewPoint) -> IO ViewAccessor
 initView (Screen w h _, caption, viewPlane) = do
     mw <- GLFW.createWindow w h caption Nothing Nothing
@@ -36,6 +41,7 @@ initView (Screen w h _, caption, viewPlane) = do
         Just window -> do
             Log.info "Window created."
             GLFW.makeContextCurrent mw
+            adjustWindowSize (w, h)
             GLFW.swapBuffers window
             Log.info "Context made current."
             outputAccessor <- initOutputAccessor window viewPlane
@@ -51,9 +57,9 @@ getEvent = tryReadEvent . getInputAccessor
 
 evalViewCommand :: (GL.GameLogicAccessor, ViewAccessor) -> Command -> IO ()
 evalViewCommand (glAccessor, viewAccessor) Render = do
-    --game <- readGame glAccessor
-    --view <- readView viewAccessor
-    --renderGame view game
+    game <- GL.readGame glAccessor
+    rt <- readRuntime viewAccessor
+    renderGame rt game
     return ()
 evalViewCommand (glAccessor, viewAccessor) command = do
     --game <- STM.atomically $ STM.readTVar glAccessor

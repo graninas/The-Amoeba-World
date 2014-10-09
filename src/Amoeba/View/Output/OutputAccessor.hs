@@ -1,33 +1,42 @@
-module Amoeba.View.Output.OutputAccessor (
-      OutputAccessor
-    , initOutputAccessor
-    , getWindow
-    ) where
+module Amoeba.View.Output.OutputAccessor where
 
-import Control.Concurrent.STM.TVar as STM
-import Control.Concurrent.STM as STM
-
-import qualified Graphics.Rendering.OpenGL as OGL
 import qualified Amoeba.Middleware.GLFW.Facade as GLFW
 
 import Amoeba.View.Output.Types
 import Amoeba.View.Output.Runtime
+import Amoeba.Middleware.OpenGL.Facade as OGL
+
+import Control.Concurrent.STM.TVar as STM
+import Control.Concurrent.STM as STM
 
 type OutputAccessor = STM.TVar Runtime
 
 initOutputAccessor :: GLFW.Window -> UserViewPoint -> IO OutputAccessor
 initOutputAccessor window virtualPlane = do
-    OGL.shadeModel OGL.$= OGL.Smooth
-    -- enable antialiasing
-    OGL.lineSmooth OGL.$= OGL.Enabled
-    OGL.blend OGL.$= OGL.Enabled
-    OGL.blendFunc OGL.$= (OGL.SrcAlpha, OGL.OneMinusSrcAlpha)
-    -- set the color to clear background
-    OGL.clearColor OGL.$= OGL.Color4 0 0 0 0
+    shadeModel $= Smooth
+    lineSmooth $= Enabled -- antialiasing
+    blend      $= Enabled
+    blendFunc  $= (SrcAlpha, OneMinusSrcAlpha)
+    clearColor $= black
     
     STM.newTVarIO $ Runtime window virtualPlane Nothing
 
 getWindow :: OutputAccessor -> IO GLFW.Window
 getWindow = fmap runtimeWindow . atomically . readTVar
             
-            
+-- From here: https://github.com/crockeo/netwire-pong/blob/master/src/Main.hs
+-- Because I don't know the OpenGL.
+adjustWindowSize (w', h') = do
+    let (w, h) = ( (fromIntegral w' / 640) * 100
+                 , (fromIntegral h' / 640) * 100
+                 )
+
+    matrixMode $= Projection
+    loadIdentity
+    ortho (-w) ( w)
+          (-h) ( h)
+          (-1) ( 1)
+
+    matrixMode $= Modelview 0
+    viewport $= (Position 0 0, Size (fromIntegral w') (fromIntegral h'))
+    

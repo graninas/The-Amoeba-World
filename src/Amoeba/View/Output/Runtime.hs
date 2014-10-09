@@ -6,6 +6,6 @@ import qualified Amoeba.Middleware.GLFW.Facade as GLFW
 
 data Runtime = Runtime
     { runtimeWindow :: GLFW.Window
-    , runtimeVirtualPlain :: UserViewPoint
-    , runtimeVirtualPlainShift :: Maybe (UserViewPoint, UserViewPoint)
+    , runtimeUserViewPoint :: UserViewPoint
+    , runtimeUserViewPointShift :: Maybe (UserViewPoint, UserViewPoint)
     }

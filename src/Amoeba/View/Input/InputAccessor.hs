@@ -12,9 +12,10 @@ data Event =
       | EventClose
       | EventKey !GLFW.Key !Int !GLFW.KeyState !GLFW.ModifierKeys
       | EventChar !Char
+      | EventWindowSize !Int !Int
       
       | EventWindowPos       !GLFW.Window !Int !Int
-      | EventWindowSize      !GLFW.Window !Int !Int
+      
       | EventWindowRefresh   !GLFW.Window
       | EventWindowFocus     !GLFW.Window !GLFW.FocusState
       | EventWindowIconify   !GLFW.Window !GLFW.IconifyState
@@ -23,7 +24,7 @@ data Event =
       | EventCursorPos       !GLFW.Window !Double !Double
       | EventCursorEnter     !GLFW.Window !GLFW.CursorState
       | EventScroll          !GLFW.Window !Double !Double
-  deriving Show
+  deriving (Show, Eq)
 
 type InputAccessor = TQueue Event
 
@@ -35,9 +36,9 @@ initInputAccessor window = do
     GLFW.setWindowCloseCallback window $ Just $ windowCloseCallback eventsChan
     GLFW.setKeyCallback         window $ Just $ keyCallback         eventsChan
     GLFW.setCharCallback        window $ Just $ charCallback        eventsChan
+    GLFW.setWindowSizeCallback  window $ Just $ windowSizeCallback  eventsChan
     
     GLFW.setWindowPosCallback       window $ Just $ windowPosCallback       eventsChan
-    GLFW.setWindowSizeCallback      window $ Just $ windowSizeCallback      eventsChan
     GLFW.setWindowRefreshCallback   window $ Just $ windowRefreshCallback   eventsChan
     GLFW.setWindowFocusCallback     window $ Just $ windowFocusCallback     eventsChan
     GLFW.setWindowIconifyCallback   window $ Just $ windowIconifyCallback   eventsChan
@@ -66,12 +67,12 @@ cursorPosCallback       :: InputAccessor -> GLFW.Window -> Double -> Double     
 cursorEnterCallback     :: InputAccessor -> GLFW.Window -> GLFW.CursorState                                                 -> IO ()
 scrollCallback          :: InputAccessor -> GLFW.Window -> Double -> Double                                                 -> IO ()
 
-windowCloseCallback tc _    = atomically $ writeTQueue tc   EventClose
-keyCallback tc _ k sc ka mk = atomically $ writeTQueue tc $ EventKey k sc ka mk
-charCallback tc _ c         = atomically $ writeTQueue tc $ EventChar c
+windowCloseCallback     tc _              = atomically $ writeTQueue tc $ EventClose
+keyCallback             tc _ k sc ka mk   = atomically $ writeTQueue tc $ EventKey k sc ka mk
+charCallback            tc _ c            = atomically $ writeTQueue tc $ EventChar c
+windowSizeCallback      tc _ w h          = atomically $ writeTQueue tc $ EventWindowSize w h
 
 windowPosCallback       tc win x y        = atomically $ writeTQueue tc $ EventWindowPos       win x y
-windowSizeCallback      tc win w h        = atomically $ writeTQueue tc $ EventWindowSize      win w h
 windowRefreshCallback   tc win            = atomically $ writeTQueue tc $ EventWindowRefresh   win
 windowFocusCallback     tc win fa         = atomically $ writeTQueue tc $ EventWindowFocus     win fa
 windowIconifyCallback   tc win ia         = atomically $ writeTQueue tc $ EventWindowIconify   win ia
@@ -87,5 +88,3 @@ tryReadEvent ia = do
     atomically $ do
         mbE <- tryReadTQueue ia
         maybe (return NoEvent) return mbE
-
-

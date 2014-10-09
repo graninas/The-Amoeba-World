@@ -97,11 +97,13 @@ executable Amoeba
                     Amoeba.View.Facade,
                     Amoeba.View.Input.InputAccessor,
                     Amoeba.View.Language,
-                    Amoeba.View.Output.Color,
                     Amoeba.View.Output.OutputAccessor,
                     Amoeba.View.Output.Render,
                     Amoeba.View.Output.Runtime,
                     Amoeba.View.Output.Types,
                     Amoeba.View.Output.Utils,
                     Amoeba.View.View,
-                    Amoeba.View.ViewAccessor
+                    Amoeba.View.ViewAccessor,
+                    Amoeba.Middleware.FRP.Debug,
+                    Amoeba.Middleware.OpenGL.Color,
+                    Amoeba.Middleware.OpenGL.Common

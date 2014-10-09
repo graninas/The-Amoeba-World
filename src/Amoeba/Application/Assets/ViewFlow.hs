@@ -1,4 +1,3 @@
-{-# LANGUAGE LambdaCase #-}
 module Amoeba.Application.Assets.ViewFlow where
 
 import Amoeba.View.Facade as V
@@ -9,6 +8,7 @@ import Amoeba.View.ViewAccessor as ViewAcc
 import Amoeba.GameLogic.Facade as GL
 
 import Amoeba.Middleware.FRP.NetwireFacade as FRP
+import Amoeba.Middleware.FRP.Debug as FRPD
 --import Amoeba.Middleware.GLFW.Facade as GLFW
 
 import qualified Amoeba.Middleware.Tracing.Log as Log
@@ -23,8 +23,13 @@ viewFlow = viewFlow' TitleScreen
 viewFlow' :: GameNode -> ViewWire () ()
 viewFlow' node = modes Render (selector node) .
     (
-        pure () &&& now . commandInterpreter node . event
+        pure () &&& interpret node . FRPD.printEventVal . filterE isActualEvent . now . event
     )
+
+isActualEvent e = e /= ViewAcc.NoEvent
+
+interpret :: GameNode -> ViewWire (FRP.Event ViewAcc.Event) (FRP.Event V.Command)
+interpret node = mkSF_ $ fmap (commandInterpreter node)
 
 switcher :: GameNode -> ViewWire () () -> ViewWire () ()
 switcher node w1 = mkEmpty . w1 --> viewFlow' node
@@ -44,15 +49,12 @@ evalViewCommand' command = mkGen_ $ const $ do
 
 render = evalViewCommand' V.Render
 
-commandInterpreter :: GameNode -> ViewWire ViewAcc.Event V.Command
-commandInterpreter node = mkSF_ $ \case
-    ViewAcc.EventClose -> V.Finish
-{-    (SDL.KeyDown (SDL.Keysym SDL.SDLK_ESCAPE _ _)) -> Finish
-    SDL.MouseButtonDown x y SDL.ButtonLeft         -> StartViewPointMoving (x, y)
-    SDL.MouseMotion x y _ _                        -> ViewPointMoving (x, y)
-    SDL.MouseButtonUp x y SDL.ButtonLeft           -> StopViewPointMoving (x, y)
--}
-    _ -> V.Render
+commandInterpreter :: GameNode -> ViewAcc.Event -> V.Command
+commandInterpreter _ ViewAcc.EventClose                      = V.Finish
+--commandInterpreter _ SDL.MouseButtonDown x y SDL.ButtonLeft  = StartViewPointMoving (x, y)
+--commandInterpreter _ SDL.MouseMotion x y _ _                 = ViewPointMoving (x, y)
+--commandInterpreter _ SDL.MouseButtonUp x y SDL.ButtonLeft    = StopViewPointMoving (x, y)
+commandInterpreter _ _ = V.Render
 
 mkViewAccessorWire act = mkGen_ $ const $ do
     viewAccessor <- Rt.getViewAccessor
@@ -63,11 +65,13 @@ event :: ViewWire () ViewAcc.Event
 event = mkViewAccessorWire ViewAcc.getEvent
 
 -- debug
-diagnose :: Show a => a -> ViewWire () ()
-diagnose a = mkGen_ $ \_ -> withIO . print $ a
+diagnose :: Show a => a -> ViewWire b b
+diagnose a = mkGen_ $ \b -> liftIO (print a) >> retR b
 
-trace :: Show a => a -> ViewWire () ()
-trace a = mkGen_ $ \_ -> withIO . Log.info . show $ a
+trace :: Show a => a -> ViewWire b b
+trace a = mkGen_ $ \b -> (liftIO . Log.info . show $ a) >> retR b
 
 printVal :: Show a => ViewWire a a
-printVal = mkGen_ $ \a -> (liftIO $ print a) >> (liftIO $ Log.info $ show a)  >> retR a 
+printVal = mkGen_ $ \a -> liftIO (print a) >> liftIO (Log.info $ show a) >> retR a
+
+
