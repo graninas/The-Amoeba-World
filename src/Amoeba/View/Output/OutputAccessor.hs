@@ -23,12 +23,13 @@ initOutputAccessor window virtualPlane = do
 
 getWindow :: OutputAccessor -> IO GLFW.Window
 getWindow = fmap runtimeWindow . atomically . readTVar
-            
+
 -- From here: https://github.com/crockeo/netwire-pong/blob/master/src/Main.hs
 -- Because I don't know the OpenGL.
+adjustWindowSize :: ViewPointCoordinates -> IO ()
 adjustWindowSize (w', h') = do
-    let (w, h) = ( (fromIntegral w' / 640) * 100
-                 , (fromIntegral h' / 640) * 100
+    let (w, h) = ( (fromIntegral w' / 640) * 100    -- Strange magic constants.
+                 , (fromIntegral h' / 640) * 100    -- TODO: investigate.
                  )
 
     matrixMode $= Projection

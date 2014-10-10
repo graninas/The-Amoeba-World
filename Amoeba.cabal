@@ -106,4 +106,5 @@ executable Amoeba
                     Amoeba.View.ViewAccessor,
                     Amoeba.Middleware.FRP.Debug,
                     Amoeba.Middleware.OpenGL.Color,
-                    Amoeba.Middleware.OpenGL.Common
+                    Amoeba.Middleware.OpenGL.Common,
+                    Amoeba.Middleware.OpenGL.Primitives
